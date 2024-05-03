@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANZPROJECT</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome CSS -->
+<style>
+  /* Style for gallery container */
+  .gallery-container {
+    display: grid;
+    grid-template-columns: repeat(6, 100%);
+    gap: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 300px; /* Sesuaikan dengan lebar gambar */
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Style for gallery item */
+  .gallery-item {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Style for images inside gallery items */
+  .gallery-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+  }
+
+  /* Style for gallery buttons */
+  .gallery-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  /* Positioning for previous button */
+  #prevBtn {
+    left: 0;
+  }
+
+  /* Positioning for next button */
+  #nextBtn {
+    right: 0;
+  }
+<style>
+  /* Style for slider container */
+  .slider-container {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Style for slider */
+  .slider {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  /* Style for individual slide */
+  .slide {
+    min-width: 100%;
+    flex: 1;
+  }
+
+  /* Style for images inside slides */
+  .slide img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Style for arrow buttons */
+  .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  }
+
+  /* Positioning for previous button */
+  .prev {
+    left: 0;
+  }
+
+  /* Positioning for next button */
+  .next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* Style for arrow button on hover */
+  .prev:hover, .next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  /* Style for video container */
+  .video-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Style for individual video */
+  .video-container iframe {
+    width: 100%; /* Full width for mobile */
+    max-width: 320px; /* Maximum width for larger screens */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+  /* Media query for smaller screens (mobile) */
+  @media screen and (max-width: 600px) {
+    .video-container iframe {
+      max-width: none; /* Remove maximum width restriction */
+    }
+  }
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .parallax {
+    /* The image used */
+    background-image: url('gambar1.png');
+
+    /* Set a specific height */
+    min-height: 500px; 
+    
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  /* Add styles to the parallax content */
+  .content {
+    padding: 20px;
+    text-align: center;
+    margin-top: 300px; /* Adjust the margin to center the content */
+  }
+
+  .image-container {
+    margin-top: 20px; /* Adjust top margin as needed */
+    text-align: center;
+  }
+
+  .image-container img {
+    border-radius: 10px; /* Rounded corners */
+    border: 3px solid rgba(0, 0, 0, 0.2);
+    width: 100%; /* Set image width to 100% of container */
+    max-width: 400px; /* Limit maximum width */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+  .text-container {
+    margin-top: 20px; /* Adjust top margin as needed */
+    color: #333;
+  }
+
+  .content {
+    position: relative;
+    width: 80%; /* Adjust width as needed */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    border-radius: 20px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Shadow effect */
+    animation: slideAndFadeIn 1s ease forwards; /* Animation to slide and fade in */
+    opacity: 0; /* Hide initially */
+  }
+
+  .content h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #333;
+  }
+
+  .content p {
+    margin-bottom: 0;
+    font-size: 16px;
+    color: #666;
+  }
+
+  /* Navigation styles */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+  }
+
+  nav ul li {
+    display: inline;
+    margin: 0 10px;
+  }
+
+  nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: all 0.3s ease;
+  }
+
+  nav ul li a:hover {
+    color: #f7df1e;
+  }
+
+  /* Header text */
+  .header-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: red; /* Merah */
+    font-size: 36px; /* Perbesar */
+    font-family: 'Arial Black', sans-serif; /* Ganti font */
+  }
+
+  /* Social media icons */
+  .social-media-icons {
+    margin-top: 20px; /* Adjust top margin as needed */
+    text-align: center;
+  }
+
+  .social-media-icons a {
+    display: inline-block;
+    margin: 0 10px;
+    color: #666;
+    font-size: 24px;
+    transition: color 0.3s ease;
+  }
+
+  .social-media-icons a:hover {
+    color: black; /* Change color on hover */
+  }
+
+  @keyframes slideAndFadeIn {
+    from {
+      top: -100px; /* Initial position */
+      opacity: 0;
+    }
+    to {
+      top: 0; /* Final position */
+      opacity: 1;
+    }
+  }
+
+  /* Wave effect */
+  .wave {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 0 5px;
+    background-color: #f7df1e;
+    border-radius: 50%;
+    animation: waveAnimation 0.5s infinite;
+  }
+
+  @keyframes waveAnimation {
+    0% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(20px);
+    }
+  }
+
+  /* Product items */
+  .product-item {
+    opacity: 0;
+    transition: opacity 1s, transform 1s;
+  }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#product">Product</a></li>
+  </ul>
+</nav>
+
+<div class="parallax" id="home">
+  <div class="header-text">SANZ PROJECTS</div>
+</div>
+
+<div class="content" id="contact">
+  <div class="image-container">
+    <img src="gambar6.jpg" alt="Content Picture">
+  </div>
+  <div class="text-container">
+    <h2>Ade Ikhsan Nur Rahman</h2>
+    <p>Saya seorang mahasiswa jurusan multimedia yang memiliki niat dalam pembukaan jasa desain logo dan vektor. Saya senang berkreasi dan ingin membantu Anda menciptakan desain yang memukau.</p>
+  </div>
+  <div class="contact">
+    <a href="#"><i class="fab fa-youtube"></i></a>
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-tiktok"></i></a>
+    <a href="#"><i class="fab fa-whatsapp"></i></a>
+  </div>
+</div>
+
+<div id="gallery" class="content">
+  <h2>Gallery</h2>
+  <div class="gallery-container">
+    <!-- Image 1 -->
+    <div class="gallery-item">
+      <img src="gambar1.png" alt="Image 1">
+    </div>
+    <!-- Image 2 -->
+    <div class="gallery-item">
+      <img src="gambar2.jpg" alt="Image 2">
+    </div>
+    <!-- Image 3 -->
+    <div class="gallery-item">
+      <img src="gambar3.jpg" alt="Image 3">
+    </div>
+    <!-- Image 4 -->
+    <div class="gallery-item">
+      <img src="gambar4.jpg" alt="Image 4">
+    </div>
+    <!-- Image 5 -->
+    <div class="gallery-item">
+      <img src="gambar5.jpg" alt="Image 5">
+    </div>
+    <!-- Image 6 -->
+    <div class="gallery-item">
+      <img src="gambar6.jpg" alt="Image 6">
+    </div>
+  </div>
+  <button id="prevBtn" class="gallery-btn">&lt;</button>
+  <button id="nextBtn" class="gallery-btn">&gt;</button>
+</div>
+  <!-- Place your tutor videos here -->
+</div>
+  <div id="content" class="content">
+  <h2>Product</h2>
+  <div id="product"class="slider-container">
+    <div class="slider">
+      <!-- Image 1 -->
+      <div class="slide"><img src="gambar1.png" alt="Product Image 1"></div>
+      <!-- Image 2 -->
+      <div class="slide"><img src="gambar2.png" alt="Product Image 2"></div>
+      <!-- Image 3 -->
+      <div class="slide"><img src="gambar3.png" alt="Product Image 3"></div>
+      <!-- Image 4 -->
+      <div class="slide"><img src="gambar4.png" alt="Product Image 4"></div>
+      <!-- Image 5 -->
+      <div class="slide"><img src="gambar5.png" alt="Product Image 5"></div>
+      <!-- Image 6 -->
+      <div class="slide"><img src="gambar6.png" alt="Product Image 6"></div>
+      <!-- Image 7 -->
+      <div class="slide"><img src="gambar7.png" alt="Product Image 7"></div>
+    </div>
+    <!-- Navigation arrows -->
+    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+  </div>
+</div>
+  <!-- Place your product images here -->
+</div>
+
+<script>
+  // Automatic slideshow
+  var slideIndex = 0;
+  showSlides();
+
+  function showSlides() {
+    var i;
+    var slides = document.getElementsByClassName("slide");
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+    }
+    slideIndex++;
+    if (slideIndex > slides.length) {slideIndex = 1}    
+    slides[slideIndex-1].style.display = "block";  
+    setTimeout(showSlides, 10000); // Change image every 10 seconds
+  }
+
+  // Next/previous controls
+  function plusSlides(n) {
+    showSlides(slideIndex += n);
+  }
+  // Smooth scrolling
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      document.querySelector(this.getAttribute('href')).scrollIntoView({
+        behavior: 'smooth'
+      });
+    });
+  });
+
+  // Highlight active navigation link based on scroll position
+  window.addEventListener('scroll', function (){
+    var sections = document.querySelectorAll('.content');
+    var navLinks = document.querySelectorAll('nav ul li a');
+
+    sections.forEach((section, i) => {
+      var rect = section.getBoundingClientRect();
+
+      if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+        });
+
+        navLinks[i].classList.add('active');
+      }
+    });
+
+    // Fade in effect for content
+    sections.forEach(section => {
+      if (isInViewport(section)) {
+        section.style.opacity = "1";
+        section.style.transform = "translateY(0)";
+      }
+    });
+  });
+
+  // Function to check if element is in viewport
+  function isInViewport(element) {
+    var rect = element.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+  let index = 0;
+  const slides = document.querySelectorAll('.gallery-item');
+
+  function showSlide(n) {
+    slides.forEach(slide => slide.style.display = 'none');
+    slides[index].style.display = 'block';
+  }
+
+  function nextSlide() {
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  }
+
+  function prevSlide() {
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', prevSlide);
+  document.getElementById('nextBtn').addEventListener('click', nextSlide);
+
+  // Show first slide
+  showSlide(index);
+</script>
+
+</body>
+</html>
