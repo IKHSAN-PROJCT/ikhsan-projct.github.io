@@ -440,21 +440,15 @@
 <div id="notification" class="notification">
   <span class="close" onclick="closeNotification()">&times;</span>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  showNotification();
-});
-
+// Membuat fungsi untuk menampilkan notifikasi pop-up
+// Membuat fungsi untuk menampilkan notifikasi pop-up
 function showNotification() {
-  var notification = document.getElementById('notification');
-  var message = document.getElementById('notificationMessage');
-  message.textContent = "Selamat datang di website SANZPROJECT, hey kamu!, belum mandi yaa 😂";
-  notification.style.display = 'block';
+  alert("Selamat datang di website SANZPROJECT");
+  alert("Pasti kamu belum mandi ya 😂");
 }
 
-function closeNotification() {
-  document.getElementById('notification').style.display = 'none';
-}
-  /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+// Memanggil fungsi untuk menampilkan notifikasi pop-up
+showNotification();
 function myFunction() {
   var x = document.getElementById("myTopnav");
   if (x.className === "topnav") {
