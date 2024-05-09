@@ -3,550 +3,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="icon.png">
-<title>SANZPROJECT</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome CSS -->
+<title>Side Menu Bar</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Tambahkan link untuk ikon Font Awesome -->
+
 <style>
-  /* Style for gallery container */
-  .gallery-container {
-    display: grid;
-    grid-template-columns: repeat(6, 100%);
-    gap: 10px;
-    overflow: hidden;
-    position: relative;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 300px; /* Sesuaikan dengan lebar gambar */
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Style for gallery item */
-  .gallery-item {
-    width: 100%;
-    height: auto;
-  }
-
-  /* Style for images inside gallery items */
-  .gallery-item img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-  }
-
-  /* Style for gallery buttons */
-  .gallery-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: black;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 1;
-  }
-
-  /* Positioning for previous button */
-  #prevBtn {
-    left: 0;
-  }
-
-  /* Positioning for next button */
-  #nextBtn {
-    right: 0;
-  }
-<style>
-  /* Style for slider container */
-  .slider-container {
-    position: relative;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  /* Style for slider */
-  .slider {
-    display: flex;
-    transition: transform 0.5s ease;
-  }
-
-  /* Style for individual slide */
-  .slide {
-    min-width: 100%;
-    flex: 1;
-  }
-
-  /* Style for images inside slides */
-  .slide img {
-    width: 100%;
-    height: auto;
-  }
-
-  /* Style for arrow buttons */
-  .prev, .next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    width: auto;
-    padding: 16px;
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-    transition: 0.6s ease;
-    border-radius: 0 3px 3px 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 100;
-  }
-
-  /* Positioning for previous button */
-  .prev {
-    left: 0;
-  }
-
-  /* Positioning for next button */
-  .next {
-    right: 0;
-    border-radius: 3px 0 0 3px;
-  }
-
-  /* Style for arrow button on hover */
-  .prev:hover, .next:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-  /* Style for video container */
-  .video-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  /* Style for individual video */
-  .video-container iframe {
-    width: 100%; /* Full width for mobile */
-    max-width: 320px; /* Maximum width for larger screens */
-    height: auto; /* Maintain aspect ratio */
-  }
-
-  /* Media query for smaller screens (mobile) */
-  @media screen and (max-width: 600px) {
-    .video-container iframe {
-      max-width: none; /* Remove maximum width restriction */
-    }
-  }
-  body, html {
-    height: 100%;
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-  
-.parallax {
-  /* Set a specific height */
-  min-height: 500px; 
-  
-  /* Create the parallax scrolling effect */
-  overflow: hidden;
-  position: relative;
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-.parallax video {
-  /* Set video to cover entire container */
-  min-width: 100%; 
-  min-height: 100%; 
-  
-  /* Set position and scaling */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-
-  /* Set maximum width and height */
-  max-width: 800px;
-  max-height: 600px;
-}
-  .content {
-    padding: 20px;
-    text-align: center;
-    margin-top: 300px; /* Adjust the margin to center the content */
-  }
-
-  .image-container {
-    margin-top: 20px; /* Adjust top margin as needed */
-    text-align: center;
-  }
-
-  .image-container img {
-    border-radius: 10px; /* Rounded corners */
-    border: 3px solid rgba(0, 0, 0, 0.2);
-    width: 100%; /* Set image width to 100% of container */
-    max-width: 400px; /* Limit maximum width */
-    height: auto; /* Maintain aspect ratio */
-  }
-
-  .text-container {
-    margin-top: 20px; /* Adjust top margin as needed */
-    color: #333;
-  }
-
-  .content {
-    position: relative;
-    width: 80%; /* Adjust width as needed */
-    margin: 0 auto;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
-    border-radius: 20px; /* Rounded corners */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Shadow effect */
-    animation: slideAndFadeIn 1s ease forwards; /* Animation to slide and fade in */
-    opacity: 0; /* Hide initially */
-  }
-
-  .content h2 {
-    margin-top: 0;
-    font-size: 20px;
-    color: #333;
-  }
-
-  .content p {
-    margin-bottom: 0;
-    font-size: 16px;
-    color: #666;
-  }
-
-  /* Navigation styles */
-    /* Add a black background color to the top navigation */
-.topnav {
+.navbar {
   background-color: #333;
+  color: #fff;
   overflow: hidden;
 }
 
-/* Style the links inside the navigation bar */
-.topnav a {
+.navbar a {
   float: left;
   display: block;
-  color: #f2f2f2;
+  color: #fff;
   text-align: center;
-  padding: 14px 16px;
+  padding: 14px 20px;
   text-decoration: none;
-  font-size: 17px;
 }
 
-/* Change the color of links on hover */
-.topnav a:hover {
+.navbar a:hover {
   background-color: #ddd;
-  color: black;
+  color: #333;
 }
 
-/* Add an active class to highlight the current page */
-.topnav a.active {
-  background-color: #04AA6D;
+.sidebar a {
+  padding: 10px 15px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  color: #fff; /* Mengatur warna teks menjadi putih */
+  background-color: rgba(0, 255, 0, 0.8); /* Memberikan warna latar belakang hijau terang dan transparansi */
+  border-radius: 5px; /* Mengatur sudut border menjadi agak bulat */
+  animation: glow 1s ease infinite alternate; /* Menambahkan animasi glow */
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px 0 rgba(0, 255, 0, 0.8); /* Efek bayangan awal */
+  }
+  100% {
+    box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.8); /* Efek bayangan saat puncak animasi */
+  }
+}
+
+.sidebar .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+.openbtn {
+  top: 50px;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: 1px solid transparent;
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #333;
   color: white;
+  padding: 10px 15px;
+  z-index: 2;
 }
 
-/* Hide the link that should open and close the topnav on small screens */
-.topnav .icon {
-  display: none;
-}
-/* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
-@media screen and (max-width: 600px) {
-  .topnav a:not(:first-child) {display: none;}
-  .topnav a.icon {
-    float: right;
-    display: block;
-  }
+.openbtn:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Memberikan efek hover */
+  backdrop-filter: blur(10px); /* Menambahkan efek blur pada border */
 }
 
-/* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
-@media screen and (max-width: 600px) {
-  .topnav.responsive {position: relative;}
-  .topnav.responsive a.icon {
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-  .topnav.responsive a {
-    float: none;
-    display: block;
-    text-align: left;
-  }
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
 }
-  /* Header text */
-  .header-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: red; /* Merah */
-    font-size: 36px; /* Perbesar */
-    font-family: 'Arial Black', sans-serif; /* Ganti font */
-  }
 
-  /* Social media icons */
-  .social-media-icons {
-    margin-top: 20px; /* Adjust top margin as needed */
-    text-align: center;
-  }
+.content {
+  margin-left: 10px; /* Menggeser konten ke kanan saat sidebar terbuka */
+  transition: margin-left 0.5s;
+}
 
-  .social-media-icons a {
-    display: inline-block;
-    margin: 0 10px;
-    color: #666;
-    font-size: 24px;
-    transition: color 0.3s ease;
-  }
-
-  .social-media-icons a:hover {
-    color: black; /* Change color on hover */
-  }
-
-  @keyframes slideAndFadeIn {
-    from {
-      top: -100px; /* Initial position */
-      opacity: 0;
-    }
-    to {
-      top: 0; /* Final position */
-      opacity: 1;
-    }
-  }
-
-  /* Wave effect */
-  .wave {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin: 0 5px;
-    background-color: #f7df1e;
-    border-radius: 50%;
-    animation: waveAnimation 0.5s infinite;
-  }
-
-  @keyframes waveAnimation {
-    0% {
-      transform: translateY(-20px);
-    }
-    100% {
-      transform: translateY(20px);
-    }
-  }
-
-  /* Product items */
-  .product-item {
-    opacity: 0;
-    transition: opacity 1s, transform 1s;
-  }
+/* Tambahkan gaya untuk konten */
+.content-inner {
+  padding: 20px;
+}
 
 </style>
 </head>
 <body>
-<div class="topnav" id="myTopnav">
-  <a href="#home" class="active">Home</a>
-  <a href="https://ikhsan-projct.github.io/website-me/biodata">Biodata</a>
-  <a href="https://ikhsan-projct.github.io/website-me/Tutors.html">Tutors</a>
-  <a href="https://ikhsan-projct.github.io/website-me/Berita.html">News</a>
-  <a href="#contact">Contact</a>
-  <a href="#gallery">Gallery</a>
-    <a href="#product">Product</a>
-  <a href="javascript:void(0);" class="icon" onclick="myFunction()">
-    <i class="fa fa-bars"></i>
-  </a>
-</div>
-<div class="parallax" id="home">
-  <div class="header-text"></div>
+
+<div class="navbar">
+  <span class="openbtn" onclick="openNav()">&#9776; SANZ•PROJECT</span>
 </div>
 
-<div class="content" id="contact">
-  <div class="image-container">
-    <img src="gambar6.jpg" alt="Content Picture">
-  </div>
-  <div class="text-container">
-    <h2>Ade Ikhsan Nur Rahman</h2>
-    <p>Saya seorang mahasiswa jurusan multimedia yang memiliki niat dalam pembukaan jasa desain logo dan vektor. Saya senang berkreasi dan ingin membantu Anda menciptakan desain yang memukau.</p>
-  </div>
-  <div class="contact">
-    <a href="https://youtube.com/@sanzacil_026"><i class="fab fa-youtube"></i></a>
-    <a href="https://instagram.com/@sanzacil_026"><i class="fab fa-instagram"></i></a>
-    <a href="https://tiktok.com/@sanzacil_026"><i class="fab fa-tiktok"></i></a>
-    <a href="https://wa.me/6283151697416"><i class="fab fa-whatsapp"></i></a>
-  </div>
+<div id="mySidebar" class="sidebar">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <a href="#" onclick="showContent('home')"><i class="fas fa-home"></i> Home</a>
+  <a href="#" onclick="showContent('about')"><i class="fas fa-info-circle"></i> About</a>
+  <a href="#" onclick="showContent('services')"><i class="fas fa-cogs"></i> Services</a>
+  <a href="#" onclick="showContent('contact')"><i class="fas fa-envelope"></i> Contact</a>
 </div>
-<div class="parallax">
-  <video autoplay loop muted>
-    <source src="ironman.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
-<div id="gallery" class="content">
-  <h2>Galeri</h2>
-  <div class="gallery-container">
-    <!-- Image 1 -->
-    <div class="gallery-item">
-      <img src="gambar1.png" alt="Image 1">
-    </div>
-    <!-- Image 2 -->
-    <div class="gallery-item">
-      <img src="gambar2.jpg" alt="Image 2">
-    </div>
-    <!-- Image 3 -->
-    <div class="gallery-item">
-      <img src="gambar3.jpg" alt="Image 3">
-    </div>
-    <!-- Image 4 -->
-    <div class="gallery-item">
-      <img src="gambar4.jpg" alt="Image 4">
-    </div>
-    <!-- Image 5 -->
-    <div class="gallery-item">
-      <img src="gambar5.jpg" alt="Image 5">
-    </div>
-    <!-- Image 6 -->
-    <div class="gallery-item">
-      <img src="gambar6.jpg" alt="Image 6">
-    </div>
-  </div>
-  <button id="prevBtn" class="gallery-btn">&lt;</button>
-  <button id="nextBtn" class="gallery-btn">&gt;</button>
-</div>
-  <!-- Place your tutor videos here -->
-</div>
-  <div id="content" class="content">
-  <h2>Produk</h2>
-  <div id="product"class="slider-container">
-    <div class="slider">
-      <!-- Image 1 -->
-      <div class="slide"><img src="gambar1.png" alt="Product Image 1"></div>
-      <!-- Image 2 -->
-      <div class="slide"><img src="gambar2.png" alt="Product Image 2"></div>
-      <!-- Image 3 -->
-      <div class="slide"><img src="gambar3.png" alt="Product Image 3"></div>
-      <!-- Image 4 -->
-      <div class="slide"><img src="gambar4.png" alt="Product Image 4"></div>
-      <!-- Image 5 -->
-      <div class="slide"><img src="gambar5.png" alt="Product Image 5"></div>
-      <!-- Image 6 -->
-      <div class="slide"><img src="gambar6.png" alt="Product Image 6"></div>
-      <!-- Image 7 -->
-      <div class="slide"><img src="gambar7.png" alt="Product Image 7"></div>
-    </div>
-    <!-- Navigation arrows -->
-    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
-    <a class="next" onclick="plusSlides(1)">&#10095;</a>
-  </div>
-</div>
-  <!-- Place your product images here -->
-</div>
-<div id="notification" class="notification">
-  <span class="close" onclick="closeNotification()">&times;</span>
-<script>
-// Membuat fungsi untuk menampilkan notifikasi pop-up
-// Membuat fungsi untuk menampilkan notifikasi pop-up
-function showNotification() {
-  alert("Selamat datang di website SANZPROJECT");
-  alert("Pasti kamu belum mandi ya 😂");
-}
 
-// Memanggil fungsi untuk menampilkan notifikasi pop-up
-showNotification();
-function myFunction() {
-  var x = document.getElementById("myTopnav");
-  if (x.className === "topnav") {
-    x.className += " responsive";
-  } else {
-    x.className = "topnav";
+<div class="content">
+  <div class="content-inner" id="home">
+    <h2>RUMAH IKHSAN</h2>
+    <p>Selmat datang di website sederhana saya , dan terima kasih telah berkunjung di halaman saya</p>
+  </div>
+  <div class="content-inner" id="about" style="display: none;">
+    <h2>About us</h2>
+    <p>Perkenalkan nama saya Ade ikhsan nur rahman </p>
+    <p>Tujuan saya membuat website ini untuk membuka bisnis online yaitu terima jasa logo nama dan masih banyak lagi ya.</p>
+  </div>
+  <div class="content-inner" id="services" style="display: none;">
+    <h2>Our services</h2>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>-</title>
+<style>
+  .slideshow-container {
+    max-width:auto;
+    position: relative;
+    margin: auto;
+    overflow: hidden;
   }
-}
-  // Automatic slideshow
+  
+  .slides {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .slide {
+    flex: 0 0 auto;
+    width: 100%;
+    border-radius: 20px;
+    border: 3px solid #ccc; /* warna dan ketebalan border */
+    box-sizing: border-box; /* biar ukuran tetap sama dengan dimensi gambar */
+    cursor: pointer;
+    position: relative;
+  }
+
+  .slide img {
+    width: 100%;
+    height: auto;
+    border-radius: 17px; /* agar sesuai dengan border */
+  }
+
+  .slide .caption {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Effect</title>
+    <style>
+        /* Styling for the container */
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+        
+        /* Styling for the text */
+        .typing-text {
+            font-size: 24px;
+            color: #333;
+            font-family: Arial, sans-serif;
+            border-right: 2px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 2s steps(30, end), blink-caret 0.5s step-end infinite alternate;
+            word-wrap: break-word; /* Teks akan pindah ke baris baru jika tidak cukup ruang */
+        }
+        
+        /* Keyframe animation for typing effect */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        /* Keyframe animation for blinking cursor */
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #333; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="typing-text">Kumpulan gambar logo</h3>
+</div>
+
+</body>
+</html>
+<div class="slideshow-container">
+  <div class="slides">
+    <div class="slide" onclick="openImage('gambar1.png')">
+      <img src="gambar1.png" alt="Gambar 1">
+      <div class="caption" id="caption1"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar2.png')">
+      <img src="gambar2.png" alt="Gambar 2">
+      <div class="caption" id="caption2"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar3.png')">
+      <img src="gambar3.png" alt="Gambar 3">
+      <div class="caption" id="caption3"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar4.png')">
+      <img src="gambar4.png" alt="Gambar 4">
+      <div class="caption" id="caption4"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar5.png')">
+      <img src="gambar5.png" alt="Gambar 5">
+      <div class="caption" id="caption5"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar6.png')">
+      <img src="gambar6.png" alt="Gambar 6">
+      <div class="caption" id="caption6"></div>
+    </div>
+    <div class="slide" onclick="openImage('gambar7.png')">
+      <img src="gambar7.png" alt="Gambar 7">
+      <div class="caption" id="caption7"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fungsi untuk menambahkan keterangan nama gambar otomatis
+  function addCaptions() {
+    var slides = document.querySelectorAll('.slide');
+    slides.forEach(function(slide, index) {
+      var imageName = slide.querySelector('img').getAttribute('src');
+      var captionId = 'caption' + (index + 1);
+      slide.querySelector('#' + captionId).textContent = imageName; // Menampilkan nama gambar sebagai keterangan
+    });
+  }
+
   var slideIndex = 0;
   showSlides();
+  addCaptions(); // Panggil fungsi addCaptions untuk menambahkan keterangan
 
   function showSlides() {
-    var i;
-    var slides = document.getElementsByClassName("slide");
-    for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";  
-    }
+    var slides = document.querySelectorAll('.slide');
     slideIndex++;
-    if (slideIndex > slides.length) {slideIndex = 1}    
-    slides[slideIndex-1].style.display = "block";  
-    setTimeout(showSlides, 10000); // Change image every 10 seconds
+    if (slideIndex >= slides.length) { slideIndex = 0 }
+    var offset = -100 * slideIndex + '%';
+    document.querySelector('.slides').style.transform = 'translateX(' + offset + ')';
+    setTimeout(showSlides, 2000); // Ganti gambar setiap 2 detik
   }
 
-  // Next/previous controls
-  function plusSlides(n) {
-    showSlides(slideIndex += n);
+  function openImage(imageUrl) {
+    window.open(imageUrl, '_blank');
   }
-  // Smooth scrolling
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
+</script>
 
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
-      });
-    });
-  });
+</body>
+</html>
+  </div>
+  <div class="content-inner" id="contact" style="display: none;">
+          <cernter>
+    <h2>Contact Us</h2>
+    </center>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(10px);
+        }
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+            z-index: 1;
+        }
+        .contact-info a {
+            text-decoration: none;
+            color: #333;
+            margin: 0 10px;
+            font-size: 24px;
+        }
+        .message-box {
+            border: 2px solid #333;
+            padding: 10px;
+            margin-top: 20px;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        .message-box textarea {
+            width: calc(100% - 22px);
+            margin: 0;
+            border: none;
+            background-color: transparent;
+            color: #000;
+            resize: none;
+        }
+        .send-whatsapp {
+            background-color: #25d366;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-background">
+        <video autoplay loop muted>
+            <source src="Ironman.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div class="contact-info">
+        <a href="https://wa.me/6283151697416" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://instagram.com/sanzacil_026" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@sanzacil_026" target="_blank"><i class="fab fa-tiktok"></i></a>
+    </div>
+    <div class="message-box">
+        <textarea placeholder="Type your message here..." rows="4" cols="30"></textarea>
+        <br>
+        <button class="send-whatsapp" onclick="sendWhatsAppMessage()">Kirim pesan anda disini</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script>
+        function sendWhatsAppMessage() {
+            var phoneNumber = "+6283151697416";
+            var message = document.querySelector(".message-box textarea").value;
+            var whatsappURL = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
+            window.open(whatsappURL, '_blank');
+        }
+    </script>
+</body>
+</html>
+</div>
 
-  // Highlight active navigation link based on scroll position
-  window.addEventListener('scroll', function (){
-    var sections = document.querySelectorAll('.content');
-    var navLinks = document.querySelectorAll('nav ul li a');
+<script>
+function openNav() {
+  document.getElementById("mySidebar").style.width = "250px";
+  document.getElementsByClassName("content")[0].style.marginLeft = "250px";
+}
 
-    sections.forEach((section, i) => {
-      var rect = section.getBoundingClientRect();
+function closeNav() {
+  document.getElementById("mySidebar").style.width = "0";
+  document.getElementsByClassName("content")[0].style.marginLeft= "0";
+}
 
-      if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-        navLinks.forEach(link => {
-          link.classList.remove('active');
-        });
-
-        navLinks[i].classList.add('active');
-      }
-    });
-
-    // Fade in effect for content
-    sections.forEach(section => {
-      if (isInViewport(section)) {
-        section.style.opacity = "1";
-        section.style.transform = "translateY(0)";
-      }
-    });
-  });
-
-  // Function to check if element is in viewport
-  function isInViewport(element) {
-    var rect = element.getBoundingClientRect();
-    return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
+function showContent(contentId) {
+  // Hide all content sections
+  var contents = document.getElementsByClassName("content-inner");
+  for (var i = 0; i < contents.length; i++) {
+    contents[i].style.display = "none";
   }
-  let index = 0;
-  const slides = document.querySelectorAll('.gallery-item');
-
-  function showSlide(n) {
-    slides.forEach(slide => slide.style.display = 'none');
-    slides[index].style.display = 'block';
-  }
-
-  function nextSlide() {
-    index = (index + 1) % slides.length;
-    showSlide(index);
-  }
-
-  function prevSlide() {
-    index = (index - 1 + slides.length) % slides.length;
-    showSlide(index);
-  }
-
-  document.getElementById('prevBtn').addEventListener('click', prevSlide);
-  document.getElementById('nextBtn').addEventListener('click', nextSlide);
-
-  // Show first slide
-  showSlide(index);
+  // Show the selected content section
+  document.getElementById(contentId).style.display = "block";
+}
 </script>
 
 </body>
