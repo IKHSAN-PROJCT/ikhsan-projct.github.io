@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Toko Ikhsan</title>
- <link rel="icon" href="gambar3.png" type="image/png">
+ <link rel="icon" href="poster.png" type="image/png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Tambahkan link untuk ikon Font Awesome -->
 
 <style>
@@ -128,7 +128,68 @@ body {
   <div class="content-inner" id="home">
     <h2>RUMAH IKHSAN</h2>
     <p>Selmat datang di website sederhana saya , dan terima kasih telah berkunjung di halaman saya</p>
-    
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burning Paper</title>
+<style>
+  /* Style untuk kontainer gambar */
+  .poster-container {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    background-image: url('paper_texture.jpg'); /* Gambar kertas sebagai latar belakang */
+  }
+
+  /* Style untuk gambar utama */
+  .poster {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    z-index: 1; /* Letakkan di atas elemen lain */
+  }
+
+  /* Elemen overlay untuk efek api */
+  .fire {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: burnAnimation 3s linear infinite alternate;
+    z-index: 2; /* Letakkan di atas gambar utama */
+  }
+
+  /* Keyframes untuk animasi api */
+  @keyframes burnAnimation {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Kontainer untuk gambar -->
+<div class="poster-container">
+  <!-- Gambar utama -->
+  <img src="poster.png" alt="Poster" class="poster">
+  <!-- Elemen overlay untuk efek api -->
+  <div class="fire"></div>
+</div>
+
+</body>
+</html>
   </div>
   <div class="content-inner" id="about" style="display: none;">
     <h2>About us</h2>
@@ -191,7 +252,7 @@ body {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typing Effect</title>
+    <title></title>
     <style>
         /* Styling for the container */
         .container {
@@ -261,7 +322,7 @@ body {
     <div class="slide" onclick="openImage('gambar7.png')">
       <img src="gambar7.png" alt="Gambar 7">
       <div class="caption" id="caption7"></div>
-            <img src="gambar8.png" alt="Gambar 8">
+            <img src="poster.png" alt="Gambarpos">
       <div class="caption" id="caption8"></div>
     </div>
   </div>
