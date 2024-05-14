@@ -3,24 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontak Kami</title>
+    <title>Kontak saya</title>
     <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes bounceIn {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-30px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #e0f7fa;
             margin: 0;
             padding: 0;
+            animation: fadeIn 1s ease-in;
         }
         .container {
             max-width: 600px;
             margin: 50px auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #00796b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: bounceIn 1s ease;
         }
         .container h2 {
             text-align: center;
-            color: #333;
+            color: #00796b;
+            margin-bottom: 20px;
+            animation: fadeIn 1.5s ease-in;
         }
         .form-group {
             margin-bottom: 15px;
@@ -28,14 +49,21 @@
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            color: #333;
+            color: #00796b;
+            animation: fadeIn 2s ease-in;
         }
-        .form-group input, 
+        .form-group input,
         .form-group textarea {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 1px solid #b2dfdb;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #00796b;
+            outline: none;
         }
         .form-group textarea {
             height: 100px;
@@ -54,11 +82,13 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background-color: #ddd;
-            transition: background-color 0.3s;
+            background-color: #00796b;
+            transition: transform 0.3s, background-color 0.3s;
+            animation: fadeIn 2.5s ease-in;
         }
         .contact-buttons a:hover {
-            background-color: #ccc;
+            background-color: #004d40;
+            transform: scale(1.1);
         }
         .contact-buttons img {
             width: 24px;
@@ -68,51 +98,47 @@
 </head>
 <body>
     <div class="container">
-        <h2>Kontak saya</h2>
-        <div class="form-group">
-            <label for="name">Nama</label>
-            <input type="text" id="name" name="name" placeholder="Nama Anda">
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Email Anda">
-        </div>
-        <div class="form-group">
-            <label for="message">Pesan</label>
-            <textarea id="message" name="message" placeholder="Pesan Anda"></textarea>
-        </div>
-        <div class="contact-buttons">
-            <a href="mailto:aristriadi123@gmail.com" id="gmailButton" title="Kirim Pesan ke Gmail">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Gmail">
-            </a>
-            <a href="https://wa.me/6283151697416" id="whatsappButton" title="Kirim Pesan ke WhatsApp">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-            </a>
-        </div>
+        <h2>Kontak Saya</h2>
+        <form id="contactForm">
+            <div class="form-group">
+                <label for="name">Nama</label>
+                <input type="text" id="name" name="name" placeholder="Nama Anda" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Email Anda" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Pesan</label>
+                <textarea id="message" name="message" placeholder="Pesan Anda" required></textarea>
+            </div>
+            <div class="contact-buttons">
+                <a href="#" id="sendGmail" title="Kirim Pesan ke Gmail">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Gmail">
+                </a>
+                <a href="#" id="sendWhatsApp" title="Kirim Pesan ke WhatsApp">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+                </a>
+            </div>
+        </form>
     </div>
 
     <script>
-        const gmailButton = document.getElementById('gmailButton');
-        const whatsappButton = document.getElementById('whatsappButton');
-
-        gmailButton.addEventListener('mouseover', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.backgroundColor = '#ccc';
+        document.getElementById('sendGmail').addEventListener('click', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            const mailtoLink = `mailto:aristriadi123@gmail.com?subject=Message from ${name}&body=${message}\n\nFrom: ${name}\nEmail: ${email}`;
+            window.location.href = mailtoLink;
         });
 
-        gmailButton.addEventListener('mouseout', function() {
-            this.style.transform = 'scale(1)';
-            this.style.backgroundColor = '#ddd';
-        });
-
-        whatsappButton.addEventListener('mouseover', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.backgroundColor = '#ccc';
-        });
-
-        whatsappButton.addEventListener('mouseout', function() {
-            this.style.transform = 'scale(1)';
-            this.style.backgroundColor = '#ddd';
+        document.getElementById('sendWhatsApp').addEventListener('click', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+            const whatsappLink = `https://wa.me/6283151697416?text=${encodeURIComponent(`Name: ${name}\nMessage: ${message}`)}`;
+            window.location.href = whatsappLink;
         });
     </script>
 </body>
