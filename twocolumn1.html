@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontak Kami</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input, 
+        .form-group textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .contact-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .contact-buttons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #ddd;
+            transition: background-color 0.3s;
+        }
+        .contact-buttons a:hover {
+            background-color: #ccc;
+        }
+        .contact-buttons img {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Kontak saya</h2>
+        <div class="form-group">
+            <label for="name">Nama</label>
+            <input type="text" id="name" name="name" placeholder="Nama Anda">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Email Anda">
+        </div>
+        <div class="form-group">
+            <label for="message">Pesan</label>
+            <textarea id="message" name="message" placeholder="Pesan Anda"></textarea>
+        </div>
+        <div class="contact-buttons">
+            <a href="mailto:aristriadi123@gmail.com" id="gmailButton" title="Kirim Pesan ke Gmail">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Gmail">
+            </a>
+            <a href="https://wa.me/6283151697416" id="whatsappButton" title="Kirim Pesan ke WhatsApp">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const gmailButton = document.getElementById('gmailButton');
+        const whatsappButton = document.getElementById('whatsappButton');
+
+        gmailButton.addEventListener('mouseover', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.backgroundColor = '#ccc';
+        });
+
+        gmailButton.addEventListener('mouseout', function() {
+            this.style.transform = 'scale(1)';
+            this.style.backgroundColor = '#ddd';
+        });
+
+        whatsappButton.addEventListener('mouseover', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.backgroundColor = '#ccc';
+        });
+
+        whatsappButton.addEventListener('mouseout', function() {
+            this.style.transform = 'scale(1)';
+            this.style.backgroundColor = '#ddd';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ade Ikhsan Nur Rahman - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: blur(10px);
+        }
+        .profile-card {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1.5s ease-in-out;
+            z-index: 1;
+        }
+        .profile-card img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 15px;
+            animation: bounceIn 1.5s ease-in-out;
+        }
+        .profile-card h1 {
+            font-size: 24px;
+            margin: 0;
+            padding: 0;
+        }
+        .profile-card p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .gallery {
+            width: 100%;
+            position: absolute;
+            bottom: 20px;
+            z-index: 1;
+        }
+        .swiper-container {
+            width: 100%;
+            padding-bottom: 20px;
+        }
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .swiper-slide img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .swiper-slide img:hover {
+            transform: scale(1.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="background-video">
+        <source src="ironman.mp4" type="video/mp4">
+    </video>
+    <div class="profile-card">
+        <img src="gambar.jpg/gambar4.jpg" alt="Profile Picture">
+        <h1>Ade Ikhsan Nur Rahman</h1>
+        <p>Passionate about multimedia with experience in graphic design, video editing, and animation. Always eager to learn and create visually engaging content.</p>
+    </div>
+    <div class="gallery">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img src="gambar.jpg/gambar1.jpg" alt="Gallery Image 1"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar2.jpg" alt="Gallery Image 2"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar3.jpg" alt="Gallery Image 3"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar4.jpg" alt="Gallery Image 4"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar5.jpg" alt="Gallery Image 5"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar6.jpg" alt="Gallery Image 6"></div>
+                <div class="swiper-slide"><img src="gambar.jpg/gambar7.jpg" alt="Gallery Image 7"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            slidesPerView: 3,
+            spaceBetween: 10,
+            loop: true,
+            centeredSlides: true,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
+    </script>
+</body>
+</html>

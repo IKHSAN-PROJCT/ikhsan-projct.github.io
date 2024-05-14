@@ -1,491 +1,2225 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Toko Ikhsan</title>
- <link rel="icon" href="poster.png" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Tambahkan link untuk ikon Font Awesome -->
-
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>SANZPROJCT</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body>
+		<div id="page-wrapper">
 <style>
+  @import url("https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300,200");
+html, body, div, span, applet, object,
+iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
+pre, a, abbr, acronym, address, big, cite,
+code, del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var, b,
+u, i, center, dl, dt, dd, ol, ul, li, fieldset,
+form, label, legend, table, caption, tbody,
+tfoot, thead, tr, th, td, article, aside,
+canvas, details, embed, figure, figcaption,
+footer, header, hgroup, menu, nav, output, ruby,
+section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;}
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;}
+
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+	line-height: 1;
 }
 
-.navbar {
-  background-color: #333;
-  color: #fff;
-  overflow: hidden;
+ol, ul {
+	list-style: none;
 }
 
-.navbar a {
-  float: left;
-  display: block;
-  color: #fff;
-  text-align: center;
-  padding: 14px 20px;
-  text-decoration: none;
+blockquote, q {
+	quotes: none;
 }
 
-.navbar a:hover {
-  background-color: #ddd;
-  color: #333;
+	blockquote:before, blockquote:after, q:before, q:after {
+		content: '';
+		content: none;
+	}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
 }
 
-.sidebar a {
-  padding: 10px 15px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  transition: 0.3s;
+body {
+	-webkit-text-size-adjust: none;
 }
 
-.sidebar a:hover {
-  color: #fff; /* Mengatur warna teks menjadi putih */
-  background-color: rgba(0, 255, 0, 0.8); /* Memberikan warna latar belakang hijau terang dan transparansi */
-  border-radius: 5px; /* Mengatur sudut border menjadi agak bulat */
-  animation: glow 1s ease infinite alternate; /* Menambahkan animasi glow */
+mark {
+	background-color: transparent;
+	color: inherit;
 }
 
-@keyframes glow {
-  0% {
-    box-shadow: 0 0 10px 0 rgba(0, 255, 0, 0.8); /* Efek bayangan awal */
-  }
-  100% {
-    box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.8); /* Efek bayangan saat puncak animasi */
-  }
+input::-moz-focus-inner {
+	border: 0;
+	padding: 0;
 }
 
-.sidebar .closebtn {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
+input, select, textarea {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	-ms-appearance: none;
+	appearance: none;
 }
 
-.openbtn {
-  top: 50px;
-  transform: translateY(-50%);
-  background-color: transparent;
-  border: 1px solid transparent;
-  font-size: 20px;
-  cursor: pointer;
-  background-color: #333;
-  color: white;
-  padding: 10px 15px;
-  z-index: 2;
-}
+/* Basic */
 
-.openbtn:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Memberikan efek hover */
-  backdrop-filter: blur(10px); /* Menambahkan efek blur pada border */
-}
+	html {
+		box-sizing: border-box;
+	}
 
-.sidebar {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 60px;
-}
+	*, *:before, *:after {
+		box-sizing: inherit;
+	}
 
-.content {
-  margin-left: 10px; /* Menggeser konten ke kanan saat sidebar terbuka */
-  transition: margin-left 0.5s;
-}
+	body {
+		background: #D4D9DD url("gambar.png/gambar3.png");
+		color: #474f51;
+		font-size: 13.5pt;
+		font-family: 'Yanone Kaffeesatz';
+		line-height: 1.85em;
+		font-weight: 300;
+	}
 
-/* Tambahkan gaya untuk konten */
-.content-inner {
-  padding: 20px;
-}
+	input, textarea, select {
+		color: #474f51;
+		font-size: 13.5pt;
+		font-family: 'Yanone Kaffeesatz';
+		line-height: 1.85em;
+		font-weight: 300;
+	}
 
+	ul, ol, p, dl {
+		margin: 0 0 2em 0;
+	}
+
+	a {
+		text-decoration: underline;
+	}
+
+		a:hover {
+			text-decoration: none;
+		}
+
+	section > :last-child,
+	section:last-child,
+	.last-child {
+		margin-bottom: 0 !important;
+	}
+
+/* Container */
+
+	.container {
+		margin: 0 auto;
+		max-width: 100%;
+		width: 1200px;
+	}
+
+		@media screen and (max-width: 1680px) {
+
+			.container {
+				width: 1200px;
+			}
+
+		}
+
+		@media screen and (max-width: 1280px) {
+
+			.container {
+				width: calc(100% - 40px);
+			}
+
+		}
+
+		@media screen and (max-width: 980px) {
+
+			.container {
+				width: calc(100% - 50px);
+			}
+
+		}
+
+		@media screen and (max-width: 736px) {
+
+			.container {
+				width: calc(100% - 40px);
+			}
+
+		}
+
+/* Row */
+
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		box-sizing: border-box;
+		align-items: stretch;
+	}
+
+		.row > * {
+			box-sizing: border-box;
+		}
+
+		.row.gtr-uniform > * > :last-child {
+			margin-bottom: 0;
+		}
+
+		.row.aln-left {
+			justify-content: flex-start;
+		}
+
+		.row.aln-center {
+			justify-content: center;
+		}
+
+		.row.aln-right {
+			justify-content: flex-end;
+		}
+
+		.row.aln-top {
+			align-items: flex-start;
+		}
+
+		.row.aln-middle {
+			align-items: center;
+		}
+
+		.row.aln-bottom {
+			align-items: flex-end;
+		}
+
+		.row > .imp {
+			order: -1;
+		}
+
+		.row > .col-1 {
+			width: 8.33333%;
+		}
+
+		.row > .off-1 {
+			margin-left: 8.33333%;
+		}
+
+		.row > .col-2 {
+			width: 16.66667%;
+		}
+
+		.row > .off-2 {
+			margin-left: 16.66667%;
+		}
+
+		.row > .col-3 {
+			width: 25%;
+		}
+
+		.row > .off-3 {
+			margin-left: 25%;
+		}
+
+		.row > .col-4 {
+			width: 33.33333%;
+		}
+
+		.row > .off-4 {
+			margin-left: 33.33333%;
+		}
+
+		.row > .col-5 {
+			width: 41.66667%;
+		}
+
+		.row > .off-5 {
+			margin-left: 41.66667%;
+		}
+
+		.row > .col-6 {
+			width: 50%;
+		}
+
+		.row > .off-6 {
+			margin-left: 50%;
+		}
+
+		.row > .col-7 {
+			width: 58.33333%;
+		}
+
+		.row > .off-7 {
+			margin-left: 58.33333%;
+		}
+
+		.row > .col-8 {
+			width: 66.66667%;
+		}
+
+		.row > .off-8 {
+			margin-left: 66.66667%;
+		}
+
+		.row > .col-9 {
+			width: 75%;
+		}
+
+		.row > .off-9 {
+			margin-left: 75%;
+		}
+
+		.row > .col-10 {
+			width: 83.33333%;
+		}
+
+		.row > .off-10 {
+			margin-left: 83.33333%;
+		}
+
+		.row > .col-11 {
+			width: 91.66667%;
+		}
+
+		.row > .off-11 {
+			margin-left: 91.66667%;
+		}
+
+		.row > .col-12 {
+			width: 100%;
+		}
+
+		.row > .off-12 {
+			margin-left: 100%;
+		}
+
+		.row.gtr-0 {
+			margin-top: 0px;
+			margin-left: 0px;
+		}
+
+			.row.gtr-0 > * {
+				padding: 0px 0 0 0px;
+			}
+
+			.row.gtr-0.gtr-uniform {
+				margin-top: 0px;
+			}
+
+				.row.gtr-0.gtr-uniform > * {
+					padding-top: 0px;
+				}
+
+		.row.gtr-25 {
+			margin-top: -6.25px;
+			margin-left: -6.25px;
+		}
+
+			.row.gtr-25 > * {
+				padding: 6.25px 0 0 6.25px;
+			}
+
+			.row.gtr-25.gtr-uniform {
+				margin-top: -6.25px;
+			}
+
+				.row.gtr-25.gtr-uniform > * {
+					padding-top: 6.25px;
+				}
+
+		.row.gtr-50 {
+			margin-top: -12.5px;
+			margin-left: -12.5px;
+		}
+
+			.row.gtr-50 > * {
+				padding: 12.5px 0 0 12.5px;
+			}
+
+			.row.gtr-50.gtr-uniform {
+				margin-top: -12.5px;
+			}
+
+				.row.gtr-50.gtr-uniform > * {
+					padding-top: 12.5px;
+				}
+
+		.row {
+			margin-top: -25px;
+			margin-left: -25px;
+		}
+
+			.row > * {
+				padding: 25px 0 0 25px;
+			}
+
+			.row.gtr-uniform {
+				margin-top: -25px;
+			}
+
+				.row.gtr-uniform > * {
+					padding-top: 25px;
+				}
+
+		.row.gtr-150 {
+			margin-top: -37.5px;
+			margin-left: -37.5px;
+		}
+
+			.row.gtr-150 > * {
+				padding: 37.5px 0 0 37.5px;
+			}
+
+			.row.gtr-150.gtr-uniform {
+				margin-top: -37.5px;
+			}
+
+				.row.gtr-150.gtr-uniform > * {
+					padding-top: 37.5px;
+				}
+
+		.row.gtr-200 {
+			margin-top: -50px;
+			margin-left: -50px;
+		}
+
+			.row.gtr-200 > * {
+				padding: 50px 0 0 50px;
+			}
+
+			.row.gtr-200.gtr-uniform {
+				margin-top: -50px;
+			}
+
+				.row.gtr-200.gtr-uniform > * {
+					padding-top: 50px;
+				}
+
+		@media screen and (max-width: 1680px) {
+
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				box-sizing: border-box;
+				align-items: stretch;
+			}
+
+				.row > * {
+					box-sizing: border-box;
+				}
+
+				.row.gtr-uniform > * > :last-child {
+					margin-bottom: 0;
+				}
+
+				.row.aln-left {
+					justify-content: flex-start;
+				}
+
+				.row.aln-center {
+					justify-content: center;
+				}
+
+				.row.aln-right {
+					justify-content: flex-end;
+				}
+
+				.row.aln-top {
+					align-items: flex-start;
+				}
+
+				.row.aln-middle {
+					align-items: center;
+				}
+
+				.row.aln-bottom {
+					align-items: flex-end;
+				}
+
+				.row > .imp-xlarge {
+					order: -1;
+				}
+
+				.row > .col-1-xlarge {
+					width: 8.33333%;
+				}
+
+				.row > .off-1-xlarge {
+					margin-left: 8.33333%;
+				}
+
+				.row > .col-2-xlarge {
+					width: 16.66667%;
+				}
+
+				.row > .off-2-xlarge {
+					margin-left: 16.66667%;
+				}
+
+				.row > .col-3-xlarge {
+					width: 25%;
+				}
+
+				.row > .off-3-xlarge {
+					margin-left: 25%;
+				}
+
+				.row > .col-4-xlarge {
+					width: 33.33333%;
+				}
+
+				.row > .off-4-xlarge {
+					margin-left: 33.33333%;
+				}
+
+				.row > .col-5-xlarge {
+					width: 41.66667%;
+				}
+
+				.row > .off-5-xlarge {
+					margin-left: 41.66667%;
+				}
+
+				.row > .col-6-xlarge {
+					width: 50%;
+				}
+
+				.row > .off-6-xlarge {
+					margin-left: 50%;
+				}
+
+				.row > .col-7-xlarge {
+					width: 58.33333%;
+				}
+
+				.row > .off-7-xlarge {
+					margin-left: 58.33333%;
+				}
+
+				.row > .col-8-xlarge {
+					width: 66.66667%;
+				}
+
+				.row > .off-8-xlarge {
+					margin-left: 66.66667%;
+				}
+
+				.row > .col-9-xlarge {
+					width: 75%;
+				}
+
+				.row > .off-9-xlarge {
+					margin-left: 75%;
+				}
+
+				.row > .col-10-xlarge {
+					width: 83.33333%;
+				}
+
+				.row > .off-10-xlarge {
+					margin-left: 83.33333%;
+				}
+
+				.row > .col-11-xlarge {
+					width: 91.66667%;
+				}
+
+				.row > .off-11-xlarge {
+					margin-left: 91.66667%;
+				}
+
+				.row > .col-12-xlarge {
+					width: 100%;
+				}
+
+				.row > .off-12-xlarge {
+					margin-left: 100%;
+				}
+
+				.row.gtr-0 {
+					margin-top: 0px;
+					margin-left: 0px;
+				}
+
+					.row.gtr-0 > * {
+						padding: 0px 0 0 0px;
+					}
+
+					.row.gtr-0.gtr-uniform {
+						margin-top: 0px;
+					}
+
+						.row.gtr-0.gtr-uniform > * {
+							padding-top: 0px;
+						}
+
+				.row.gtr-25 {
+					margin-top: -6.25px;
+					margin-left: -6.25px;
+				}
+
+					.row.gtr-25 > * {
+						padding: 6.25px 0 0 6.25px;
+					}
+
+					.row.gtr-25.gtr-uniform {
+						margin-top: -6.25px;
+					}
+
+						.row.gtr-25.gtr-uniform > * {
+							padding-top: 6.25px;
+						}
+
+				.row.gtr-50 {
+					margin-top: -12.5px;
+					margin-left: -12.5px;
+				}
+
+					.row.gtr-50 > * {
+						padding: 12.5px 0 0 12.5px;
+					}
+
+					.row.gtr-50.gtr-uniform {
+						margin-top: -12.5px;
+					}
+
+						.row.gtr-50.gtr-uniform > * {
+							padding-top: 12.5px;
+						}
+
+				.row {
+					margin-top: -25px;
+					margin-left: -25px;
+				}
+
+					.row > * {
+						padding: 25px 0 0 25px;
+					}
+
+					.row.gtr-uniform {
+						margin-top: -25px;
+					}
+
+						.row.gtr-uniform > * {
+							padding-top: 25px;
+						}
+
+				.row.gtr-150 {
+					margin-top: -37.5px;
+					margin-left: -37.5px;
+				}
+
+					.row.gtr-150 > * {
+						padding: 37.5px 0 0 37.5px;
+					}
+
+					.row.gtr-150.gtr-uniform {
+						margin-top: -37.5px;
+					}
+
+						.row.gtr-150.gtr-uniform > * {
+							padding-top: 37.5px;
+						}
+
+				.row.gtr-200 {
+					margin-top: -50px;
+					margin-left: -50px;
+				}
+
+					.row.gtr-200 > * {
+						padding: 50px 0 0 50px;
+					}
+
+					.row.gtr-200.gtr-uniform {
+						margin-top: -50px;
+					}
+
+						.row.gtr-200.gtr-uniform > * {
+							padding-top: 50px;
+						}
+
+		}
+
+		@media screen and (max-width: 1280px) {
+
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				box-sizing: border-box;
+				align-items: stretch;
+			}
+
+				.row > * {
+					box-sizing: border-box;
+				}
+
+				.row.gtr-uniform > * > :last-child {
+					margin-bottom: 0;
+				}
+
+				.row.aln-left {
+					justify-content: flex-start;
+				}
+
+				.row.aln-center {
+					justify-content: center;
+				}
+
+				.row.aln-right {
+					justify-content: flex-end;
+				}
+
+				.row.aln-top {
+					align-items: flex-start;
+				}
+
+				.row.aln-middle {
+					align-items: center;
+				}
+
+				.row.aln-bottom {
+					align-items: flex-end;
+				}
+
+				.row > .imp-large {
+					order: -1;
+				}
+
+				.row > .col-1-large {
+					width: 8.33333%;
+				}
+
+				.row > .off-1-large {
+					margin-left: 8.33333%;
+				}
+
+				.row > .col-2-large {
+					width: 16.66667%;
+				}
+
+				.row > .off-2-large {
+					margin-left: 16.66667%;
+				}
+
+				.row > .col-3-large {
+					width: 25%;
+				}
+
+				.row > .off-3-large {
+					margin-left: 25%;
+				}
+
+				.row > .col-4-large {
+					width: 33.33333%;
+				}
+
+				.row > .off-4-large {
+					margin-left: 33.33333%;
+				}
+
+				.row > .col-5-large {
+					width: 41.66667%;
+				}
+
+				.row > .off-5-large {
+					margin-left: 41.66667%;
+				}
+
+				.row > .col-6-large {
+					width: 50%;
+				}
+
+				.row > .off-6-large {
+					margin-left: 50%;
+				}
+
+				.row > .col-7-large {
+					width: 58.33333%;
+				}
+
+				.row > .off-7-large {
+					margin-left: 58.33333%;
+				}
+
+				.row > .col-8-large {
+					width: 66.66667%;
+				}
+
+				.row > .off-8-large {
+					margin-left: 66.66667%;
+				}
+
+				.row > .col-9-large {
+					width: 75%;
+				}
+
+				.row > .off-9-large {
+					margin-left: 75%;
+				}
+
+				.row > .col-10-large {
+					width: 83.33333%;
+				}
+
+				.row > .off-10-large {
+					margin-left: 83.33333%;
+				}
+
+				.row > .col-11-large {
+					width: 91.66667%;
+				}
+
+				.row > .off-11-large {
+					margin-left: 91.66667%;
+				}
+
+				.row > .col-12-large {
+					width: 100%;
+				}
+
+				.row > .off-12-large {
+					margin-left: 100%;
+				}
+
+				.row.gtr-0 {
+					margin-top: 0px;
+					margin-left: 0px;
+				}
+
+					.row.gtr-0 > * {
+						padding: 0px 0 0 0px;
+					}
+
+					.row.gtr-0.gtr-uniform {
+						margin-top: 0px;
+					}
+
+						.row.gtr-0.gtr-uniform > * {
+							padding-top: 0px;
+						}
+
+				.row.gtr-25 {
+					margin-top: -5px;
+					margin-left: -5px;
+				}
+
+					.row.gtr-25 > * {
+						padding: 5px 0 0 5px;
+					}
+
+					.row.gtr-25.gtr-uniform {
+						margin-top: -5px;
+					}
+
+						.row.gtr-25.gtr-uniform > * {
+							padding-top: 5px;
+						}
+
+				.row.gtr-50 {
+					margin-top: -10px;
+					margin-left: -10px;
+				}
+
+					.row.gtr-50 > * {
+						padding: 10px 0 0 10px;
+					}
+
+					.row.gtr-50.gtr-uniform {
+						margin-top: -10px;
+					}
+
+						.row.gtr-50.gtr-uniform > * {
+							padding-top: 10px;
+						}
+
+				.row {
+					margin-top: -20px;
+					margin-left: -20px;
+				}
+
+					.row > * {
+						padding: 20px 0 0 20px;
+					}
+
+					.row.gtr-uniform {
+						margin-top: -20px;
+					}
+
+						.row.gtr-uniform > * {
+							padding-top: 20px;
+						}
+
+				.row.gtr-150 {
+					margin-top: -30px;
+					margin-left: -30px;
+				}
+
+					.row.gtr-150 > * {
+						padding: 30px 0 0 30px;
+					}
+
+					.row.gtr-150.gtr-uniform {
+						margin-top: -30px;
+					}
+
+						.row.gtr-150.gtr-uniform > * {
+							padding-top: 30px;
+						}
+
+				.row.gtr-200 {
+					margin-top: -40px;
+					margin-left: -40px;
+				}
+
+					.row.gtr-200 > * {
+						padding: 40px 0 0 40px;
+					}
+
+					.row.gtr-200.gtr-uniform {
+						margin-top: -40px;
+					}
+
+						.row.gtr-200.gtr-uniform > * {
+							padding-top: 40px;
+						}
+
+		}
+
+		@media screen and (max-width: 980px) {
+
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				box-sizing: border-box;
+				align-items: stretch;
+			}
+
+				.row > * {
+					box-sizing: border-box;
+				}
+
+				.row.gtr-uniform > * > :last-child {
+					margin-bottom: 0;
+				}
+
+				.row.aln-left {
+					justify-content: flex-start;
+				}
+
+				.row.aln-center {
+					justify-content: center;
+				}
+
+				.row.aln-right {
+					justify-content: flex-end;
+				}
+
+				.row.aln-top {
+					align-items: flex-start;
+				}
+
+				.row.aln-middle {
+					align-items: center;
+				}
+
+				.row.aln-bottom {
+					align-items: flex-end;
+				}
+
+				.row > .imp-medium {
+					order: -1;
+				}
+
+				.row > .col-1-medium {
+					width: 8.33333%;
+				}
+
+				.row > .off-1-medium {
+					margin-left: 8.33333%;
+				}
+
+				.row > .col-2-medium {
+					width: 16.66667%;
+				}
+
+				.row > .off-2-medium {
+					margin-left: 16.66667%;
+				}
+
+				.row > .col-3-medium {
+					width: 25%;
+				}
+
+				.row > .off-3-medium {
+					margin-left: 25%;
+				}
+
+				.row > .col-4-medium {
+					width: 33.33333%;
+				}
+
+				.row > .off-4-medium {
+					margin-left: 33.33333%;
+				}
+
+				.row > .col-5-medium {
+					width: 41.66667%;
+				}
+
+				.row > .off-5-medium {
+					margin-left: 41.66667%;
+				}
+
+				.row > .col-6-medium {
+					width: 50%;
+				}
+
+				.row > .off-6-medium {
+					margin-left: 50%;
+				}
+
+				.row > .col-7-medium {
+					width: 58.33333%;
+				}
+
+				.row > .off-7-medium {
+					margin-left: 58.33333%;
+				}
+
+				.row > .col-8-medium {
+					width: 66.66667%;
+				}
+
+				.row > .off-8-medium {
+					margin-left: 66.66667%;
+				}
+
+				.row > .col-9-medium {
+					width: 75%;
+				}
+
+				.row > .off-9-medium {
+					margin-left: 75%;
+				}
+
+				.row > .col-10-medium {
+					width: 83.33333%;
+				}
+
+				.row > .off-10-medium {
+					margin-left: 83.33333%;
+				}
+
+				.row > .col-11-medium {
+					width: 91.66667%;
+				}
+
+				.row > .off-11-medium {
+					margin-left: 91.66667%;
+				}
+
+				.row > .col-12-medium {
+					width: 100%;
+				}
+
+				.row > .off-12-medium {
+					margin-left: 100%;
+				}
+
+				.row.gtr-0 {
+					margin-top: 0px;
+					margin-left: 0px;
+				}
+
+					.row.gtr-0 > * {
+						padding: 0px 0 0 0px;
+					}
+
+					.row.gtr-0.gtr-uniform {
+						margin-top: 0px;
+					}
+
+						.row.gtr-0.gtr-uniform > * {
+							padding-top: 0px;
+						}
+
+				.row.gtr-25 {
+					margin-top: -6.25px;
+					margin-left: -6.25px;
+				}
+
+					.row.gtr-25 > * {
+						padding: 6.25px 0 0 6.25px;
+					}
+
+					.row.gtr-25.gtr-uniform {
+						margin-top: -6.25px;
+					}
+
+						.row.gtr-25.gtr-uniform > * {
+							padding-top: 6.25px;
+						}
+
+				.row.gtr-50 {
+					margin-top: -12.5px;
+					margin-left: -12.5px;
+				}
+
+					.row.gtr-50 > * {
+						padding: 12.5px 0 0 12.5px;
+					}
+
+					.row.gtr-50.gtr-uniform {
+						margin-top: -12.5px;
+					}
+
+						.row.gtr-50.gtr-uniform > * {
+							padding-top: 12.5px;
+						}
+
+				.row {
+					margin-top: -25px;
+					margin-left: -25px;
+				}
+
+					.row > * {
+						padding: 25px 0 0 25px;
+					}
+
+					.row.gtr-uniform {
+						margin-top: -25px;
+					}
+
+						.row.gtr-uniform > * {
+							padding-top: 25px;
+						}
+
+				.row.gtr-150 {
+					margin-top: -37.5px;
+					margin-left: -37.5px;
+				}
+
+					.row.gtr-150 > * {
+						padding: 37.5px 0 0 37.5px;
+					}
+
+					.row.gtr-150.gtr-uniform {
+						margin-top: -37.5px;
+					}
+
+						.row.gtr-150.gtr-uniform > * {
+							padding-top: 37.5px;
+						}
+
+				.row.gtr-200 {
+					margin-top: -50px;
+					margin-left: -50px;
+				}
+
+					.row.gtr-200 > * {
+						padding: 50px 0 0 50px;
+					}
+
+					.row.gtr-200.gtr-uniform {
+						margin-top: -50px;
+					}
+
+						.row.gtr-200.gtr-uniform > * {
+							padding-top: 50px;
+						}
+
+		}
+
+		@media screen and (max-width: 736px) {
+
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				box-sizing: border-box;
+				align-items: stretch;
+			}
+
+				.row > * {
+					box-sizing: border-box;
+				}
+
+				.row.gtr-uniform > * > :last-child {
+					margin-bottom: 0;
+				}
+
+				.row.aln-left {
+					justify-content: flex-start;
+				}
+
+				.row.aln-center {
+					justify-content: center;
+				}
+
+				.row.aln-right {
+					justify-content: flex-end;
+				}
+
+				.row.aln-top {
+					align-items: flex-start;
+				}
+
+				.row.aln-middle {
+					align-items: center;
+				}
+
+				.row.aln-bottom {
+					align-items: flex-end;
+				}
+
+				.row > .imp-small {
+					order: -1;
+				}
+
+				.row > .col-1-small {
+					width: 8.33333%;
+				}
+
+				.row > .off-1-small {
+					margin-left: 8.33333%;
+				}
+
+				.row > .col-2-small {
+					width: 16.66667%;
+				}
+
+				.row > .off-2-small {
+					margin-left: 16.66667%;
+				}
+
+				.row > .col-3-small {
+					width: 25%;
+				}
+
+				.row > .off-3-small {
+					margin-left: 25%;
+				}
+
+				.row > .col-4-small {
+					width: 33.33333%;
+				}
+
+				.row > .off-4-small {
+					margin-left: 33.33333%;
+				}
+
+				.row > .col-5-small {
+					width: 41.66667%;
+				}
+
+				.row > .off-5-small {
+					margin-left: 41.66667%;
+				}
+
+				.row > .col-6-small {
+					width: 50%;
+				}
+
+				.row > .off-6-small {
+					margin-left: 50%;
+				}
+
+				.row > .col-7-small {
+					width: 58.33333%;
+				}
+
+				.row > .off-7-small {
+					margin-left: 58.33333%;
+				}
+
+				.row > .col-8-small {
+					width: 66.66667%;
+				}
+
+				.row > .off-8-small {
+					margin-left: 66.66667%;
+				}
+
+				.row > .col-9-small {
+					width: 75%;
+				}
+
+				.row > .off-9-small {
+					margin-left: 75%;
+				}
+
+				.row > .col-10-small {
+					width: 83.33333%;
+				}
+
+				.row > .off-10-small {
+					margin-left: 83.33333%;
+				}
+
+				.row > .col-11-small {
+					width: 91.66667%;
+				}
+
+				.row > .off-11-small {
+					margin-left: 91.66667%;
+				}
+
+				.row > .col-12-small {
+					width: 100%;
+				}
+
+				.row > .off-12-small {
+					margin-left: 100%;
+				}
+
+				.row.gtr-0 {
+					margin-top: 0px;
+					margin-left: 0px;
+				}
+
+					.row.gtr-0 > * {
+						padding: 0px 0 0 0px;
+					}
+
+					.row.gtr-0.gtr-uniform {
+						margin-top: 0px;
+					}
+
+						.row.gtr-0.gtr-uniform > * {
+							padding-top: 0px;
+						}
+
+				.row.gtr-25 {
+					margin-top: -5px;
+					margin-left: -5px;
+				}
+
+					.row.gtr-25 > * {
+						padding: 5px 0 0 5px;
+					}
+
+					.row.gtr-25.gtr-uniform {
+						margin-top: -5px;
+					}
+
+						.row.gtr-25.gtr-uniform > * {
+							padding-top: 5px;
+						}
+
+				.row.gtr-50 {
+					margin-top: -10px;
+					margin-left: -10px;
+				}
+
+					.row.gtr-50 > * {
+						padding: 10px 0 0 10px;
+					}
+
+					.row.gtr-50.gtr-uniform {
+						margin-top: -10px;
+					}
+
+						.row.gtr-50.gtr-uniform > * {
+							padding-top: 10px;
+						}
+
+				.row {
+					margin-top: -20px;
+					margin-left: -20px;
+				}
+
+					.row > * {
+						padding: 20px 0 0 20px;
+					}
+
+					.row.gtr-uniform {
+						margin-top: -20px;
+					}
+
+						.row.gtr-uniform > * {
+							padding-top: 20px;
+						}
+
+				.row.gtr-150 {
+					margin-top: -30px;
+					margin-left: -30px;
+				}
+
+					.row.gtr-150 > * {
+						padding: 30px 0 0 30px;
+					}
+
+					.row.gtr-150.gtr-uniform {
+						margin-top: -30px;
+					}
+
+						.row.gtr-150.gtr-uniform > * {
+							padding-top: 30px;
+						}
+
+				.row.gtr-200 {
+					margin-top: -40px;
+					margin-left: -40px;
+				}
+
+					.row.gtr-200 > * {
+						padding: 40px 0 0 40px;
+					}
+
+					.row.gtr-200.gtr-uniform {
+						margin-top: -40px;
+					}
+
+						.row.gtr-200.gtr-uniform > * {
+							padding-top: 40px;
+						}
+
+		}
+
+/* Multi-use */
+
+	.link-list li {
+		padding: 0.2em 0 0.2em 0;
+	}
+
+		.link-list li:first-child {
+			padding-top: 0 !important;
+			border-top: 0 !important;
+		}
+
+		.link-list li:last-child {
+			padding-bottom: 0 !important;
+			border-bottom: 0 !important;
+		}
+
+	.quote-list li {
+		padding: 1em 0 1em 0;
+		overflow: hidden;
+	}
+
+		.quote-list li:first-child {
+			padding-top: 0 !important;
+			border-top: 0 !important;
+		}
+
+		.quote-list li:last-child {
+			padding-bottom: 0 !important;
+			border-bottom: 0 !important;
+		}
+
+		.quote-list li img {
+			float: left;
+		}
+
+		.quote-list li p {
+			margin: 0 0 0 90px;
+			font-size: 1.2em;
+			font-style: italic;
+		}
+
+		.quote-list li span {
+			display: block;
+			margin-left: 90px;
+			font-size: 0.9em;
+			font-weight: 400;
+		}
+
+	.check-list li {
+		padding: 0.7em 0 0.7em 45px;
+		font-size: 1.2em;
+		background: url("images/icon-checkmark.png") 0px 1.05em no-repeat;
+	}
+
+		.check-list li:first-child {
+			padding-top: 0 !important;
+			border-top: 0 !important;
+			background-position: 0 0.3em;
+		}
+
+		.check-list li:last-child {
+			padding-bottom: 0 !important;
+			border-bottom: 0 !important;
+		}
+
+	.feature-image {
+		display: block;
+		margin: 0 0 2em 0;
+		outline: 0;
+	}
+
+		.feature-image img {
+			display: block;
+			width: 100%;
+		}
+
+	.bordered-feature-image {
+		display: block;
+		background: #fff url("images/bg04.png");
+		padding: 10px;
+		box-shadow: 3px 3px 3px 1px rgba(0, 0, 0, 0.15);
+		margin: 0 0 1.5em 0;
+		outline: 0;
+	}
+
+		.bordered-feature-image img {
+			display: block;
+			width: 100%;
+		}
+
+	.button-large {
+		background-image: -moz-linear-gradient(top, #ed391b, #ce1a00);
+		background-image: -webkit-linear-gradient(top, #ed391b, #ce1a00);
+		background-image: -ms-linear-gradient(top, #ed391b, #ce1a00);
+		background-image: linear-gradient(top, #ed391b, #ce1a00);
+		display: inline-block;
+		background-color: #ed391b;
+		color: #fff;
+		text-decoration: none;
+		font-size: 1.75em;
+		height: 2em;
+		line-height: 2.125em;
+		font-weight: 300;
+		padding: 0 45px;
+		outline: 0;
+		border-radius: 10px;
+		box-shadow: inset 0px 0px 0px 1px rgba(0, 0, 0, 0.75), inset 0px 2px 0px 0px rgba(255, 192, 192, 0.5), inset 0px 0px 0px 2px rgba(255, 96, 96, 0.85), 3px 3px 3px 1px rgba(0, 0, 0, 0.15);
+		text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.5);
+	}
+
+		.button-large:hover {
+			background-image: -moz-linear-gradient(top, #fd492b, #de2a10);
+			background-image: -webkit-linear-gradient(top, #fd492b, #de2a10);
+			background-image: -ms-linear-gradient(top, #fd492b, #de2a10);
+			background-image: linear-gradient(top, #fd492b, #de2a10);
+			background-color: #fd492b;
+			box-shadow: inset 0px 0px 0px 1px rgba(0, 0, 0, 0.75), inset 0px 2px 0px 0px rgba(255, 192, 192, 0.5), inset 0px 0px 0px 2px rgba(255, 96, 96, 0.85), 3px 3px 3px 1px rgba(0, 0, 0, 0.15);
+		}
+
+		.button-large:active {
+			background-image: -moz-linear-gradient(top, #ce1a00, #ed391b);
+			background-image: -webkit-linear-gradient(top, #ce1a00, #ed391b);
+			background-image: -ms-linear-gradient(top, #ce1a00, #ed391b);
+			background-image: linear-gradient(top, #ce1a00, #ed391b);
+			background-color: #ce1a00;
+			box-shadow: inset 0px 0px 0px 1px rgba(0, 0, 0, 0.75), inset 0px 2px 0px 0px rgba(255, 192, 192, 0.5), inset 0px 0px 0px 2px rgba(255, 96, 96, 0.85), 3px 3px 3px 1px rgba(0, 0, 0, 0.15);
+		}
+
+/* Header */
+
+	#header {
+		position: relative;
+		background: #3B4346 url("images/bg01.jpg");
+		border-bottom: solid 1px #272d30;
+		box-shadow: inset 0px -1px 0px 0px #51575a;
+		text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
+	}
+
+		#header > .container {
+			position: relative;
+			min-height: 155px;
+		}
+
+		#header h1 {
+			position: absolute;
+			left: 0;
+			bottom: 35px;
+			font-size: 2.75em;
+		}
+
+			#header h1 a {
+				color: #fff;
+				text-decoration: none;
+			}
+
+		#header nav {
+			position: absolute;
+			right: 0;
+			bottom: 35px;
+			font-weight: 200;
+		}
+
+			#header nav a {
+				color: #c6c8c8;
+				text-decoration: none;
+				font-size: 1.4em;
+				margin-left: 60px;
+				outline: 0;
+			}
+
+				#header nav a:hover {
+					color: #f6f8f8;
+				}
+
+		.subpage #header > .container {
+			height: 155px;
+		}
+
+/* Banner */
+
+	#banner {
+		border-top: solid 1px #222628;
+		box-shadow: inset 0px 1px 0px 0px #3e484a;
+		padding: 35px 0 35px 0;
+		color: #fff;
+	}
+
+		#banner .bordered-feature-image {
+			margin-bottom: 0;
+		}
+
+		#banner p {
+			font-size: 2em;
+			font-weight: 200;
+			line-height: 1.25em;
+			padding-right: 1em;
+			margin: 0 0 1em 0;
+		}
+
+/* Features */
+
+	#features {
+		background: #353D40 url("images/bg02.jpg");
+		border-bottom: solid 1px #272e31;
+		padding: 45px 0 45px 0;
+		text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
+		color: #a0a8ab;
+	}
+
+		#features h2 {
+			font-size: 1.25em;
+			color: #fff;
+			margin: 0 0 0.25em 0;
+		}
+
+		#features a {
+			color: #e0e8eb;
+		}
+
+		#features strong {
+			color: #fff;
+		}
+
+/* Content */
+
+	#content {
+		background: #f7f7f7 url("images/bg04.png");
+		border-top: solid 1px #fff;
+		padding: 45px 0 45px 0;
+	}
+
+		#content section {
+			background: #fff;
+			padding: 40px 30px 45px 30px;
+			box-shadow: 2px 2px 2px 1px rgba(128, 128, 128, 0.1);
+			margin: 0 0 25px 0;
+		}
+
+		#content h2 {
+			font-size: 1.8em;
+			color: #373f42;
+			margin: 0 0 0.25em 0;
+		}
+
+		#content h3 {
+			color: #96a9b5;
+			font-size: 1.25em;
+		}
+
+		#content a {
+			color: #ED391B;
+		}
+
+		#content header {
+			margin: 0 0 2em 0;
+		}
+
+		#content .quote-list li {
+			border-bottom: solid 1px #e2e6e8;
+		}
+
+		#content .link-list li {
+			border-bottom: solid 1px #e2e6e8;
+		}
+
+		#content .check-list li {
+			border-bottom: solid 1px #e2e6e8;
+		}
+
+/* Footer */
+
+	#footer {
+		padding: 45px 0 45px 0;
+		text-shadow: 1px 1px 1px white;
+		color: #546b76;
+		text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+	}
+
+		#footer h2 {
+			font-size: 1.25em;
+			color: #212f35;
+			margin: 0 0 1em 0;
+		}
+
+		#footer a {
+			color: #546b76;
+		}
+
+		#footer .quote-list li {
+			border-top: solid 1px #e0e4e6;
+			border-bottom: solid 1px #b5bec3;
+		}
+
+		#footer .link-list li {
+			border-top: solid 1px #e0e4e6;
+			border-bottom: solid 1px #b5bec3;
+		}
+
+		#footer .check-list li {
+			border-top: solid 1px #e0e4e6;
+			border-bottom: solid 1px #b5bec3;
+		}
+
+/* Copyright */
+
+	#copyright {
+		border-top: solid 1px #b5bec3;
+		box-shadow: inset 0px 1px 0px 0px #e0e4e7;
+		text-align: center;
+		padding: 45px 0 80px 0;
+		color: #8d9ca3;
+		text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+	}
+
+		#copyright a {
+			color: #8d9ca3;
+		}
+
+/* Large */
+
+	@media screen and (max-width: 1280px) {
+
+		/* Multi-use */
+
+			.check-list li {
+				font-size: 1em;
+				line-height: 2em;
+			}
+
+			.quote-list li {
+				padding: 1em 0 1em 0;
+			}
+
+				.quote-list li img {
+					width: 60px;
+				}
+
+				.quote-list li p {
+					margin: 0 0 0 80px;
+					font-size: 1em;
+					font-style: italic;
+					line-height: 1.8em;
+				}
+
+				.quote-list li span {
+					display: block;
+					margin-left: 80px;
+					font-size: 0.8em;
+					font-weight: 400;
+					line-height: 1.8em;
+				}
+
+			.feature-image {
+				margin: 0 0 1em 0;
+			}
+
+			.button-large {
+				font-size: 1.5em;
+			}
+
+		/* Banner */
+
+			#banner p {
+				font-size: 1.75em;
+			}
+
+		/* Header */
+
+			#header h1 {
+				font-size: 2.25em;
+			}
+
+			#header nav a {
+				font-size: 1.1em;
+			}
+
+		/* Content */
+
+			#content h2 {
+				font-size: 1.4em;
+			}
+
+			#content h3 {
+				font-size: 1.1em;
+			}
+
+			#content header {
+				margin: 0 0 1.25em 0;
+			}
+
+	}
+
+/* Medium */
+
+	#navPanel, #titleBar {
+		display: none;
+	}
+
+	@media screen and (max-width: 980px) {
+
+		/* Basic */
+
+			html, body {
+				overflow-x: hidden;
+			}
+
+		/* Header */
+
+			#header {
+				text-align: center;
+			}
+
+				#header > .container:first-child {
+					display: none;
+				}
+
+		/* Content */
+
+			#content {
+				padding: 25px 0;
+			}
+
+		/* Nav */
+
+			#page-wrapper {
+				-moz-backface-visibility: hidden;
+				-webkit-backface-visibility: hidden;
+				-ms-backface-visibility: hidden;
+				backface-visibility: hidden;
+				-moz-transition: -moz-transform 0.5s ease;
+				-webkit-transition: -webkit-transform 0.5s ease;
+				-ms-transition: -ms-transform 0.5s ease;
+				transition: transform 0.5s ease;
+				padding-bottom: 1px;
+				padding-top: 44px;
+			}
+
+			#titleBar {
+				-moz-backface-visibility: hidden;
+				-webkit-backface-visibility: hidden;
+				-ms-backface-visibility: hidden;
+				backface-visibility: hidden;
+				-moz-transition: -moz-transform 0.5s ease;
+				-webkit-transition: -webkit-transform 0.5s ease;
+				-ms-transition: -ms-transform 0.5s ease;
+				transition: transform 0.5s ease;
+				display: block;
+				height: 44px;
+				left: 0;
+				position: fixed;
+				top: 0;
+				width: 100%;
+				z-index: 10001;
+				color: #fff;
+				background: url("images/bg04.jpg");
+				box-shadow: inset 0px -20px 70px 0px rgba(200, 220, 245, 0.1), inset 0px -1px 0px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.6);
+				text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.75);
+			}
+
+				#titleBar .title {
+					display: block;
+					text-align: center;
+					font-size: 1.2em;
+					font-weight: 400;
+					line-height: 48px;
+				}
+
+				#titleBar .toggle {
+					position: absolute;
+					left: 0;
+					top: 0;
+					width: 80px;
+					height: 60px;
+				}
+
+					#titleBar .toggle:after {
+						content: '';
+						display: block;
+						position: absolute;
+						top: 6px;
+						left: 6px;
+						color: #fff;
+						background: rgba(255, 255, 255, 0.025);
+						box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.1), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.05), inset 0px -8px 10px 0px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.25);
+						text-shadow: -1px -1px 1px black;
+						width: 49px;
+						height: 31px;
+						border-radius: 8px;
+					}
+
+					#titleBar .toggle:before {
+						content: '';
+						position: absolute;
+						width: 20px;
+						height: 30px;
+						background: url("images/mobileUI-site-nav-opener-bg.svg");
+						top: 15px;
+						left: 20px;
+						z-index: 1;
+						opacity: 0.25;
+					}
+
+					#titleBar .toggle:active:after {
+						background: rgba(255, 255, 255, 0.05);
+					}
+
+			#navPanel {
+				-moz-backface-visibility: hidden;
+				-webkit-backface-visibility: hidden;
+				-ms-backface-visibility: hidden;
+				backface-visibility: hidden;
+				-moz-transform: translateX(-275px);
+				-webkit-transform: translateX(-275px);
+				-ms-transform: translateX(-275px);
+				transform: translateX(-275px);
+				-moz-transition: -moz-transform 0.5s ease;
+				-webkit-transition: -webkit-transform 0.5s ease;
+				-ms-transition: -ms-transform 0.5s ease;
+				transition: transform 0.5s ease;
+				display: block;
+				height: 100%;
+				left: 0;
+				overflow-y: auto;
+				position: fixed;
+				top: 0;
+				width: 275px;
+				z-index: 10002;
+				background: url("images/bg04.jpg");
+				box-shadow: inset -1px 0px 0px 0px rgba(255, 255, 255, 0.25), inset -2px 0px 25px 0px rgba(0, 0, 0, 0.5);
+				text-shadow: -1px -1px 1px black;
+			}
+
+				#navPanel .link {
+					display: block;
+					color: #fff;
+					text-decoration: none;
+					font-size: 1.25em;
+					line-height: 2em;
+					padding: 0.625em 1.5em 0.325em 1.5em;
+					border-top: solid 1px #373d40;
+					border-bottom: solid 1px rgba(0, 0, 0, 0.4);
+				}
+
+					#navPanel .link:first-child {
+						border-top: 0;
+					}
+
+					#navPanel .link:last-child {
+						border-bottom: 0;
+					}
+
+			body.navPanel-visible #page-wrapper {
+				-moz-transform: translateX(275px);
+				-webkit-transform: translateX(275px);
+				-ms-transform: translateX(275px);
+				transform: translateX(275px);
+			}
+
+			body.navPanel-visible #titleBar {
+				-moz-transform: translateX(275px);
+				-webkit-transform: translateX(275px);
+				-ms-transform: translateX(275px);
+				transform: translateX(275px);
+			}
+
+			body.navPanel-visible #navPanel {
+				-moz-transform: translateX(0);
+				-webkit-transform: translateX(0);
+				-ms-transform: translateX(0);
+				transform: translateX(0);
+			}
+
+	}
+
+/* Small */
+
+	@media screen and (max-width: 736px) {
+
+		/* Basic */
+
+			body, input, textarea, select {
+				font-size: 13pt;
+				line-height: 1.4em;
+			}
+
+		/* Multi-use */
+
+			.link-list li {
+				padding: 0.75em 0 0.75em 0;
+			}
+
+			.quote-list li p {
+				margin-bottom: 0.5em;
+			}
+
+			.check-list li {
+				font-size: 1em;
+			}
+
+			.button-large {
+				width: 100%;
+			}
+
+		/* Banner */
+
+			#banner p {
+				font-size: 1.25em;
+				font-weight: 200;
+				line-height: 1.25em;
+				margin: 0 0 1em 0;
+			}
+
+		/* Content */
+
+			#content section {
+				padding: 30px 20px;
+			}
+
+			#content h2 {
+				font-size: 1.25em;
+			}
+
+			#content h3 {
+				font-size: 1em;
+			}
+
+			#content header {
+				margin: 0 0 1.25em 0;
+			}
+
+		/* Footer */
+
+			#footer .link-list {
+				margin: 0 0 10px 0 !important;
+			}
+
+		/* Copyright */
+
+			#copyright {
+				padding: 20px 30px;
+			}
+
+	}
 </style>
-</head>
-<body>
+			<!-- Header -->
+				<section id="header">
+					<div class="container">
+						<div class="row">
+							<div class="col-12">
 
-<div class="navbar">
-  <span class="openbtn" onclick="openNav()">&#9776;</span>
+								<!-- Logo -->
+									<h1><a href="index.html" id="logo">SAN PROJECT</a></h1>
+
+								<!-- Nav -->
+									<nav id="nav">
+										<a href="index.html">Homepage</a>
+										<a href="threecolumn.html">Profile</a>
+										<a href="twocolumn1.html">Contact</a>
+									</nav>
+
+							</div>
+						</div>
+					</div>
+					<div id="banner">
+						<div class="container">
+							<div class="row">
+								<div class="col-6 col-12-medium">
+
+									<!-- Banner Copy -->
+										<p>Selamat datang!!<br>Di toko design logo ikhsan</p>
+										<a href="treecolumn.html" class="button-large">Klik disini...</a>
+
+								</div>
+								<div class="col-6 col-12-medium imp-medium">
+
+									<!-- Banner Image -->
+										<a href="#" class="bordered-feature-image"><img src="poster.png" alt="" /></a>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+			<!-- Features -->
+				<section id="features">
+					<div class="container">
+						<div class="row">
+							<div class="col-3 col-6-medium col-12-small">
+
+								<!-- Feature #1 -->
+									<section>
+										<a href="#" class="bordered-feature-image"><img src="gambar.png/gambar4.png" alt="" /></a>
+										<h2>Logo monogram</h2>
+										<p>Logo ini merupakan logo dari "FITRI". Desainnya menggunakan warna dominan hitam dan putih dengan aksen merah. Huruf "F" dan "T" ditampilkan dalam bentuk geometris sederhana namun kuat, dengan tambahan elemen lingkaran merah dan garis miring putih yang memberikan sentuhan modern dan dinamis. Keterangan di bawah logo menggunakan font yang bersih dan minimalis, menegaskan identitas yang profesional dan elegan. Logo ini mencerminkan inovasi, kekuatan, dan keandalan, sesuai dengan nilai-nilai yang ingin disampaikan oleh merek FITRI.</p>
+									</section>
+
+							</div>
+							<div class="col-3 col-6-medium col-12-small">
+
+								<!-- Feature #2 -->
+									<section>
+										<a href="#" class="bordered-feature-image"><img src="gambar.png/gambar3.png" alt="" /></a>
+										<h2>Logo geometry</h2>
+										<p>Gambar ini merupakan sebuah desain grafis dengan elemen geometris yang dominan menggunakan warna hitam, putih, dan merah. Terdapat teks "IKHSAN" di bagian bawah gambar. Desain ini tampaknya membentuk pola atau huruf tertentu, dengan penggunaan garis tegas dan bentuk segitiga serta persegi panjang yang tersusun secara dinamis. Warna merah memberikan kontras yang kuat terhadap latar belakang hitam dan elemen putih, menciptakan tampilan yang menarik dan modern.</p>
+									</section>
+
+							</div>
+							<div class="col-3 col-6-medium col-12-small">
+
+								<!-- Feature #3 -->
+									<section>
+										<a href="#" class="bordered-feature-image"><img src="gambar.png/gambar2.png" alt="" /></a>
+										<h2>Logo gambar vecktor</h2>
+										<p>Logo tersebut merupakan logo vecktor gambar yang terdiri atas gambar vecktor dan nama "SANZ PROJECT" logo tersebut biasa nya di gunakan sebagai gambar stiker tempelan dan lain lain.</p>
+									</section>
+
+							</div>
+							<div class="col-3 col-6-medium col-12-small">
+
+								<!-- Feature #4 -->
+									<section>
+										<a href="#" class="bordered-feature-image"><img src="gambar.png/logosimpel.png" alt="" /></a>
+										<h2>The umbrella academy</h2>
+										<p>Logo tersebut adalah contoh dari **logo monogram** atau **logo huruf**. Logo monogram menggunakan satu atau lebih huruf atau inisial yang diubah menjadi simbol grafis yang merepresentasikan perusahaan, organisasi, atau produk. 
+
+Dalam konteks "The Umbrella Academy," logo ini menggabungkan unsur-unsur grafis yang membentuk simbol payung, yang merupakan elemen ikonik dari serial tersebut. Jenis logo ini sering digunakan karena kemampuannya untuk memberikan identitas visual yang kuat dan mudah dikenali, serta dapat menyampaikan esensi atau tema dari merek atau produk yang diwakilinya.
+</p>
+									</section>
+
+							</div>
+						</div>
+					</div>
+				</section>
+
+			<!-- Content -->
+				<section id="content">
+					<div class="container">
+						<div class="row aln-center">
+							<div class="col-4 col-12-medium">
+
+								<!-- Box #1 -->
+									<section>
+										<header>
+										<h2>Tentang Saya</h2>
+<p>
+    Saya adalah seorang desainer logo independen yang berdedikasi, menciptakan identitas visual yang kuat untuk merek-merek. Dengan fokus pada desain yang sederhana namun efektif, saya memastikan setiap logo mencerminkan nilai dan visi klien saya.
+</p>
+<p>
+    Percaya bahwa logo yang baik harus memberikan kesan mendalam, saya bekerja dengan teliti dalam pemilihan warna, bentuk, dan tipografi untuk menciptakan logo yang unik dan mudah diingat.
+</p>
+<p>
+    Saya siap membantu Anda menciptakan logo yang memuaskan dan sesuai dengan harapan Anda.
+</p>
+										</header>
+									</section>
+
+							</div>
+							<div class="col-4 col-6-medium col-12-small">
+
+								<!-- Box #2 -->
+									<section>
+										<header>
+							</div>
+							<div class="col-4 col-6-medium col-12-small">
+
+								<!-- Box #3 -->
+									<section>
+										<header>
+										
+										</header>
+										<ul class="quote-list">
+
+							</div>
+						</div>
+					</div>
+				</section>
+
+			<!-- Footer -->
+				<section id="footer">
+					<div class="container">
+						<div class="row">
+							<div class="col-8 col-12-medium">
+<!-- Blurb -->
+<section>
+    <h2>About Our Logo Design Services</h2>
+    <p>
+        We specialize in creating unique and impactful logos that effectively represent your brand's identity. With a passion for multimedia and a keen eye for detail, we ensure each design is not only visually appealing but also communicates the essence of your business. Our expertise spans across various styles and industries, delivering custom logos that stand out and make a lasting impression.
+    </p>
+<div class="social-media">
+    <a href="https://wa.me/6283151697416" target="_blank" class="social-icon">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" title="WhatsApp: +6283151697416">
+    </a>
+    <a href="https://www.instagram.com/sanzacil_026" target="_blank" class="social-icon">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" title="Instagram: @sanzacil_026">
+    </a>
+    <a href="https://www.tiktok.com/@sanzacil_026" target="_blank" class="social-icon">
+        <img src="https://i.ibb.co/4VwsNqN/images-removebg-preview.png" alt="TikTok" title="TikTok: @sanzacil_026">
+    </a>
 </div>
 
-<div id="mySidebar" class="sidebar">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="#" onclick="showContent('home')"><i class="fas fa-home"></i> Home</a>
-  <a href="#" onclick="showContent('about')"><i class="fas fa-info-circle"></i> About</a>
-  <a href="#" onclick="showContent('services')"><i class="fas fa-cogs"></i> Services</a>
-  <a href="#" onclick="showContent('contact')"><i class="fas fa-envelope"></i> Contact</a>
+<div id="hakcipta">
+    &copy; SANZPROJECT. Semua hak dilindungi. | Desain oleh: 
+    <a href="https://www.instagram.com/sanzacil_026" style="color: #00aaff; text-decoration: none; font-weight: bold;" target="_blank">SANZPROJECT</a>
 </div>
 
-<div class="content">
-  <div class="content-inner" id="home">
-    <h2>RUMAH IKHSAN</h2>
-    <p>Selmat datang di website sederhana saya , dan terima kasih telah berkunjung di halaman saya</p>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Burning Paper</title>
 <style>
-  /* Style untuk kontainer gambar */
-  .poster-container {
-    max-width: 600px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-    background-image: url('paper_texture.jpg'); /* Gambar kertas sebagai latar belakang */
-  }
-
-  /* Style untuk gambar utama */
-  .poster {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    position: relative;
-    z-index: 1; /* Letakkan di atas elemen lain */
-  }
-
-  /* Elemen overlay untuk efek api */
-  .fire {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    animation: burnAnimation 3s linear infinite alternate;
-    z-index: 2; /* Letakkan di atas gambar utama */
-  }
-
-  /* Keyframes untuk animasi api */
-  @keyframes burnAnimation {
-    0% {
-      transform: scale(1);
+    .social-media {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
     }
-    50% {
-      transform: scale(1.2);
+    .social-icon img {
+        width: 24px;
+        height: 24px;
+        transition: transform 0.3s ease-in-out;
     }
-    100% {
-      transform: scale(1);
+    .social-icon img:hover {
+        transform: scale(1.2);
     }
-  }
+    #hakcipta {
+        text-align: center;
+        font-size: 16px;
+        color: #bbb;
+        padding: 30px;
+        background: #1e1e1e;
+        border-top: 1px solid #333;
+        margin-top: 40px;
+    }
 </style>
-</head>
-<body>
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
 
-<!-- Kontainer untuk gambar -->
-<div class="poster-container">
-  <!-- Gambar utama -->
-  <img src="poster.png" alt="Poster" class="poster">
-  <!-- Elemen overlay untuk efek api -->
-  <div class="fire"></div>
-</div>
-
-</body>
-</html>
-  </div>
-  <div class="content-inner" id="about" style="display: none;">
-    <h2>About us</h2>
-    <p>Perkenalkan nama saya Ade ikhsan nur rahman </p>
-    <p>Tujuan saya membuat website ini untuk membuka bisnis online yaitu terima jasa logo nama dan masih banyak lagi ya.</p>
-  </div>
-  <div class="content-inner" id="services" style="display: none;">
-    <h2>Our services</h2>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>-</title>
-<style>
-  .slideshow-container {
-    max-width:auto;
-    position: relative;
-    margin: auto;
-    overflow: hidden;
-  }
-  
-  .slides {
-    display: flex;
-    transition: transform 0.5s ease;
-  }
-
-  .slide {
-    flex: 0 0 auto;
-    width: 100%;
-    border-radius: 20px;
-    border: 3px solid #ccc; /* warna dan ketebalan border */
-    box-sizing: border-box; /* biar ukuran tetap sama dengan dimensi gambar */
-    cursor: pointer;
-    position: relative;
-  }
-
-  .slide img {
-    width: 100%;
-    height: auto;
-    border-radius: 17px; /* agar sesuai dengan border */
-  }
-
-  .slide .caption {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: bold;
-  }
-</style>
-</head>
-<body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-    <style>
-        /* Styling for the container */
-        .container {
-            text-align: center;
-            margin-top: 100px;
-        }
-        
-        /* Styling for the text */
-        .typing-text {
-            font-size: 24px;
-            color: #333;
-            font-family: Arial, sans-serif;
-            border-right: 2px solid transparent;
-            white-space: nowrap;
-            overflow: hidden;
-            animation: typing 2s steps(30, end), blink-caret 0.5s step-end infinite alternate;
-            word-wrap: break-word; /* Teks akan pindah ke baris baru jika tidak cukup ruang */
-        }
-        
-        /* Keyframe animation for typing effect */
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-        
-        /* Keyframe animation for blinking cursor */
-        @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: #333; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h3 class="typing-text">Kumpulan gambar logo</h3>
-</div>
-
-</body>
-</html>
-<div class="slideshow-container">
-  <div class="slides">
-    <div class="slide" onclick="openImage('gambar1.png')">
-      <img src="gambar1.png" alt="Gambar 1">
-      <div class="caption" id="caption1"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar2.png')">
-      <img src="gambar2.png" alt="Gambar 2">
-      <div class="caption" id="caption2"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar3.png')">
-      <img src="gambar3.png" alt="Gambar 3">
-      <div class="caption" id="caption3"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar4.png')">
-      <img src="gambar4.png" alt="Gambar 4">
-      <div class="caption" id="caption4"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar5.png')">
-      <img src="gambar5.png" alt="Gambar 5">
-      <div class="caption" id="caption5"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar6.png')">
-      <img src="gambar6.png" alt="Gambar 6">
-      <div class="caption" id="caption6"></div>
-    </div>
-    <div class="slide" onclick="openImage('gambar7.png')">
-      <img src="gambar7.png" alt="Gambar 7">
-      <div class="caption" id="caption7"></div>
-            <img src="poster.png" alt="Gambarpos">
-      <div class="caption" id="caption8"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Fungsi untuk menambahkan keterangan nama gambar otomatis
-  function addCaptions() {
-    var slides = document.querySelectorAll('.slide');
-    slides.forEach(function(slide, index) {
-      var imageName = slide.querySelector('img').getAttribute('src');
-      var captionId = 'caption' + (index + 1);
-      slide.querySelector('#' + captionId).textContent = imageName; // Menampilkan nama gambar sebagai keterangan
-    });
-  }
-
-  var slideIndex = 0;
-  showSlides();
-  addCaptions(); // Panggil fungsi addCaptions untuk menambahkan keterangan
-
-  function showSlides() {
-    var slides = document.querySelectorAll('.slide');
-    slideIndex++;
-    if (slideIndex >= slides.length) { slideIndex = 0 }
-    var offset = -100 * slideIndex + '%';
-    document.querySelector('.slides').style.transform = 'translateX(' + offset + ')';
-    setTimeout(showSlides, 2000); // Ganti gambar setiap 2 detik
-  }
-
-  function openImage(imageUrl) {
-    window.open(imageUrl, '_blank');
-  }
-</script>
-
-</body>
-</html>
-  </div>
-  <div class="content-inner" id="contact" style="display: none;">
-          <cernter>
-    <h2>Contact Us</h2>
-    </center>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-        .video-background video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(10px);
-        }
-        .contact-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 50px;
-            z-index: 1;
-        }
-        .contact-info a {
-            text-decoration: none;
-            color: #333;
-            margin: 0 10px;
-            font-size: 24px;
-        }
-        .message-box {
-            border: 2px solid #333;
-            padding: 10px;
-            margin-top: 20px;
-            width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-            z-index: 1;
-            background-color: rgba(255, 255, 255, 0.5);
-        }
-        .message-box textarea {
-            width: calc(100% - 22px);
-            margin: 0;
-            border: none;
-            background-color: transparent;
-            color: #000;
-            resize: none;
-        }
-        .send-whatsapp {
-            background-color: #25d366;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="video-background">
-        <video autoplay loop muted>
-            <source src="ironman.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    <div class="contact-info">
-        <a href="https://wa.me/6283151697416" target="_blank"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://instagram.com/sanzacil_026" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.tiktok.com/@sanzacil_026" target="_blank"><i class="fab fa-tiktok"></i></a>
-    </div>
-    <div class="message-box">
-        <textarea placeholder="Type your message here..." rows="4" cols="30"></textarea>
-        <br>
-        <button class="send-whatsapp" onclick="sendWhatsAppMessage()">Kirim pesan anda disini</button>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
-    <script>
-        function sendWhatsAppMessage() {
-            var phoneNumber = "+6283151697416";
-            var message = document.querySelector(".message-box textarea").value;
-            var whatsappURL = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
-            window.open(whatsappURL, '_blank');
-        }
-    </script>
-</body>
-</html>
-</div>
-
-<script>
-function openNav() {
-  document.getElementById("mySidebar").style.width = "250px";
-  document.getElementsByClassName("content")[0].style.marginLeft = "250px";
-}
-
-function closeNav() {
-  document.getElementById("mySidebar").style.width = "0";
-  document.getElementsByClassName("content")[0].style.marginLeft= "0";
-}
-
-function showContent(contentId) {
-  // Hide all content sections
-  var contents = document.getElementsByClassName("content-inner");
-  for (var i = 0; i < contents.length; i++) {
-    contents[i].style.display = "none";
-  }
-  // Show the selected content section
-  document.getElementById(contentId).style.display = "block";
-}
-</script>
-
-</body>
+	</body>
 </html>
