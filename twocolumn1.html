@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontak saya</title>
+    <title>Kontak Saya</title>
+    <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
     <style>
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -119,6 +120,9 @@
                 <a href="#" id="sendWhatsApp" title="Kirim Pesan ke WhatsApp">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
                 </a>
+                <a href="#" id="sendDana" title="Kirim Pesan ke Dana">
+                    <img src="https://i.ibb.co/QXxY7x1/images-removebg-preview-1.png" alt="Dana">
+                </a>
             </div>
         </form>
     </div>
@@ -139,6 +143,14 @@
             const message = document.getElementById('message').value;
             const whatsappLink = `https://wa.me/6283151697416?text=${encodeURIComponent(`Name: ${name}\nMessage: ${message}`)}`;
             window.location.href = whatsappLink;
+        });
+
+        document.getElementById('sendDana').addEventListener('click', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+            const danaLink = `https://link.dana.id/qr/083151697416?text=${encodeURIComponent(`Name: ${name}\nMessage: ${message}`)}`;
+            window.location.href = danaLink;
         });
     </script>
 </body>
