@@ -95,6 +95,18 @@
             width: 24px;
             height: 24px;
         }
+        .dana-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #00796b;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #00796b;
+            animation: fadeIn 2s ease-in;
+        }
     </style>
 </head>
 <body>
@@ -124,6 +136,9 @@
                     <img src="https://i.ibb.co/QXxY7x1/images-removebg-preview-1.png" alt="Dana">
                 </a>
             </div>
+            <div class="dana-number">Dana :
++6283835960471
+            </div>
         </form>
     </div>
 
@@ -149,7 +164,7 @@
             event.preventDefault();
             const name = document.getElementById('name').value;
             const message = document.getElementById('message').value;
-            const danaLink = `https://link.dana.id/qr/083151697416?text=${encodeURIComponent(`Name: ${name}\nMessage: ${message}`)}`;
+            const danaLink = `https://link.dana.id/qr/083835960471?text=${encodeURIComponent(`Name: ${name}\nMessage: ${message}`)}`;
             window.location.href = danaLink;
         });
     </script>
