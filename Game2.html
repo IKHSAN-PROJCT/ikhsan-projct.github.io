@@ -22,7 +22,7 @@
         color: #333;
     }
 
-    .game-container, .menu-container, .settings-container {
+    .game-container, .menu-container, .settings-container, .register-container {
         margin-top: 20px;
         display: none;
     }
@@ -39,7 +39,7 @@
         transform: scale(1.05);
     }
 
-    input[type="text"], input[type="number"], input[type="color"] {
+    input[type="text"], input[type="number"], input[type="color"], input[type="file"], select {
         padding: 10px;
         margin-top: 10px;
         width: 200px;
@@ -82,8 +82,9 @@
             <button onclick="showRegister()">Daftar dan Main</button>
             <button onclick="showSettings()">Settingan</button>
             <button onclick="exitGame()">Keluar</button>
+            <button onclick="continueGame()">Lanjutkan</button>
         </div>
-        <div class="register-container" style="display: none;">
+        <div class="register-container">
             <h2>Daftar</h2>
             <input type="text" id="nama" placeholder="Nama">
             <input type="number" id="umur" placeholder="Umur">
@@ -94,6 +95,15 @@
             <h2>Settings</h2>
             <label for="bgColor">Warna Background:</label>
             <input type="color" id="bgColor" name="bgColor" value="#f3f3f3">
+            <label for="fontSelect">Font Teks:</label>
+            <select id="fontSelect">
+                <option value="Arial">Arial</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+            </select>
+            <label for="bgMusic">Background Musik:</label>
+            <input type="file" id="bgMusic" accept="audio/*">
             <button onclick="applySettings()">Terapkan</button>
             <button onclick="backToMenu()">Kembali</button>
         </div>
@@ -107,7 +117,7 @@
         <p id="poin">Poin: 0</p>
     </div>
 
-    <audio id="background-music" src="your-music-file.mp3" loop autoplay></audio>
+    <audio id="background-music" src="" loop autoplay></audio>
     <script>
 const gambar = document.getElementById('gambar');
 const tebakanInput = document.getElementById('tebakan');
@@ -119,6 +129,8 @@ const registerContainer = document.querySelector('.register-container');
 const settingsContainer = document.querySelector('.settings-container');
 const gameContainer = document.querySelector('.game-container');
 const bgColorInput = document.getElementById('bgColor');
+const fontSelect = document.getElementById('fontSelect');
+const bgMusicInput = document.getElementById('bgMusic');
 let playerData = null;
 
 // Daftar gambar beserta jawaban
@@ -165,10 +177,15 @@ function cekTebakan() {
         poin += 3;
         loadNewImage();
     } else {
-        hasil.textContent = `Tebakan Anda salah. Coba lagi.`;
         wrongAttempts++;
         if (wrongAttempts >= 3) {
             hasil.textContent += ` Petunjuk: ${giveHint(currentImage.answer)}`;
+        } else {
+            hasil.textContent = `Tebakan Anda salah. Coba lagi.`;
+        }
+        if (wrongAttempts >= 5) {
+            alert('Game over!!');
+            backToMenu();
         }
     }
     poinDisplay.innerHTML = `Poin: <span class="dollar">$</span>${poin}`;
@@ -188,6 +205,16 @@ function bukaJawaban() {
 
 function applySettings() {
     document.body.style.backgroundColor = bgColorInput.value;
+    document.body.style.fontFamily = fontSelect.value;
+    const file = bgMusicInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            backgroundMusic.src = event.target.result;
+            backgroundMusic.play();
+        };
+        reader.readAsDataURL(file);
+    }
     alert('Pengaturan telah diterapkan.');
 }
 
@@ -212,7 +239,16 @@ function backToMenu() {
 }
 
 function exitGame() {
+    saveGameState();
     backToMenu();
+}
+
+function continueGame() {
+    if (playerData) {
+        startGame();
+    } else {
+        alert('Tidak ada permainan yang sedang berlangsung.');
+    }
 }
 
 function registerPlayer() {
@@ -227,14 +263,12 @@ function registerPlayer() {
         alert('Silakan isi nama dan umur.');
     }
 }
-
 async function savePlayerData(data) {
     const token = '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';
     const repo = 'IKHSAN-PROJCT/ikhsan-projct.github.io';
     const path = 'data/registration.json';
 
     try {
-        // Get current content of the file
         const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
             headers: {
                 'Authorization': `token ${token}`,
@@ -251,31 +285,35 @@ async function savePlayerData(data) {
             sha = file.sha;
         }
 
-        // Add new data
-        content.push(data);
+        const isRegistered = content.some(player => player.nama === data.nama && player.umur === data.umur);
 
-        // Update the file
-        const newContent = btoa(JSON.stringify(content));
-        const body = {
-            message: 'Add new registration',
-            content: newContent,
-            sha: sha
-        };
+        if (!isRegistered) {
+            content.push(data);
 
-        const updateResponse = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify(body)
-        });
+            const newContent = btoa(JSON.stringify(content));
+            const body = {
+                message: 'Add new registration',
+                content: newContent,
+                sha: sha
+            };
 
-        if (!updateResponse.ok) {
-            throw new Error('Gagal menyimpan data.');
+            const updateResponse = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error('Gagal menyimpan data.');
+            }
+
+            console.log('Data berhasil disimpan ke GitHub');
+        } else {
+            console.log('Pengguna sudah terdaftar.');
         }
-
-        console.log('Data berhasil disimpan ke GitHub');
     } catch (error) {
         console.error('Error:', error);
     }
@@ -284,8 +322,95 @@ async function savePlayerData(data) {
 function startGame() {
     showContainer(gameContainer);
     loadNewImage();
+    saveGameState();
 }
 
+async function checkIfRegistered() {
+    const nama = document.getElementById('nama').value.trim();
+    const umur = document.getElementById('umur').value.trim();
+
+    if (nama && umur) {
+        const token = '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';
+        const repo = 'IKHSAN-PROJCT/ikhsan-projct.github.io';
+        const path = 'data/registration.json';
+
+        try {
+            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (response.ok) {
+                const file = await response.json();
+                const content = JSON.parse(atob(file.content));
+
+                const isRegistered = content.some(player => player.nama === nama && player.umur === umur);
+
+                if (isRegistered) {
+                    playerData = { nama, umur };
+                    startGame();
+                } else {
+                    alert('Pengguna belum terdaftar, silakan daftar terlebih dahulu.');
+                    showRegister();
+                }
+            } else {
+                throw new Error('Gagal memuat data.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    } else {
+        alert('Silakan isi nama dan umur.');
+    }
+}
+
+function saveGameState() {
+    if (playerData) {
+        localStorage.setItem('playerData', JSON.stringify(playerData));
+        localStorage.setItem('currentImageIndex', currentImageIndex);
+        localStorage.setItem('poin', poin);
+    }
+}
+
+function loadGameState() {
+    const savedPlayerData = localStorage.getItem('playerData');
+    const savedCurrentImageIndex = localStorage.getItem('currentImageIndex');
+    const savedPoin = localStorage.getItem('poin');
+
+    if (savedPlayerData && savedCurrentImageIndex !== null && savedPoin !== null) {
+        playerData = JSON.parse(savedPlayerData);
+        currentImageIndex = parseInt(savedCurrentImageIndex);
+        poin = parseInt(savedPoin);
+        gambar.src = `${images[currentImageIndex].name}.png`;
+        poinDisplay.innerHTML = `Poin: <span class="dollar">$</span>${poin}`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadGameState();
+    if (playerData) {
+        startGame();
+    } else {
+        backToMenu();
+    }
+
+    backgroundMusic.play();
+});
+
+function continueGame() {
+    if (playerData) {
+        loadGameState();
+        startGame();
+    } else {
+        alert('Tidak ada permainan yang sedang berlangsung.');
+    }
+}
+
+// Menampilkan menu saat pertama kali membuka halaman
 backToMenu();
 backgroundMusic.play();
 </script>
+</body>
+</html>
