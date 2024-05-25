@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Racing Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Lobster', cursive;
+        }
+
+        .menu, .settings, .game, .register {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #000;
+        }
+
+        .menuButton, .controlButton {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color:black; /* Changed background color */
+            border: none;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .game {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: url('bg.jpg') no-repeat;
+            background-size: 100% 100%;
+        }
+
+        .startScreen {
+            width: 500px;
+            height: 150px;
+            line-height: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            background-color: rgb(43, 205, 226);
+            text-align: center;
+            border: 2px solid rgb(132, 197, 197);
+        }
+
+        .score, .highScore, .level {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            text-align: center;
+            background-color: rgb(100, 224, 156);
+            width: 200px;
+            color: rgb(59, 40, 40);
+            line-height: 40px;
+            border-radius: 4px;
+            font-size: 1.2em;
+        }
+
+        .highScore {
+            top: 60px;
+        }
+
+        .level {
+            top: 110px;
+        }
+
+        .ClickToStart {
+            cursor: pointer;
+        }
+
+        .gameArea {
+            height: 100vh;
+            width: 400px;
+            margin: auto;
+            position: relative;
+            background-color: rgb(32, 32, 32);
+            overflow: hidden;
+            border-left: 4px dashed white;
+            border-right: 4px dashed white;
+        }
+
+        .car {
+            background: url('car.png') no-repeat;
+            background-size: 100% 100%;
+            height: 75px;
+            width: 50px;
+            position: absolute;
+            top: 520px;
+            left: 175px;
+        }
+
+        .enemy {
+            background: url('enemyCar.png') no-repeat;
+            background-size: 100% 100%;
+            height: 75px;
+            width: 50px;
+            position: absolute;
+        }
+
+        .roadLines {
+            height: 100px;
+            width: 10px;
+            background-color: white;
+            position: absolute;
+            margin-left: 195px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+
+        .controlButton {
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+        }
+
+        .register form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .register form input, .register form button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .settings .option {
+            margin: 10px;
+            padding: 10px;
+            background-color: rgb(43, 205, 226);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #shootControl {
+    background-color: #4CAF50; /* Hijau */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+    position: absolute; /* Pastikan tombol diposisikan dengan benar */
+    bottom: 20px; /* Posisi di bawah */
+    right: 20px; /* Posisi di kanan */
+    z-index: 1000; /* Pastikan tombol muncul di atas elemen lainnya */
+}
+
+#shootControl:hover {
+    background-color: #45a049;
+}
+
+.bullet {
+    position: absolute;
+    width: 5px;
+    height: 20px;
+    background-color: yellow; /* Warna peluru */
+    z-index: 100; /* Pastikan peluru muncul di atas elemen game */
+}
+
+.enemy.hit {
+    animation: hitEffect 0.5s;
+}
+
+@keyframes hitEffect {
+    0% { background-color: red; }
+    50% { background-color: yellow; }
+    100% { background-color: red; }
+}
+.enemy {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    background-color:transparent;
+    transition: left 1s ease-in-out; /* Transisi halus untuk properti left */
+}
+.menu {
+    background-image: url('bg.jpg'); /* Menggunakan gambar bg.jpg sebagai latar belakang */
+    background-size: cover; /* Mengatur gambar latar belakang agar mencakup seluruh area menu */
+
+    /* Tambahan gaya lain sesuai kebutuhan Anda */
+}
+    </style>
+<div id="gameArea">
+    <!-- Konten game lainnya di sini -->
+    <div id="shootControl">Shoot</div>
+</div>
+    <div class="menu">
+    <p id="scoreInfo" class="hide">Score: <span id="currentScore"></span></p> <!-- Elemen untuk menampilkan skor -->
+    <button class="menuButton" id="startGame">Daftar dan Mulai</button>
+    <button class="menuButton" id="settings">Settingan</button>
+    <button class="menuButton" id="exit">Keluar</button>
+</div>
+    <div class="register hide">
+        <form id="registrationForm">
+            <h2>Register</h2>
+            <input type="text" id="playerName" placeholder="Nama" required>
+            <button type="submit">Mulai</button>
+        </form>
+    </div>
+
+    <div class="settings hide">
+        <h2>Settings</h2>
+        <div>
+            <label for="track">Pilih Track:</label>
+            <select id="track" class="option">
+                <option value="bg.jpg">Default</option>
+                <option value="track1.jpg">Track 1</option>
+                <option value="track2.jpg">Track 2</option>
+            </select>
+        </div>
+        <div>
+            <label for="weather">Pilih Cuaca:</label>
+            <select id="weather" class="option">
+                <option value="sunny">Panas</option>
+                <option value="rainy">Hujan</option>
+                <option value="snowy">Musim Salju</option>
+            </select>
+        </div>
+        <div>
+            <label for="car">Pilih Mobil:</label>
+            <select id="car" class="option">
+                <option value="car.png">Mobil 1</option>
+                <option value="car2.png">Mobil 2</option>
+                <option value="car3.png">Mobil 3</option>
+            </select>
+        </div>
+        <button class="menuButton" id="done">Done</button>
+        <button class="menuButton" id="backToMenu">Kembali ke Menu</button>
+    </div>
+
+    <div class="game hide">
+        <div class="score">Score: 0</div>
+        <div class="highScore">High Score: 0</div>
+        <div class="level">Level: 1</div>
+        <div class="startScreen">
+            <p class="ClickToStart">Klik di sini untuk memulai permainan</p>
+            <p>
+                PETUNJUK:<br>
+                Gunakan tombol panah untuk memindahkan mobil<br>
+                Jika Anda menabrak mobil apa pun maka permainan akan berakhir
+            </p>
+        </div>
+        <div class="gameArea"></div>
+        <div class="controls">
+            <button class="controlButton" id="leftControl">←</button>
+            <button class="controlButton" id="upControl">↑</button>
+            <button class="controlButton" id="downControl">↓</button>
+            <button class="controlButton" id="rightControl">→</button>
+        </div>
+    </div>
+
+    <script>
+        const score = document.querySelector('.score');
+        const highScoreElement = document.querySelector('.highScore');
+        const levelElement = document.querySelector('.level');
+        const startScreen = document.querySelector('.startScreen');
+        const gameArea = document.querySelector('.gameArea');
+        const menu = document.querySelector('.menu');
+        const settings = document.querySelector('.settings');
+        const game = document.querySelector('.game');
+        const register = document.querySelector('.register');
+
+        const leftControl = document.getElementById('leftControl');
+        const upControl = document.getElementById('upControl');
+        const downControl = document.getElementById('downControl');
+        const rightControl = document.getElementById('rightControl');
+
+        const track = document.getElementById('track');
+        const weather = document.getElementById('weather');
+        const carSelection = document.getElementById('car');
+        const doneButton = document.getElementById('done');
+
+        let player = { speed: 5, score: 0, highScore: 0, level: 1 };
+        let keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+        document.getElementById('startGame').addEventListener('click', () => {
+            menu.classList.add('hide');
+            register.classList.remove('hide');
+        });
+
+        document.getElementById('settings').addEventListener('click', () => {
+            menu.classList.add('hide');
+            settings.classList.remove('hide');
+        });
+
+        document.getElementById('exit').addEventListener('click', () => {
+            window.close();
+        });
+
+        document.getElementById('backToMenu').addEventListener('click', () => {
+            settings.classList.add('hide');
+            menu.classList.remove('hide');
+        });
+
+        doneButton.addEventListener('click', () => {
+            settings.classList.add('hide');
+            game.classList.remove('hide');
+            start();
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const playerName = document.getElementById('playerName').value;
+            if (playerName) {
+                register.classList.add('hide');
+                settings.classList.remove('hide');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            controlCar(e.key);
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        leftControl.addEventListener('click', () => controlCar('ArrowLeft'));
+        upControl.addEventListener('click', () => controlCar('ArrowUp'));
+        downControl.addEventListener('click', () => controlCar('ArrowDown'));
+        rightControl.addEventListener('click', () => controlCar('ArrowRight'));
+
+        function controlCar(key) {
+            if (player.start) {
+                keys.ArrowUp = false;
+                keys.ArrowDown = false;
+                keys.ArrowLeft = false;
+                keys.ArrowRight = false;
+                keys[key] = true;
+            }
+        }
+
+        function start() {
+            startScreen.classList.add('hide');
+            gameArea.innerHTML = '';
+            player.start = true;
+            player.score = 0;
+
+            const selectedTrack = track.value;
+            const selectedCar = carSelection.value;
+
+            game.style.backgroundImage = `url('${selectedTrack}')`;
+
+            for (let x = 0; x < 5; x++) {
+                let roadLine = document.createElement('div');
+                roadLine.setAttribute('class', 'roadLines');
+                roadLine.y = x * 150;
+                roadLine.style.top = roadLine.y + 'px';
+                gameArea.appendChild(roadLine);
+            }
+
+            let car = document.createElement('div');
+            car.setAttribute('class', 'car');
+            car.style.backgroundImage = `url('${selectedCar}')`;
+            gameArea.appendChild(car);
+
+            player.x = car.offsetLeft;
+            player.y = car.offsetTop;
+
+            createEnemies();
+
+            window.requestAnimationFrame(playGame);
+        }
+function moveEnemiesSmoothly() {
+    let enemies = document.querySelectorAll('.enemy');
+
+    enemies.forEach(enemy => {
+        // Tentukan arah acak untuk bergerak: -1 untuk kiri, 1 untuk kanan
+        let direction = Math.random() < 0.5 ? -1 : 1;
+
+        // Tentukan seberapa jauh musuh akan bergerak
+        let movement = Math.floor(Math.random() * 100) * direction;
+
+        // Posisi horizontal mobil musuh saat ini
+        let enemyX = parseInt(enemy.style.left) + movement;
+
+        // Pastikan mobil musuh tidak keluar dari area permainan
+        if (enemyX < 0) {
+            enemyX = 0;
+        } else if (enemyX > gameArea.offsetWidth - enemy.offsetWidth) {
+            enemyX = gameArea.offsetWidth - enemy.offsetWidth;
+        }
+
+        // Perbarui posisi mobil musuh
+        enemy.style.left = enemyX + 'px';
+    });
+}
+
+// Panggil fungsi moveEnemiesSmoothly di dalam playGame atau loop permainan utama
+function playGame() {
+    let car = document.querySelector('.car');
+    let road = gameArea.getBoundingClientRect();
+
+    if (player.start) {
+        moveRoadLines();
+        moveEnemies(car);
+        moveEnemiesSmoothly();  // Panggil fungsi untuk memindahkan musuh dengan smooth
+
+        if (keys.ArrowUp && player.y > (road.top + 70)) {
+            player.y -= player.speed;
+            animateCar(car, 'up');
+        }
+        if (keys.ArrowDown && player.y < (road.bottom - 95)) {
+            player.y += player.speed;
+            animateCar(car, 'down');
+        }
+        if (keys.ArrowLeft && player.x > 0) {
+            player.x -= player.speed;
+            animateCar(car, 'left');
+        }
+        if (keys.ArrowRight && player.x < (road.width - 50)) {
+            player.x += player.speed;
+            animateCar(car, 'right');
+        }
+
+        car.style.left = player.x + 'px';
+        car.style.top = player.y + 'px';
+
+        player.score++;
+        score.innerText = "Score: " + player.score;
+        window.requestAnimationFrame(playGame);
+    }
+}
+        function animateCar(car, direction) {
+            car.style.transition = 'transform 0.2s ease';
+
+            switch (direction) {
+                case 'up':
+                    car.style.transform = 'translateY(-20px)';
+                    break;
+                case 'down':
+                    car.style.transform = 'translateY(20px)';
+                    break;
+                case 'left':
+                    car.style.transform = 'translateX(-20px)';
+                    break;
+                case 'right':
+                    car.style.transform = 'translateX(20px)';
+                    break;
+                default:
+                    break;
+            }
+
+            setTimeout(() => {
+                car.style.transform = 'translate(0)';
+            }, 200); // Mengembalikan mobil ke posisi semula setelah 200 milidetik (0.2 detik)
+        }
+
+        function createEnemies() {
+            for (let x = 0; x < 3; x++) {
+                let enemyCar = document.createElement('div');
+                enemyCar.setAttribute('class', 'enemy');
+                enemyCar.y = ((x + 1) * 600) * -1;
+                enemyCar.style.top = enemyCar.y + 'px';
+                enemyCar.style.left = Math.floor(Math.random() * 350) + 'px';
+                gameArea.appendChild(enemyCar);
+            }
+        }
+
+        function moveEnemies(car) {
+            let enemies = document.querySelectorAll('.enemy');
+
+            enemies.forEach(enemy => {
+                if (isCollide(car, enemy)) {
+                    endGame();
+                }
+
+                enemy.y += player.speed / 2;
+                enemy.style.top = enemy.y + 'px';
+
+                if (enemy.y >= 700) {
+                    enemy.y = -300;
+                    enemy.style.left = Math.floor(Math.random() * 350) + 'px';
+                }
+            });
+        }
+
+        function moveRoadLines() {
+            let roadLines = document.querySelectorAll('.roadLines');
+
+            roadLines.forEach(roadLine => {
+                roadLine.y += player.speed;
+                roadLine.style.top = roadLine.y + 'px';
+
+                if (roadLine.y > 600) {
+                    roadLine.y = -300;
+                }
+            });
+        }
+
+        function isCollide(a, b) {
+            let aRect = a.getBoundingClientRect();
+            let bRect = b.getBoundingClientRect();
+
+            return !(
+                aRect.top > bRect.bottom ||
+                aRect.bottom < bRect.top ||
+                aRect.right < bRect.left ||
+                aRect.left > bRect.right
+            );
+        }
+function endGame() {
+    player.start = false;
+    score.innerHTML = "Game Over<br>Your Score: " + player.score;
+    highScoreElement.innerHTML = "High Score: " + player.highScore;
+    document.getElementById('currentScore').innerText = player.score; // Menampilkan skor di menu
+    menu.classList.remove('hide');
+    document.getElementById('scoreInfo').classList.remove('hide'); // Menampilkan elemen skor di menu
+}
+function checkFinishLine() {
+    let car = document.querySelector('.car');
+    let finishLine = document.querySelector('.finishLine');
+
+    if (isCollide(car, finishLine)) {
+        finishGame();
+    }
+}
+
+// Function to finish the game
+function finishGame() {
+    player.start = false;
+    score.innerHTML = "Finish!<br>Your Score: " + player.score;
+    menu.classList.remove('hide');
+}
+
+// Function to create finish line and round mapping
+function createFinishLine() {
+    const finishLine = document.createElement('div');
+    finishLine.classList.add('finishLine');
+    finishLine.style.top = '-200px'; // Adjust the position of the finish line
+    finishLine.style.width = '400px';
+    finishLine.style.height = '20px';
+    finishLine.style.backgroundColor = 'green';
+    finishLine.style.position = 'absolute';
+    finishLine.style.left = '0';
+    gameArea.appendChild(finishLine);
+}
+
+// Call function to create finish line
+createFinishLine();
+document.getElementById('shootControl').addEventListener('click', shoot);
+
+function shoot() {
+    if (player.start) {
+        const bullet = document.createElement('div');
+        bullet.classList.add('bullet');
+        bullet.style.left = (player.x + 25) + 'px'; // Sesuaikan posisi peluru sesuai dengan posisi mobil
+        bullet.style.top = (player.y - 20) + 'px';  // Sesuaikan posisi peluru sesuai dengan posisi mobil
+        gameArea.appendChild(bullet);
+
+        moveBullet(bullet);
+    }
+}
+
+function moveBullet(bullet) {
+    let bulletInterval = setInterval(() => {
+        bullet.style.top = (parseInt(bullet.style.top) - 10) + 'px';
+
+        // Periksa tabrakan peluru dengan musuh
+        let enemies = document.querySelectorAll('.enemy');
+        enemies.forEach(enemy => {
+            if (isCollide(bullet, enemy)) {
+                enemyHit(enemy);
+                bullet.remove();
+                clearInterval(bulletInterval);
+            }
+        });
+
+        // Periksa apakah peluru mencapai atas
+        if (parseInt(bullet.style.top) <= 0) {
+            bullet.remove();
+            clearInterval(bulletInterval);
+        }
+    }, 50); // Gerakkan peluru setiap 50 milidetik
+}
+
+function enemyHit(enemy) {
+    enemy.classList.add('hit');
+    setTimeout(() => {
+        enemy.classList.remove('hit');
+        // Reset posisi musuh setelah terkena tembakan
+        enemy.y = -300;
+        enemy.style.top = enemy.y + 'px';
+        enemy.style.left = Math.floor(Math.random() * 350) + 'px';
+    }, 500); // Efek animasi hit berlangsung selama 500 milidetik
+}
+
+function isCollide(a, b) {
+    let aRect = a.getBoundingClientRect();
+    let bRect = b.getBoundingClientRect();
+
+    return !(
+        aRect.top > bRect.bottom ||
+        aRect.bottom < bRect.top ||
+        aRect.right < bRect.left ||
+        aRect.left > bRect.right
+    );
+}
+
+function controlCar(key) {
+    if (player.start) {
+        keys.ArrowUp = false;
+        keys.ArrowDown = false;
+        keys.ArrowLeft = false;
+        keys.ArrowRight = false;
+        keys[key] = true;
+    }
+}
+function changeDirectionTowardsPlayer(enemy, playerCar) {
+    let enemyX = parseInt(enemy.style.left);
+    let playerCarX = playerCar.offsetLeft;
+
+    // Jika posisi mobil pemain lebih kecil dari posisi mobil musuh, gerakkan musuh ke kiri
+    if (playerCarX < enemyX) {
+        enemyX -= 2; // Kecepatan musuh bergerak ke kiri
+    }
+    // Jika posisi mobil pemain lebih besar dari posisi mobil musuh, gerakkan musuh ke kanan
+    else if (playerCarX > enemyX) {
+        enemyX += 2; // Kecepatan musuh bergerak ke kanan
+    }
+
+    // Perbarui posisi mobil musuh
+    enemy.style.left = enemyX + 'px';
+}
+// Call the updateScore function whenever the player's score changes
+function increaseScoreRandomly() {
+    // Randomly determine whether to increase the score
+    if (Math.random() < 0.5) {
+        // Randomly determine the score increment (between 1 and 5)
+        let scoreIncrement = Math.floor(Math.random() * 5) + 1;
+
+        // Increment the player's score
+        player.score += scoreIncrement;
+
+        // Update and display the score
+        updateScore();
+
+        // Check if the player has reached the threshold for a score bonus (e.g., 100)
+        if (player.score % 100 === 0) {
+            // Award bonus points for reaching the threshold
+            let bonusPoints = 100; // You can adjust the bonus points as needed
+            player.score += bonusPoints;
+
+            // Update and display the score to reflect the bonus points
+            updateScore();
+        }
+    }
+}
+    </script>
+</body>
+</html>
