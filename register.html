@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register & Settings</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #171717;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .container h2 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+        }
+
+        .container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .container button:last-child {
+            background-color: #333;
+        }
+
+        .container button:hover {
+            background-color: #45a049;
+        }
+
+        .container select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="register">
+        <h2>Register</h2>
+        <label for="playerName">Your Name:</label>
+        <input type="text" id="playerName" placeholder="Enter your name">
+        <button onclick="registerPlayer()">Register</button>
+    </div>
+
+    <div class="container" id="settings" style="display: none;">
+        <h2>Settings</h2>
+        <label for="snakeSkin">Snake Skin:</label>
+        <select id="snakeSkin">
+            <option value="skin1">Skin 1</option>
+            <option value="skin2">Skin 2</option>
+            <option value="skin3">Skin 3</option>
+            <option value="skin4">Skin 4</option>
+            <option value="skin5">Skin 5</option>
+        </select>
+        <label for="gameBackground">Game Background:</label>
+        <select id="gameBackground">
+            <option value="background1">Background 1</option>
+            <option value="background2">Background 2</option>
+            <option value="background3">Background 3</option>
+            <option value="background4">Background 4</option>
+            <option value="background5">Background 5</option>
+        </select>
+        <button onclick="saveSettings()">Save</button>
+        <button onclick="toggleView()">Back</button>
+    </div>
+
+    <script>
+        function registerPlayer() {
+            const playerName = document.getElementById('playerName').value;
+            if (playerName.trim() !== '') {
+                localStorage.setItem('playerName', playerName);
+                window.location.href = 'https://ikhsan-projct.github.io/snake.html';
+            } else {
+                alert('Please enter your name to register.');
+            }
+        }
+
+        function toggleView() {
+            const registerDiv = document.getElementById('register');
+            const settingsDiv = document.getElementById('settings');
+
+            if (registerDiv.style.display === 'none') {
+                registerDiv.style.display = 'block';
+                settingsDiv.style.display = 'none';
+            } else {
+                registerDiv.style.display = 'none';
+                settingsDiv.style.display = 'block';
+            }
+        }
+
+        function saveSettings() {
+            const snakeSkin = document.getElementById('snakeSkin').value;
+            const gameBackground = document.getElementById('gameBackground').value;
+            // Simpan pengaturan di local storage atau lakukan sesuai kebutuhan aplikasi Anda
+            alert('Settings saved!');
+        }
+    </script>
+</body>
+</html>
