@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dinosaur Game</title>
+  <style>
+    .character {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      animation: character-animation 0.8s infinite alternate; /* Animasi karakter */
+    }
+
+    @keyframes character-animation {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(-10px);
+      }
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      position: relative;
+    }
+
+    canvas {
+      border: 2px solid #000;
+      background: url('map2.png'); /* Ganti dengan gambar default atau sesuai kebutuhan */
+      background-size: cover; /* Untuk menutupi seluruh area canvas */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      width: 100vw; /* Lebar canvas mengisi lebar layar */
+      height: 50vh; /* Tinggi canvas disesuaikan dengan lebar layar */
+    }
+
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 30px 50px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-over button {
+      margin: 10px;
+      padding: 15px 30px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 25px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .game-over button:hover {
+      background-color: #45a049;
+    }
+
+    .jump-button {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 70px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .jump-button:hover {
+      background-color: #45a049;
+    }
+
+    .score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 20px;
+    }
+
+    .settings-menu {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .settings-menu label, .settings-menu select {
+      display: block;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .settings-menu button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 25px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .settings-menu button:hover {
+      background-color: #45a049;
+    }
+
+    .pause-button {
+      position: absolute;
+      top: 10px;
+      right: 70px;
+      background-color: #FF9800;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 20px;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .pause-button:hover {
+      background-color: #e68900;
+    }
+
+    .settings-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #2196F3;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 20px;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    .settings-button:hover {
+      background-color: #1976D2;
+    }
+
+    .congratulations-screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 30px 50px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <audio id="backgroundMusic" autoplay loop>
+  <source src="music.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div id="gameOverScreen" class="game-over" style="display:none;">
+    <h2>Game Over!</h2>
+    <button id="restartButton">Mulai Lagi</button>
+    <button id="openSettingsButton">Setting</button>
+    <button id="exitButton">Keluar</button>
+  </div>
+  <button class="jump-button" onclick="jump()">Jump</button>
+  <button class="pause-button" id="pauseButton" onclick="togglePause()">||</button>
+  <button class="settings-button" id="settingsButtonIcon">⚙️</button>
+  <div id="scoreDisplay" class="score">Score: 0 | Level: 1</div>
+  <div id="settingsMenu" class="settings-menu">
+    <label for="characterSelect">Pilih Karakter:</label>
+    <select id="characterSelect">
+      <option value="character.png">Karakter 1</option>
+      <option value="character2.png">Karakter 2</option>
+      <option value="character3.png">Karakter 3</option>
+      <option value="character4.png">Karakter 4</option>
+      <option value="character5.png">Karakter 5</option>
+    </select>
+
+    <label for="mapSelect">Pilih Map:</label>
+    <select id="mapSelect">
+      <option value="map1.png">Map 1</option>
+      <option value="map2.png">Map 2</option>
+      <option value="map3.png">Map 3</option>
+      <option value="map4.png">Map 4</option>
+      <option value="map5.png">Map 5</option>
+    </select>
+
+    <label for="controlSelect">Pilih Kontrol:</label>
+    <select id="controlSelect">
+      <option value="space">Spacebar</option>
+      <option value="click">Klik Mouse</option>
+      <option value="touch">Sentuh</option>
+    </select>
+
+    <button id="saveSettingsButton">Simpan Pengaturan</button>
+    <button id="backButton">Kembali</button>
+  </div>
+  <div id="congratulationsScreen" class="congratulations-screen">
+    <h2>Congratulations!</h2>
+    <p>You have completed 100 levels!</p>
+    <p>You have earned a total of <span id="totalPoints">0</span> points as a reward!</p>
+  </div>
+  
+  <script>
+    var canvas = document.getElementById("gameCanvas");
+    var ctx = canvas.getContext("2d");
+
+    var character = new Image();
+    character.src ='character.png'; // Ganti dengan karakter default
+    var characterX = 50;
+    var characterY = canvas.height - 100;
+    var characterWidth = 50;
+    var characterHeight = 50;
+
+    var obstacles = [];
+    var obstacle = new Image();
+    obstacle.src = 'Enemy.png'; // Ganti dengan musuh default
+    var obstacleWidth = 50;
+    var obstacleHeight = 50;
+    var obstacleSpeed = 5;
+
+    var gravity = 0.8;
+    var jumpStrength = -15;
+    var velocityY = 0;
+    var isJumping = false;
+
+    var gameRunning = true;
+    var isPaused = false;
+
+    var score = 0;
+    var level = 1;
+    var obstaclesCleared = 0;
+    var scoreDisplay = document.getElementById("scoreDisplay");
+    var totalPointsDisplay = document.getElementById("totalPoints");
+
+    function drawCharacter() {
+      ctx.drawImage(character, characterX, characterY, characterWidth, characterHeight);
+    }
+
+    function drawObstacles() {
+      for (var i = 0; i < obstacles.length; i++) {
+        ctx.drawImage(obstacle, obstacles[i].x, obstacles[i].y, obstacleWidth, obstacleHeight);
+      }
+    }
+
+    function update() {
+      if (isPaused) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCharacter();
+      drawObstacles();
+      
+      if (!gameRunning) {
+        return;
+      }
+
+      if (obstacles.length === 0 && Math.random() < 0.02) {
+        obstacles.push({
+          x: canvas.width,
+          y: canvas.height - obstacleHeight
+        });
+      }
+
+      for (var i = 0; i < obstacles.length; i++) {
+        obstacles[i].x -= obstacleSpeed;
+        
+        if (characterX < obstacles[i].x + obstacleWidth &&
+            characterX + characterWidth > obstacles[i].x &&
+            characterY < obstacles[i].y + obstacleHeight &&
+            characterY + characterHeight > obstacles[i].y) {
+          gameRunning = false;
+          showGameOverScreen();
+        }
+      }
+
+      if (obstacles.length > 0 && obstacles[0].x + obstacleWidth < 0) {
+        obstacles.shift();
+        obstaclesCleared++;
+        score += 10;
+        if (obstaclesCleared % 10 === 0) {
+          level++;
+          obstacleSpeed += 2; // Meningkatkan kecepatan seiring dengan level
+        }
+        if (level === 100) {
+          showCongratulationsScreen();
+        }
+      }
+
+      if (isJumping) {
+        velocityY += gravity;
+        characterY += velocityY;
+        if (characterY >= canvas.height - characterHeight) {
+          characterY = canvas.height - characterHeight;
+          isJumping = false;
+          velocityY = 0;
+        }
+      } else {
+        characterY = canvas.height - characterHeight;
+      }
+
+      scoreDisplay.innerText = `Score: ${score} | Level: ${level}`;
+      requestAnimationFrame(update);
+    }
+
+    function jump() {
+      if (!isJumping && gameRunning && !isPaused) {
+        isJumping = true;
+        velocityY = jumpStrength;
+      }
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      var pauseButton = document.getElementById("pauseButton");
+      if (isPaused) {
+        pauseButton.innerText = "▶️"; // Change to play icon
+      } else {
+        pauseButton.innerText = "||"; // Change to pause icon
+        update(); // Resume the game loop
+      }
+    }
+
+    function showGameOverScreen() {
+      var gameOverScreen = document.getElementById("gameOverScreen");
+      gameOverScreen.style.display = "block";
+      
+      var restartButton = document.getElementById("restartButton");
+      var openSettingsButton = document.getElementById("openSettingsButton");
+      var exitButton = document.getElementById("exitButton");
+      
+      restartButton.addEventListener("click", function() {
+        location.reload();
+      });
+      
+      openSettingsButton.addEventListener("click", function() {
+        var settingsMenu = document.getElementById("settingsMenu");
+        settingsMenu.style.display= "block";
+        gameOverScreen.style.display = "none";
+      });
+      
+      exitButton.addEventListener("click", function() {
+        // Keluar dari permainan
+        window.location.href = "about:blank";
+      });
+    }
+var backgroundMusic = document.getElementById("backgroundMusic");
+
+function playBackgroundMusic() {
+  backgroundMusic.play();
+}
+
+function pauseBackgroundMusic() {
+  backgroundMusic.pause();
+}
+
+function toggleBackgroundMusic() {
+  if (backgroundMusic.paused) {
+    playBackgroundMusic();
+  } else {
+    pauseBackgroundMusic();
+  }
+}
+
+// Panggil fungsi playBackgroundMusic() untuk memulai musik secara otomatis saat game dimulai
+playBackgroundMusic();
+    function showCongratulationsScreen() {
+      var congratulationsScreen = document.getElementById("congratulationsScreen");
+      congratulationsScreen.style.display = "block";
+      var totalPoints = level * 10; // Setiap level bernilai 10 poin
+      totalPointsDisplay.innerText = totalPoints;
+    }
+
+    character.onload = function() {
+      update();
+    };
+
+    document.addEventListener("keydown", function(event) {
+      if (event.code === "Space") {
+        jump();
+      } else if (event.code === "Escape") {
+        togglePause();
+      }
+    });
+
+    canvas.addEventListener("click", function() {
+      jump();
+    });
+
+    var settingsButtonIcon = document.getElementById("settingsButtonIcon");
+    settingsButtonIcon.addEventListener("click", function() {
+      var settingsMenu = document.getElementById("settingsMenu");
+      settingsMenu.style.display = "block";
+      gameRunning = false;
+    });
+
+    var saveSettingsButton = document.getElementById("saveSettingsButton");
+    saveSettingsButton.addEventListener("click", function() {
+      var settingsMenu = document.getElementById("settingsMenu");
+      settingsMenu.style.display = "none";
+      gameRunning = true;
+      update();
+    });
+
+    var backButton = document.getElementById("backButton");
+    backButton.addEventListener("click", function() {
+      var settingsMenu = document.getElementById("settingsMenu");
+      settingsMenu.style.display = "none";
+      gameRunning = true;
+      update();
+    });
+
+    var characterSelect = document.getElementById("characterSelect");
+    characterSelect.addEventListener("change", function() {
+      character.src = characterSelect.value;
+    });
+
+    var mapSelect = document.getElementById("mapSelect");
+    mapSelect.addEventListener("change", function() {
+      canvas.style.backgroundImage = 'url("' + mapSelect.value + '")';
+    });
+  </script>
+</body>
+</html>
