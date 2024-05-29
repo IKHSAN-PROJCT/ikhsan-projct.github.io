@@ -247,6 +247,49 @@
   </div>
   
   <script>
+  function saveScoreToFile(score) {
+  var text = "Score: " + score + "\nTerima kasih telah mencoba bermain!!";
+  var folderName = "GAME SANZPROJECT";
+  
+  // Membuat blob teks
+  var blob = new Blob([text], { type: 'text/plain' });
+  
+  // Membuat URL untuk blob teks
+  var url = window.URL.createObjectURL(blob);
+  
+  // Membuat elemen anchor untuk mengunduh file
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'score.txt'; // Nama file
+  
+  // Menyimpan file ke dalam folder di SD Card
+  if (!window.requestFileSystem) {
+    alert('Maaf, browser tidak mendukung penyimpanan file lokal.');
+    return;
+  }
+
+  window.requestFileSystem(window.PERSISTENT, 5 * 1024 * 1024, function(fs) {
+    fs.root.getDirectory(folderName, {create: true}, function(dirEntry) {
+      a.href = dirEntry.toURL() + '/score.txt'; // Path file
+      dirEntry.getFile('score.txt', {create: true}, function(fileEntry) {
+        fileEntry.createWriter(function(fileWriter) {
+          fileWriter.write(blob);
+        }, function() {
+          alert('Gagal menyimpan file.');
+        });
+      }, function() {
+        alert('Gagal membuat file.');
+      });
+    }, function() {
+      alert('Gagal membuat folder.');
+    });
+  }, function() {
+    alert('Gagal mengakses sistem file.');
+  });
+  
+  // Mengklik link untuk mengunduh file
+  a.click();
+}
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
 
@@ -321,7 +364,7 @@
       if (obstacles.length > 0 && obstacles[0].x + obstacleWidth < 0) {
         obstacles.shift();
         obstaclesCleared++;
-        score += 10;
+        score +=10;
         if (obstaclesCleared % 10 === 0) {
           level++;
           obstacleSpeed += 2; // Meningkatkan kecepatan seiring dengan level
@@ -384,30 +427,32 @@
       });
       
       exitButton.addEventListener("click", function() {
-        // Keluar dari permainan
-        window.location.href = "about:blank";
-      });
+        saveScoreToFile(score); // Simpan skor saat keluar dari permainan
+    window.location.href = "about:blank";
+  });
+}
+
+    var backgroundMusic = document.getElementById("backgroundMusic");
+
+    function playBackgroundMusic() {
+      backgroundMusic.play();
     }
-var backgroundMusic = document.getElementById("backgroundMusic");
 
-function playBackgroundMusic() {
-  backgroundMusic.play();
-}
+    function pauseBackgroundMusic() {
+      backgroundMusic.pause();
+    }
 
-function pauseBackgroundMusic() {
-  backgroundMusic.pause();
-}
+    function toggleBackgroundMusic() {
+      if (backgroundMusic.paused) {
+        playBackgroundMusic();
+      } else {
+        pauseBackgroundMusic();
+      }
+    }
 
-function toggleBackgroundMusic() {
-  if (backgroundMusic.paused) {
+    // Panggil fungsi playBackgroundMusic() untuk memulai musik secara otomatis saat game dimulai
     playBackgroundMusic();
-  } else {
-    pauseBackgroundMusic();
-  }
-}
 
-// Panggil fungsi playBackgroundMusic() untuk memulai musik secara otomatis saat game dimulai
-playBackgroundMusic();
     function showCongratulationsScreen() {
       var congratulationsScreen = document.getElementById("congratulationsScreen");
       congratulationsScreen.style.display = "block";
