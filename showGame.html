@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kumpulan Link Website Game</title>
+    <title>All Games HTML</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
         body {
@@ -12,6 +12,7 @@
             color: #fff;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
         .navbar {
             display: flex;
@@ -26,6 +27,7 @@
         .navbar h2 {
             margin: 0;
             color: #ffeb3b;
+            animation: fadeInDown 1s;
         }
         .navbar ul {
             list-style: none;
@@ -55,11 +57,13 @@
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1.5s;
         }
         h1 {
             text-align: center;
             margin-bottom: 20px;
             color: #ffeb3b;
+            animation: fadeInDown 1s;
         }
         .card {
             display: flex;
@@ -74,6 +78,7 @@
             width: calc(33.333% - 40px);
             box-sizing: border-box;
             transition: transform 0.3s, background 0.3s;
+            animation: zoomIn 0.5s;
         }
         .card-item:hover {
             background: rgba(255, 255, 255, 0.2);
@@ -89,25 +94,6 @@
         .card-item a:hover {
             text-decoration: underline;
         }
-        .notification {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            padding: 20px;
-            transition: transform 0.3s, background 0.3s;
-        }
-        .notification:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: translateY(-10px);
-        }
-        .notification p {
-            color: #ffeb3b;
-            font-size: 18px;
-            text-align: center;
-            margin: 0;
-        }
         @media (max-width: 768px) {
             .navbar ul {
                 flex-direction: column;
@@ -120,13 +106,34 @@
             .card-item {
                 width: calc(50% - 40px);
             }
-            .notification {
-                width: calc(50% - 40px);
-            }
         }
         @media (max-width: 480px) {
-            .card-item, .notification {
+            .card-item {
                 width: 100%;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
             }
         }
     </style>
@@ -140,22 +147,22 @@
         </ul>
     </div>
     <div class="container">
-        <h1>Collection of html games</h1>
+        <h1>Collection of HTML Games</h1>
         <div class="card">
             <div class="card-item">
-                <a href="https://ikhsan-projct.github.io/snake.html">SnakeGames</a>
+                <a href="https://ikhsan-projct.github.io/snake.html">Snake Games</a>
             </div>
             <div class="card-item">
-                <a href="https://ikhsan-projct.github.io/Tes.html">2D car racing</a>
+                <a href="https://ikhsan-projct.github.io/Tes.html">2D Car Racing</a>
             </div>
             <div class="card-item">
-                <a href="https://ikhsan-projct.github.io/Game2.html">Guess the picture </a>
+                <a href="https://ikhsan-projct.github.io/Game2.html">Guess the Picture</a>
             </div>
             <div class="card-item">
-                <a href="https://ikhsan-projct.github.io/Game.html">Math counting game </a>
+                <a href="https://ikhsan-projct.github.io/Game.html">Math Counting Game</a>
             </div>
-            <div class="card-item notification">
-                <p>Game yang ke 5 masih tahap pemikiran ide</p>
+            <div class="card-item">
+                <a href="https://ikhsan-projct.github.io/Arcade.html">Complete the Jump</a>
             </div>
         </div>
     </div>
