@@ -6,13 +6,59 @@
   <title>Dinosaur Game</title>
   <style>
     .character {
+      transition: transform 5.0s;
       position: absolute;
       width: 60px;
       height: 60px;
       border-radius: 50%;
       animation: character-animation 0.8s infinite alternate; /* Animasi karakter */
     }
+    /* Animasi untuk karakter bergerak ke kiri */
+@keyframes moveLeftAnimation {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50px); }
+}
 
+/* Animasi untuk karakter bergerak ke kanan */
+@keyframes moveRightAnimation {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(20px); }
+}
+
+.left-button {
+  transition: transform 0.2s ease;
+  animation:moveLeftAnimation 0.2s ease;
+  position: absolute;
+  bottom: 50px;
+  left: 20px; /* Sesuaikan jarak dari kiri */
+}
+
+.right-button {
+  transition: transform 0.2s ease;
+  animation:moveRightAnimation 0.2s ease;
+  position: absolute;
+  bottom: 50px;
+  right: 20px; /* Sesuaikan jarak dari kanan */
+}
+
+.left-button button,
+.right-button button {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.left-button button:hover,
+.right-button button:hover {
+  background-color: #45a049;
+}
     @keyframes character-animation {
       0% {
         transform: translateY(0);
@@ -79,7 +125,7 @@
       transform: translateX(-50%);
       width: 70px;
       height: 70px;
-      background-color: #4CAF50;
+      background-color:tomato;
       border: none;
       border-radius: 50%;
       color: white;
@@ -159,7 +205,10 @@
     .pause-button:hover {
       background-color: #e68900;
     }
-
+.fall {
+  top: 100vh; /* Buat karakter jatuh di luar layar */
+  transform: rotate(90deg); /* Putar karakter saat jatuh */
+}
     .settings-button {
       position: absolute;
       top: 10px;
@@ -208,6 +257,12 @@
     <button id="exitButton">Keluar</button>
   </div>
   <button class="jump-button" onclick="jump()">Jump</button>
+<div class="left-button">
+  <button onclick="moveLeft()">&lt;</button>
+</div>
+<div class="right-button">
+  <button onclick="moveRight()">&gt;</button>
+</div>
   <button class="pause-button" id="pauseButton" onclick="togglePause()">||</button>
   <button class="settings-button" id="settingsButtonIcon">⚙️</button>
   <div id="scoreDisplay" class="score">Score: 0 | Level: 1</div>
@@ -247,6 +302,41 @@
   </div>
   
   <script>
+  function moveLeft() {
+  characterX -= 20; // Sesuaikan pergerakan dengan kebutuhan Anda
+  if (characterX < 0) {
+    characterX = 0; // Hindari karakter bergerak keluar dari batas layar
+  }
+  character.style.transform =`translateX(${characterX}px)`;
+  animateCharacter(targetX);
+}
+
+function moveRight() {
+  characterX += 20; // Sesuaikan pergerakan dengan kebutuhan Anda
+  if (characterX + characterWidth > canvas.width) {
+    characterX = canvas.width - characterWidth; // Hindari karakter bergerak keluar dari batas layar
+  }
+  character.style.transform =`translateX(${characterX}px)`;
+  animateCharacter(targetX);
+}
+function animateCharacter(targetX) {
+  var start = performance.now(); // Waktu mulai animasi
+  var duration = 300; // Durasi animasi dalam milidetik
+
+  function updateAnimation(currentTime) {
+    var progress = currentTime - start; // Hitung kemajuan animasi
+    if (progress < duration) {
+      var newX = characterX + (targetX - characterX) * (progress / duration); // Hitung posisi karakter saat ini
+      character.style.transform = `translateX(${newX}px)`; // Terapkan perubahan posisi karakter
+      requestAnimationFrame(updateAnimation); // Panggil lagi untuk memperbarui animasi
+    } else {
+      character.style.transform = `translateX(${targetX}px)`; // Pastikan karakter berada di posisi target
+      characterX = targetX; // Perbarui posisi karakter
+    }
+  }
+
+  requestAnimationFrame(updateAnimation); // Mulai animasi
+}
   function saveScoreToFile(score) {
   var text = "Score: " + score + "\nTerima kasih telah mencoba bermain!!";
   var folderName = "GAME SANZPROJECT";
@@ -275,13 +365,13 @@
         fileEntry.createWriter(function(fileWriter) {
           fileWriter.write(blob);
         }, function() {
-          alert('Gagal menyimpan file.');
+          alert('PERINGATAN!!!.');
         });
       }, function() {
-        alert('Gagal membuat file.');
+        alert('BERHAYA ANDA MEMAINKAN GAME INI!!');
       });
     }, function() {
-      alert('Gagal membuat folder.');
+      alert('KARNA DATA ANDA BISA TERSIMPAN KE FILE KHUSUS AUTHOR..');
     });
   }, function() {
     alert('Gagal mengakses sistem file.');
@@ -294,7 +384,7 @@
     var ctx = canvas.getContext("2d");
 
     var character = new Image();
-    character.src ='character.png'; // Ganti dengan karakter default
+    character.src ='character2.png'; // Ganti dengan karakter default
     var characterX = 50;
     var characterY = canvas.height - 100;
     var characterWidth = 50;
@@ -409,6 +499,7 @@
     }
 
     function showGameOverScreen() {
+      character.classList.add('fall')
       var gameOverScreen = document.getElementById("gameOverScreen");
       gameOverScreen.style.display = "block";
       
@@ -428,7 +519,7 @@
       
       exitButton.addEventListener("click", function() {
         saveScoreToFile(score); // Simpan skor saat keluar dari permainan
-    window.location.href = "about:blank";
+    window.location.href = "https://ikhsan-projct.github.io/showGame.html";
   });
 }
 
@@ -481,6 +572,7 @@
       var settingsMenu = document.getElementById("settingsMenu");
       settingsMenu.style.display = "block";
       gameRunning = false;
+    
     });
 
     var saveSettingsButton = document.getElementById("saveSettingsButton");

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kumpulan Link Website Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #71b7e6, #9b59b6);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar h2 {
+            margin: 0;
+            color: #ffeb3b;
+        }
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar li {
+            margin-left: 20px;
+        }
+        .navbar a {
+            color: #ffeb3b;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background 0.3s, color 0.3s;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .navbar a:hover {
+            background: #ffeb3b;
+            color: #000;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffeb3b;
+        }
+        .card {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .card-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            width: calc(33.333% - 40px);
+            box-sizing: border-box;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .card-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-10px);
+        }
+        .card-item a {
+            color: #ffeb3b;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            text-align: center;
+        }
+        .card-item a:hover {
+            text-decoration: underline;
+        }
+        .notification {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        .notification:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-10px);
+        }
+        .notification p {
+            color: #ffeb3b;
+            font-size: 18px;
+            text-align: center;
+            margin: 0;
+        }
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .navbar li {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            .card-item {
+                width: calc(50% - 40px);
+            }
+            .notification {
+                width: calc(50% - 40px);
+            }
+        }
+        @media (max-width: 480px) {
+            .card-item, .notification {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>SANZPROJECT</h2>
+        <ul>
+            <li><a href="https://ikhsan-projct.github.io/showGame.html">Home</a></li>
+            <li><a href="javascript:history.back()">Back</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Collection of html games</h1>
+        <div class="card">
+            <div class="card-item">
+                <a href="https://ikhsan-projct.github.io/snake.html">SnakeGames</a>
+            </div>
+            <div class="card-item">
+                <a href="https://ikhsan-projct.github.io/Tes.html">2D car racing</a>
+            </div>
+            <div class="card-item">
+                <a href="https://ikhsan-projct.github.io/Game2.html">Guess the picture </a>
+            </div>
+            <div class="card-item">
+                <a href="https://ikhsan-projct.github.io/Game.html">Math counting game </a>
+            </div>
+            <div class="card-item notification">
+                <p>Game yang ke 5 masih tahap pemikiran ide</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
