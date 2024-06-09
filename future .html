@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galery Me</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .content {
+            margin-top: 100px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInGallery 1s forwards 0.5s;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .gallery-item .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 1.5rem;
+            border-radius: 15px;
+        }
+        .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+        #qr-code-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            text-align: center;
+            animation: slideIn 1s forwards;
+        }
+        #qr-code-container img {
+            animation: float 3s ease-in-out infinite;
+        }
+        #qr-code-container p {
+            color: #f0f0f0;
+            font-size: 1.2rem;
+            margin: 20px 0 0 0;
+        }
+        .qr-overlay {
+            position: relative;
+            display: inline-block;
+        }
+        .qr-overlay::after {
+            content: 'AF';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f0f0f0;
+            font-size: 3rem;
+            font-weight: bold;
+            mix-blend-mode: difference;
+        }
+        #gallery-container {
+            display: none;
+        }
+        #screenshot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #121212;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+        }
+        #screenshot-button:hover {
+            background-color: #ccc;
+        }
+        @media (max-width: 600px) {
+            header {
+                font-size: 2rem;
+            }
+        }
+        @keyframes fadeInGallery {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const qrCodeContainer = document.getElementById('qr-code-container');
+            const galleryContainer = document.getElementById('gallery-container');
+            const screenshotButton = document.getElementById('screenshot-button');
+
+            // Generate QR code
+            const qr = qrcode(0, 'L');
+            const qrData = 'Fitri&Ade'; // Static QR code data
+            qr.addData(qrData);
+            qr.make();
+            qrCodeContainer.innerHTML = `<div class="qr-overlay">${qr.createImgTag(6)}</div><p>Code: ${qrData}</p>`;
+
+            // Fake QR code scanner
+            qrCodeContainer.addEventListener('click', function () {
+                // In a real application, you would use a QR code scanner to verify the code
+                if (prompt("Enter QR Code Value:") === qrData) {
+                    qrCodeContainer.style.display = 'none';
+                    galleryContainer.style.display = 'block';
+                } else {
+                    alert("Invalid QR Code");
+                }
+            });
+
+            // Screenshot QR code
+            screenshotButton.addEventListener('click', function () {
+                html2canvas(qrCodeContainer).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'qr-code.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="qr-code-container">
+        <button id="screenshot-button">Download QR Code</button>
+    </div>
+    <div id="gallery-container" class="content">
+        <header>Modern Gallery</header>
+        <div class="gallery">
+            <div class="gallery-item">
+                <img src="gambar1.jpg" alt="Gallery Image 1">
+                <div class="overlay">Image 1</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar2.jpg" alt="Gallery Image 2">
+                <div class="overlay">Image 2</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar3.jpg" alt="Gallery Image 3">
+                <div class="overlay">Image 3</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar4.jpg" alt="Gallery Image 4">
+                <div class="overlay">Image 4</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar5.jpg" alt="Gallery Image 5">
+                <div class="overlay">Image 5</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar6.jpg" alt="Gallery Image 6">
+                <div class="overlay">Image 6</div>
+            </div>
+            <div class="gallery-item">
+                <img src="gambar7.jpg" alt="Gallery Image 7">
+                <div class="overlay">Image 7</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
