@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .header img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #1e1e1e;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+        }
+
+        .message.bot-html {
+            background-color: #007bff;
+            color: #fff;
+            text-align: left;
+        }
+
+        .message.bot-telegram {
+            background-color: #4caf50;
+            color: #fff;
+            text-align: right;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #333;
+            background-color: #1e1e1e;
+        }
+
+        .input-box input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .input-box input[type="file"] {
+            display: none;
+        }
+
+        .input-box button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .menu-box {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .menu-box.open {
+            left: 0;
+        }
+
+        .menu-box h2 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .menu-box .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f00;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 16px;
+        }
+
+        .user-info {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .user-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .user-info div {
+            margin-left: 10px;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 10px;
+            left: 0;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .clear-btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #f00;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-btn" onclick="toggleMenu()">☰</div>
+    <div class="menu-box" id="menuBox">
+        <button class="close-btn" onclick="toggleMenu()">↩️</button>
+        <h2>Users</h2>
+        <div id="usersContainer"></div>
+    </div>
+    <div class="chat-container">
+        <div class="header">
+            <img id="profilePicture" src="https://via.placeholder.com/40" alt="Profile Picture">
+            <h1>Telegram Bot Chat</h1>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="input-box">
+            <input type="text" id="messageInput" placeholder="Type a message">
+            <button onclick="sendMessage()">Send</button>
+            <label for="fileInput" style="margin-left: 10px; background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Upload</label>
+            <input type="file" id="fileInput" onchange="sendFile()">
+            <button class="clear-btn" onclick="clearChat()">🗑️</button>
+        </div>
+    </div>
+    <script>
+        const token = '7207871141:AAHIgT71YFjUuGl0wF-LclY1bem5ZyGsrbs';
+        let chatId = null;
+        let users = {};
+
+        async function fetchUserProfilePhoto(userId) {
+            const response = await fetch(`https://api.telegram.org/bot${token}/getUserProfilePhotos?user_id=${userId}`);
+            const data = await response.json();
+            return data.result.photos && data.result.photos.length > 0 ? data.result.photos[0][0].file_id : null;
+        }
+
+        async function fetchUserInfo(userId) {
+            const response = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=${userId}`);
+            const data = await response.json();
+            return data.result;
+        }
+
+        async function fetchUserProfilePicture(fileId) {
+            const response = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
+            const data = await response.json();
+            return `https://api.telegram.org/file/bot${token}/${data.result.file_path}`;
+        }
+
+        async function getUserData() {
+            const updatesResponse = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+            const updatesData = await updatesResponse.json();
+
+            for (const update of updatesData.result) {
+                const userId = update.message.from.id;
+                if (!users[userId]) {
+                    const user = await fetchUserInfo(userId);
+                    users[userId] = user;
+                    const photoId = await fetchUserProfilePhoto(userId);
+                    if (photoId) {
+                        const photoUrl = await fetchUserProfilePicture(photoId);
+                        users[userId].profile_photo = photoUrl;
+                    }
+                    displayUser(users[userId]);
+                }
+
+                if (!chatId) {
+                    chatId = userId;
+                    displayProfilePicture(users[userId]);
+                }
+
+                if (update.message.text) {
+                    displayMessage('bot-telegram', update.message.text);
+                } else if (update.message.document) {
+                    displayMessage('bot-telegram', `Received file: ${update.message.document.file_name}`);
+                }
+            }
+        }
+
+        function displayUser(user) {
+            const usersContainer = document.getElementById('usersContainer');
+            const userInfoDiv = document.createElement('div');
+            userInfoDiv.classList.add('user-info');
+            userInfoDiv.innerHTML = `
+                <img src="${user.profile_photo || 'https://via.placeholder.com/50'}" alt="Profile Picture">
+                <div>
+                    <p><strong>👤 Nama: </strong>${user.first_name}</p>
+                    <p><strong>👤 Username: </strong>@${user.username || 'No username'}</p>
+                    <p><strong>ℹ️ Bio: </strong>${user.bio || 'No bio'}</p>
+                    <p><strong>🆔 Chat ID: </strong>${user.id}</p>
+                    <p><strong>🏙️ Kota: </strong>${user.city || 'Unknown'}</p>
+                </div>
+            `;
+            usersContainer.appendChild(userInfoDiv);
+        }
+
+        function displayProfilePicture(user) {
+            const profilePicture = document.getElementById('profilePicture');
+            profilePicture.src = user.profile_photo || 'https://via.placeholder.com/40';
+        }
+
+        function displayMessage(type, text) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', type);
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+
+            if (message.trim() === '') return;
+
+            displayMessage('bot-html', message);
+            messageInput.value = '';
+
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message
+                })
+            });
+
+            getUserData();
+        }
+
+        async function sendFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('document', file);
+
+            await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+                method: 'POST',
+                body: formData
+            });
+
+            displayMessage('bot-html', `Sent file: ${file.name}`);
+            fileInput.value = '';
+            getUserData();
+        }
+
+        function clearChat() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+        }
+
+        function toggleMenu() {
+            const menuBox = document.getElementById('menuBox');
+            menuBox.classList.toggle('open');
+        }
+
+        getUserData();
+        setInterval(getUserData, 5000); // Check for new messages every 5 seconds
+    </script>
+</body>
+</html>
