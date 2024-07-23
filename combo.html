@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            background-color: black;
+            color: #333;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #25D366; /* WhatsApp green color */
+            font-weight: 700;
+        }
+
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .options li {
+            margin: 15px 0;
+            animation: slideIn 1s ease-in-out;
+        }
+
+        .options li a {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #ffffff;
+            background: #25D366; /* WhatsApp green color */
+            border-radius: 25px;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .options li a:hover {
+            background: #128C7E; /* Darker WhatsApp green */
+            transform: translateY(-3px);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Overlay style for blur effect */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            z-index: 10;
+            border-radius: 20px; /* Match with container's border-radius */
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if the user is viewing the page source
+            if (document.location.search.includes("view-source")) {
+                // Redirect to a different page or display a warning message
+                window.location.href = "https://example.com/access-denied";
+            }
+
+            // Add a listener for `view-source:` attempts in the console
+            document.addEventListener('keydown', function(event) {
+                if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
+                    // Redirect to a different page or display a warning message
+                    window.location.href = "https://example.com/access-denied";
+                }
+            });
+        });
+
+        // Function to detect screenshot attempts
+        function detectScreenshot() {
+            const overlay = document.querySelector('.overlay');
+            overlay.classList.add('active');
+
+            // Hide overlay after some time to prevent permanent blur
+            setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 5000); // Adjust time as needed
+        }
+
+        // Detect screenshot attempts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'PrintScreen') {
+                detectScreenshot();
+            }
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                detectScreenshot();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="overlay"></div>
+        <h1>Welcome to App</h1>
+        <ul class="options">
+            <li><a href="https://ikhsan-projct.github.io/app.html">Tracking User Telegram👹 V1</a></li>
+            <li><a href="https://ikhsan-projct.github.io/app2.html">Tracking User Telegram 👹 V2</a></li>
+        </ul>
+    </div>
+</body>
+</html>
