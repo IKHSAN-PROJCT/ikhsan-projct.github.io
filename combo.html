@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -88,20 +88,44 @@
         .overlay.active {
             display: block;
         }
+
+        /* Typing effect */
+        .typing {
+            color: #25D366; /* WhatsApp green color */
+            font-size: 1.2em;
+            margin-top: 20px;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: .15em solid #25D366;
+            box-sizing: border-box;
+            animation: typing 3.5s steps(30, end) infinite,
+                       blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            0% { width: 0; }
+            50% { width: 100%; }
+            100% { width: 0; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #25D366; }
+        }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Check if the user is viewing the page source
             if (document.location.search.includes("view-source")) {
                 // Redirect to a different page or display a warning message
-                window.location.href = "https://example.com/access-denied";
+                window.location.href = "https://github.com/access-denied";
             }
 
             // Add a listener for `view-source:` attempts in the console
             document.addEventListener('keydown', function(event) {
                 if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
                     // Redirect to a different page or display a warning message
-                    window.location.href = "https://example.com/access-denied";
+                    window.location.href = "https://github.com/access-denied";
                 }
             });
         });
@@ -136,9 +160,15 @@
         <div class="overlay"></div>
         <h1>Welcome to App</h1>
         <ul class="options">
-            <li><a href="https://ikhsan-projct.github.io/app.html">Tracking User Telegram👹 V1</a></li>
-            <li><a href="https://ikhsan-projct.github.io/app2.html">Tracking User Telegram 👹 V2</a></li>
+            <li><a href="https://ikhsan-projct.github.io/app.html">BOT TELEGRAM V1</a></li>
+            <li><a href="https://ikhsan-projct.github.io/app2.html">BOT TELEGRAM V2</a></li>
         </ul>
+        <div class="typing">Selamat datang di osint telegram</div>
     </div>
+    <!-- Background music -->
+    <audio id="background-music" loop autoplay>
+        <source src="dj.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 </body>
 </html>
