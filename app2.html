@@ -3,300 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Interface</title>
+    <title>Telegram Bot Chat</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #e5ddd5;
-        }
-        .chat-container {
-            width: 360px;
-            height: 640px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .header {
-            background-color: #075e54;
-            color: #ffffff;
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .messages {
-            flex: 1;
-            padding: 10px;
-            overflow-y: scroll;
-        }
-        .message {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .message.outgoing {
-            align-items: flex-end;
-        }
-        .message.incoming {
-            align-items: flex-start;
-        }
-        .message .text {
-            max-width: 60%;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 16px;
-            line-height: 1.4;
-        }
-        .message.outgoing .text {
-            background-color: #dcf8c6;
-        }
-        .message.incoming .text {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-        }
-        .input-container {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-top: 1px solid #ddd;
-            background-color: #ffffff;
-        }
-        .input-container textarea {
-            flex: 1;
-            border: none;
-            border-radius: 20px;
-            padding: 10px;
-            resize: none;
-            font-size: 16px;
-            background-color: #f1f1f1;
-        }
-        .input-container button {
-            border: none;
-            background-color: #075e54;
-            color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        .user-profile {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .user-profile img {
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-        }
-        .user-profile .username {
-            font-weight: bold;
-        }
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+}
+
+.header {
+    background-color: #075e54;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+    border: 2px solid #fff;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+    flex: 1;
+}
+
+.header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.header button:hover {
+    color: #128c7e;
+}
+
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #fff;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.message {
+    padding: 12px 16px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    max-width: 75%;
+    display: inline-block;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.message.bot {
+    background-color: #e8e8e8;
+    align-self: flex-start;
+    color: #333;
+    border-bottom-left-radius: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.user {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    color: #333;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message .username {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.message .text {
+    margin-top: 5px;
+}
+
+.input-box {
+    display: flex;
+    border-top: 1px solid #ddd;
+    background: #fff;
+    padding: 10px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.input-box input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+    font-size: 16px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.input-box button {
+    padding: 12px;
+    border: none;
+    background-color: #075e54;
+    color: white;
+    cursor: pointer;
+    border-radius: 0 20px 20px 0;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.input-box button:hover {
+    background-color: #128c7e;
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100%;
+    background: #128c7e;
+    border-right: 1px solid #ddd;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.side-menu.open {
+    transform: translateX(0);
+}
+
+.menu-box {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+}
+
+.menu-box button {
+    background: #075e54;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.menu-box button:hover {
+    background: #128c7e;
+}
+.back-btn {
+    background-color: #f44336; /* Warna merah yang mencolok */
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 24px;
+    transition: background-color 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 50px; /* Ukuran lebar */
+    height: 50px; /* Ukuran tinggi */
+    text-align: center;
+}
+
+.back-btn:hover {
+    background-color: #d32f2f; /* Warna merah lebih gelap saat hover */
+    transform: scale(1.1); /* Efek zoom saat hover */
+}
+
+.back-btn:active {
+    background-color: #c62828; /* Warna merah saat tombol ditekan */
+    transform: scale(0.95); /* Efek mengecil saat ditekan */
+}
+
+.profile {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.profile:hover {
+    transform: scale(1.05);
+}
+
+.profile img {
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    margin-right: 15px;
+    border: 3px solid #075e54;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.profile-info p strong {
+    color: #075e54;
+}
+
+@media (max-width: 768px) {
+    .side-menu {
+        width: 100%;
+        transform: translateY(-100%);
+        height: 50%;
+    }
+    .side-menu.open {
+        transform: translateY(0);
+    }
+}
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="header">
-            Chat
-        </div>
-        <div class="messages" id="messagesContainer">
-            <!-- Messages will be dynamically added here -->
-        </div>
-        <div class="input-container">
-            <textarea id="messageInput" rows="2" placeholder="Type a message..."></textarea>
-            <button onclick="sendMessage()">Send</button>
+    <div class="header">
+        <img src="applogo.png" alt="Bot Logo">
+        <h1>🤖BOT TELEGRAM</h1>
+        <button class="menu-btn" id="menuBtn">☰</button>
+    </div>
+    <div class="chat-window">
+        <div class="messages" id="messages"></div>
+        <div class="input-box">
+            <input type="text" id="messageInput" placeholder="Type a message">
+            <button id="sendBtn">Send</button>
         </div>
     </div>
-
+    <div class="side-menu" id="sideMenu">
+        <button class="back-btn" id="backBtn">↪️</button>
+        <div id="profileInfo">
+            <!-- Profile info will be dynamically added here -->
+        </div>
+    </div>
     <script>
-        const POLLING_INTERVAL = 5000; // Interval for polling messages (5 seconds)
-        const IP_INFO_API_KEY = '75dbf422b18639'; // Replace with your IP info API key
-
+        const API_URL = 'https://api.telegram.org/bot7207871141:AAHIgT71YFjUuGl0wF-LclY1bem5ZyGsrbs/'; // Replace YOUR_BOT_TOKEN with your bot's token
         let lastUpdateId = 0;
-        const messagesShown = new Set();
+        const userProfiles = new Map();
 
-        function getBotToken() {
-            let token = localStorage.getItem('telegram_bot_token');
-            if (!token) {
-                token = prompt('Please enter your Telegram bot token:');
-                if (token) {
-                    localStorage.setItem('telegram_bot_token', token);
-                } else {
-                    alert('Token is required to use the chat.');
-                }
-            }
-            return token;
+        function fetchMessages() {
+            fetch(`${API_URL}getUpdates?offset=${lastUpdateId + 1}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        data.result.forEach(update => {
+                            const message = update.message;
+                            const text = message.text;
+                            const chatId = message.chat.id;
+                            lastUpdateId = update.update_id;
+
+                            if (!userProfiles.has(chatId)) {
+                                userProfiles.set(chatId, {
+                                    photo: message.chat.photo ? message.chat.photo.small_file_id : 'https://via.placeholder.com/60',
+                                    name: message.chat.first_name,
+                                    username: message.chat.username,
+                                    chatId: chatId
+                                });
+                                updateProfileInfo();
+                            }
+
+                            if (text) {
+                                const messageType = chatId === Array.from(userProfiles.keys())[0] ? 'user' : 'bot';
+                                appendMessage(message.chat.username || 'Bot', text, messageType);
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching messages:', error));
+        }
+
+        function appendMessage(sender, message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', type);
+            messageDiv.innerHTML = `<div class="username">${sender}</div><div class="text">${message}</div>`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
         }
 
         function sendMessage() {
-            const token = getBotToken();
-            if (!token) return;
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message === '') return;
 
-            const message = document.getElementById('messageInput').value;
-            if (message.trim() === '') return;
+            appendMessage('SANZ', message, 'user');
+            messageInput.value = '';
 
-            try {
-                fetch(`https://api.telegram.org/bot${token}/getUpdates`)
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.ok) {
-                            const updates = result.result;
-                            updates.forEach(update => {
-                                if (update.message && !messagesShown.has(update.message.message_id)) {
-                                    messagesShown.add(update.message.message_id);
-                                    const chatId = update.message.chat.id;
-
-                                    const payload = {
-                                        chat_id: chatId,
-                                        text: message
-                                    };
-
-                                    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(payload)
-                                    })
-                                    .then(response => response.json())
-                                    .then(result => {
-                                        if (result.ok) {
-                                            const messageContainer = document.createElement('div');
-                                            messageContainer.className = 'message outgoing';
-                                            messageContainer.innerHTML = `<div class="text">${message}</div>`;
-                                            document.getElementById('messagesContainer').appendChild(messageContainer);
-                                            document.getElementById('messageInput').value = '';
-                                        } else {
-                                            console.error('Failed to send message', result);
-                                        }
-                                    })
-                                    .catch(error => console.error('Error:', error));
-                                }
-                            });
-                        } else {
-                            console.error('Failed to get updates', result);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        }
-
-        function fetchMessages() {
-            const token = getBotToken();
-            if (!token) return;
-
-            fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.ok) {
-                        const updates = result.result;
-                        updates.forEach(async update => {
-                            if (update.message && !messagesShown.has(update.message.message_id)) {
-                                messagesShown.add(update.message.message_id);
-                                lastUpdateId = update.update_id;
-
-                                const chatId = update.message.chat.id;
-                                const text = update.message.text;
-                                const from = update.message.from;
-                                const userName = from.username ? from.username : from.first_name + ' ' + (from.last_name || '');
-                                const profilePic = await getUserProfilePicture(from.id);
-
-                                // Simpan informasi pengguna ke localStorage
-                                const userData = {
-                                    chatId,
-                                    firstName: from.first_name,
-                                    lastName: from.last_name || '',
-                                    userName,
-                                    profilePic
-                                };
-                                localStorage.setItem(`user_${from.id}`, JSON.stringify(userData));
-
-                                // Get IP-based geolocation
-                                const ipResponse = await fetch(`https://ipinfo.io/json?token=${IP_INFO_API_KEY}`);
-                                const ipInfo = await ipResponse.json();
-                                const country = ipInfo.country || 'Unknown';
-                                const city = ipInfo.city || 'Unknown';
-
-                                // Add the incoming message with user info to the chat
-                                const messageContainer = document.createElement('div');
-                                messageContainer.className = 'message incoming';
-                                messageContainer.innerHTML = `
-                                    <div class="user-profile">
-                                        <img src="${profilePic}" alt="Profile Picture">
-                                        <div class="username">${userName}</div>
-                                    </div>
-                                    <div class="text">${text}</div>
-                                    <div class="user-info">
-                                        <div><strong>🖼️ Foto Profil:</strong> <img src="${profilePic}" alt="Profile Picture" style="width: 50px; height: 50px;"></div>
-                                        <div><strong>👤 Nama:</strong> ${from.first_name} ${from.last_name || ''}</div>
-                                        <div><strong>📱 Username:</strong> ${userName}</div>
-                                        <div><strong>🆔 Chat ID:</strong> ${chatId}</div>
-                                        <div><strong>🇮🇩 Negara:</strong> ${country}</div>
-                                        <div><strong>🏙️ Kota:</strong> ${city}</div>
-                                    </div>
-                                `;
-                                document.getElementById('messagesContainer').appendChild(messageContainer);
-                            }
-                        });
-                    } else {
-                        console.error('Failed to get updates', result);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        function getUserProfilePicture(userId) {
-            const token = getBotToken();
-            if (!token) return;
-
-            return fetch(`https://api.telegram.org/bot${token}/getUserProfilePhotos`, {
+            const chatId = Array.from(userProfiles.keys())[0];
+            fetch(`${API_URL}sendMessage`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_id: userId })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.ok && result.result && result.result.photos.length > 0) {
-                    const photos = result.result.photos;
-                    const photo = photos[0][0]; // Get the first photo
-                    const fileId = photo.file_id;
-
-                    return fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`)
-                        .then(response => response.json())
-                        .then(fileResult => {
-                            if (fileResult.ok) {
-                                const filePath = fileResult.result.file_path;
-                                return `https://api.telegram.org/file/bot${token}/${filePath}`;
-                            } else {
-                                console.error('Failed to get file path', fileResult);
-                                return 'default-profile-pic-url'; // Default profile picture URL if failed
-                            }
-                        });
-                } else {
-                    return 'default-profile-pic-url'; // Default profile picture URL if no photos
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message })
+            }).then(response => response.json())
+              .then(data => {
+                if (!data.ok) {
+                    console.error('Failed to send message:', data.description);
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching profile picture:', error);
-                return 'default-profile-pic-url'; // Default profile picture URL on error
             });
         }
 
-        // Poll messages periodically
-        setInterval(fetchMessages, POLLING_INTERVAL);
+        function updateProfileInfo() {
+            const profileInfoDiv = document.getElementById('profileInfo');
+            profileInfoDiv.innerHTML = '';
+            userProfiles.forEach(profile => {
+                const profileDiv = document.createElement('div');
+                profileDiv.classList.add('profile');
+                profileDiv.innerHTML = `
+                    <img src="https://api.telegram.org/bot7207871141:AAHIgT71YFjUuGl0wF-LclY1bem5ZyGsrbs/getUserProfilePhotos?user_id=${profile.chatId}" alt="Profile Picture">
+                    <div class="profile-info">
+                        <p><strong>Name:</strong> ${profile.name}</p>
+                        <p><strong>Username:</strong> ${profile.username || 'N/A'}</p>
+                        <p><strong>Chat ID:</strong> ${profile.chatId}</p>
+                    </div>
+                `;
+                profileInfoDiv.appendChild(profileDiv);
+            });
+        }
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            document.getElementById('sideMenu').classList.toggle('open');
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('sideMenu').classList.remove('open');
+        });
+
+        // Initial fetch to populate messages and profile
+        fetchMessages();
+        setInterval(fetchMessages, 5000); // Fetch new messages every 5 seconds
     </script>
 </body>
 </html>
