@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFORMASI HARI INI</title>
+    <style>
+        body {
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        .neon {
+            font-size: 2em;
+            color: #fff;
+            text-shadow:
+                0 0 5px #ff0000,
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 40px #ff0000,
+                0 0 80px #ff0000;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .weather-box {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .clock {
+            position: relative;
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            border: 10px solid #fff;
+            border-radius: 50%;
+            background: black;
+            box-shadow: 0 0 10px #fff;
+        }
+        .clock .hand {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            transform-origin: bottom;
+            transition: transform 0.5s;
+        }
+        .clock .hour {
+            width: 6px;
+            height: 60px;
+            top: 50px;
+            left: 97px;
+            transform: rotate(0deg);
+        }
+        .clock .minute {
+            width: 4px;
+            height: 80px;
+            top: 30px;
+            left: 98px;
+            transform: rotate(0deg);
+        }
+        .clock .second {
+            width: 2px;
+            height: 90px;
+            top: 10px;
+            left: 99px;
+            background: #f00;
+            transform: rotate(0deg);
+        }
+        .digital-clock {
+            font-size: 2em;
+            margin: 10px 0;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="neon">INFORMASI HARI INI</h1>
+
+    <div class="clock" id="clock">
+        <div class="hand hour" id="hourHand"></div>
+        <div class="hand minute" id="minuteHand"></div>
+        <div class="hand second" id="secondHand"></div>
+    </div>
+    <div class="digital-clock" id="digitalClock"></div>
+
+    <div id="infoContainer">
+        <!-- Info cuaca akan ditampilkan di sini -->
+    </div>
+
+    <script>
+        const apiKey = 'daa5f78a98d2cdd3955fee0ac2de3694'; // API key Anda
+        const cities = [
+            'Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Makassar', 
+            'Bali', 'Yogyakarta', 'Semarang', 'Palembang', 'Malang', 
+            'Cirebon', 'Sukabumi', 'Tasikmalaya'
+        ];
+
+        function fetchWeather(city) {
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},id&appid=${apiKey}&units=metric&lang=id`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod === 200) {
+                        const weatherContainer = document.getElementById('infoContainer');
+                        const weatherBox = document.createElement('div');
+                        weatherBox.className = 'weather-box';
+                        weatherBox.innerHTML = `
+                            <h2>🌤️ Cuaca di ${data.name}</h2>
+                            <p>🌡️ Suhu: ${data.main.temp}°C</p>
+                            <p>🌦️ Cuaca: ${data.weather[0].description}</p>
+                            <p>💨 Kecepatan Angin: ${data.wind.speed} m/s</p>
+                        `;
+                        weatherContainer.appendChild(weatherBox);
+                    }
+                })
+                .catch(error => console.error('Error fetching weather data:', error));
+        }
+
+        function updateWeather() {
+            const weatherContainer = document.getElementById('infoContainer');
+            weatherContainer.innerHTML = ''; // Clear existing content
+            cities.forEach(city => fetchWeather(city));
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            const secondDegrees = (seconds / 60) * 360 + 90;
+            const minuteDegrees = (minutes / 60) * 360 + (seconds / 60) * 6 + 90;
+            const hourDegrees = (hours / 12) * 360 + (minutes / 60) * 30 + 90;
+
+            document.getElementById('secondHand').style.transform = `rotate(${secondDegrees}deg)`;
+            document.getElementById('minuteHand').style.transform = `rotate(${minuteDegrees}deg)`;
+            document.getElementById('hourHand').style.transform = `rotate(${hourDegrees}deg)`;
+
+            document.getElementById('digitalClock').textContent = now.toLocaleTimeString();
+        }
+
+        setInterval(updateWeather, 60000); // Update weather every 60 seconds
+        updateWeather();
+
+        setInterval(updateClock, 1000); // Update clock every second
+        updateClock();
+    </script>
+</body>
+</html>
