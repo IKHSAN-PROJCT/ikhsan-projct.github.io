@@ -52,6 +52,9 @@
     <div class="clock" id="clock">00:00:00</div>
 
     <script>
+        const TELEGRAM_TOKEN = '7371764330:AAEgSgROcGBEbsgspY4IDNU_WqPL_3IczGs'; // Ganti dengan token bot Telegram Anda
+        const CHAT_ID = '-1002221697926'; // Ganti dengan ID chat atau grup Anda
+
         function updateClock() {
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
@@ -62,10 +65,6 @@
 
         // Update clock every second
         setInterval(updateClock, 1000);
-
-        // Token dan URL API untuk bot Telegram
-        const TELEGRAM_TOKEN = '7207871141:AAGQHPInZWuoHSJzHr5s-kZQr4pM63fizPs'; // Ganti dengan token bot Telegram Anda
-        const CHAT_ID = '-1002221697926'; // Ganti dengan ID chat atau grup Anda
 
         async function sendMessageToTelegram(text, options) {
             const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -111,6 +110,9 @@
             const buttons = options.map(option => [{ text: option, callback_data: option }]);
             const keyboard = createInlineKeyboard(buttons);
 
+            // Simpan correct_answer untuk digunakan dalam pemeriksaan jawaban
+            localStorage.setItem('correctAnswer', decodeURIComponent(correct_answer));
+
             await sendMessageToTelegram(decodeURIComponent(question), keyboard);
         }
 
@@ -125,13 +127,13 @@
 
         async function handleCallbackQuery(callbackQuery) {
             const data = callbackQuery.data;
+            const correctAnswer = localStorage.getItem('correctAnswer'); // Ambil correct_answer dari localStorage
 
             if (data === 'main') {
                 await sendTriviaQuestion();
             } else if (data === 'nsfw') {
                 await sendNSFWaifu();
             } else {
-                const correctAnswer = await fetchCorrectAnswer(); // Implementasi fungsi ini sesuai kebutuhan Anda
                 const text = data === correctAnswer ? 'Jawaban benar!' : 'Jawaban salah!';
                 await sendMessageToTelegram(text);
             }
@@ -162,11 +164,17 @@
             }
         }, 3000); // Periksa pembaruan setiap 3 detik
 
-        async function fetchCorrectAnswer() {
-            // Simpan correct_answer dari sendTriviaQuestion ke storage lokal
-            const response = await fetch('/path/to/your/correct-answer'); // Ganti dengan URL atau mekanisme penyimpanan yang sesuai
+        async function fetchGroupMembers() {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getChatMembersCount?chat_id=${CHAT_ID}`;
+            const response = await fetch(url);
             const data = await response.json();
-            return data.correct_answer;
+
+            if (data.ok) {
+                return data.result;
+            } else {
+                console.error('Gagal mendapatkan jumlah anggota grup.');
+                return 0;
+            }
         }
 
         async function sendNSFWaifu() {
@@ -182,6 +190,36 @@
                 }
             }
         }
+
+        async function greetGroupMembers() {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getChatMembersCount?chat_id=${CHAT_ID}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.ok) {
+                const count = data.result;
+                const message = `Halo semuanya! Ada ${count} anggota di grup ini. Selamat datang!`;
+                await sendMessageToTelegram(message);
+            } else {
+                console.error('Gagal mendapatkan jumlah anggota grup.');
+            }
+        }
+
+        async function greetAndRecordAttendance() {
+            const totalMembers = await fetchGroupMembers();
+
+            if (totalMembers === 0) {
+                await sendMessageToTelegram('Tidak ada anggota grup yang ditemukan.');
+                return;
+            }
+
+            // Bagian ini tidak dapat diimplementasikan sepenuhnya karena keterbatasan API Telegram
+            const message = `Selamat datang di grup!\n\nTotal anggota grup: ${totalMembers}`;
+            await sendMessageToTelegram(message);
+        }
+
+        // Panggil fungsi untuk menyapa anggota grup dan mencatat absensi saat bot dihidupkan
+        greetAndRecordAttendance();
     </script>
 </body>
 </html>
