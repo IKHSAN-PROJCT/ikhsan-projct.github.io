@@ -122,6 +122,19 @@
                     [{ text: 'Main', callback_data: 'main' }],
                     [{ text: 'Kirim NSFWaifu', callback_data: 'nsfw' }]
                 ]));
+            } else if (command.startsWith('cari ')) {
+                const query = command.slice(5);
+                await searchYouTube(query);
+            } else if (command === 'sett') {
+                const chatMember = await getChatMember();
+                if (chatMember.status === 'administrator' || chatMember.status === 'creator') {
+                    await sendMessageToTelegram('Pengaturan Grup:', createInlineKeyboard([
+                        [{ text: 'Ubah Nama Grup', callback_data: 'ubah_nama' }],
+                        [{ text: 'Ubah Deskripsi Grup', callback_data: 'ubah_deskripsi' }]
+                    ]));
+                } else {
+                    await sendMessageToTelegram('Hanya admin yang dapat mengakses pengaturan grup.');
+                }
             }
         }
 
@@ -133,9 +146,31 @@
                 await sendTriviaQuestion();
             } else if (data === 'nsfw') {
                 await sendNSFWaifu();
+            } else if (data === 'ubah_nama') {
+                await sendMessageToTelegram('Silakan kirim nama baru untuk grup.');
+            } else if (data === 'ubah_deskripsi') {
+                await sendMessageToTelegram('Silakan kirim deskripsi baru untuk grup.');
             } else {
                 const text = data === correctAnswer ? 'Jawaban benar!' : 'Jawaban salah!';
                 await sendMessageToTelegram(text);
+            }
+        }
+
+        async function searchYouTube(query) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}+site:youtube.com`;
+            try {
+                const response = await fetch(searchUrl);
+                const text = await response.text();
+                const regex = /https:\/\/www\.youtube\.com\/watch\?v=[\w-]+/g;
+                const matches = text.match(regex);
+                if (matches && matches.length > 0) {
+                    await sendMessageToTelegram(`Video yang ditemukan:\n${matches.join('\n')}`);
+                } else {
+                    await sendMessageToTelegram('Tidak ada video ditemukan.');
+                }
+            } catch (error) {
+                console.error('Error: ' + error.message);
+                await sendMessageToTelegram('Terjadi kesalahan saat mencari video.');
             }
         }
 
@@ -208,18 +243,42 @@
         async function greetAndRecordAttendance() {
             const totalMembers = await fetchGroupMembers();
 
-            if (totalMembers === 0) {
-                await sendMessageToTelegram('Tidak ada anggota grup yang ditemukan.');
-                return;
-            }
+            if (totalMembers > 0) {
+                const message = `Halo semuanya! Ada ${totalMembers} anggota di grup ini. Selamat datang!`;
+                await sendMessageToTelegram(message);
 
-            // Bagian ini tidak dapat diimplementasikan sepenuhnya karena keterbatasan API Telegram
-            const message = `Selamat datang di grup!\n\nTotal anggota grup: ${totalMembers}`;
-            await sendMessageToTelegram(message);
+                const attendanceMessage = `Presensi anggota grup:\n\n`;
+
+                for (let i = 1; i <= totalMembers; i++) {
+                    const memberId = i;
+                    const memberInfo = await getChatMember(memberId);
+                    const memberName = memberInfo.user.username || memberInfo.user.first_name || 'Anonim';
+
+                    attendanceMessage += `${i}. ${memberName}\n`;
+                }
+
+                await sendMessageToTelegram(attendanceMessage);
+            } else {
+                await sendMessageToTelegram('Tidak ada anggota yang ditemukan di grup.');
+            }
         }
 
-        // Panggil fungsi untuk menyapa anggota grup dan mencatat absensi saat bot dihidupkan
-        greetAndRecordAttendance();
+        async function getChatMember(memberId) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getChatMember?chat_id=${CHAT_ID}&user_id=${memberId}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.ok) {
+                return data.result;
+            } else {
+                console.error(`Gagal mendapatkan informasi anggota untuk member ID: ${memberId}`);
+                return null;
+            }
+        }
+
+        // Panggil fungsi greetAndRecordAttendance saat halaman dimuat
+        window.onload = greetAndRecordAttendance;
+
     </script>
 </body>
 </html>
