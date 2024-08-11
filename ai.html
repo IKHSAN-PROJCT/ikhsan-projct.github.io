@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten</title>
+   <style>
+     body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+    color: #fff;
+    animation: backgroundAnimation 15s ease infinite;
+    overflow: hidden;
+}
+
+@keyframes backgroundAnimation {
+    0% { background: linear-gradient(135deg, #00d2ff, #3a7bd5); }
+    50% { background: linear-gradient(135deg, #3a7bd5, #00d2ff); }
+    100% { background: linear-gradient(135deg, #00d2ff, #3a7bd5); }
+}
+
+#assistant {
+    width: 90%;
+    max-width: 600px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    backdrop-filter: blur(15px);
+    position: relative;
+}
+
+h1 {
+    font-size: 2.8em;
+    margin-bottom: 25px;
+    color: #00d2ff;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 15px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    border-radius: 30px;
+    background: #1a73e8;
+    color: white;
+    transition: background 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex: 1;
+    margin: 0 5px;
+}
+
+button:hover {
+    background: #155ab3;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#output {
+    margin-top: 20px;
+    font-size: 1.3em;
+    line-height: 1.6;
+    text-align: left;
+    border: 2px solid #00d2ff;
+    padding: 20px;
+    border-radius: 15px;
+    min-height: 120px;
+    background: rgba(0, 0, 0, 0.6);
+    white-space: pre-wrap;
+}
+
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(50%);
+    animation: wave 2s infinite;
+}
+
+.wave-user {
+    background: rgba(0, 255, 0, 0.4);
+}
+
+.wave-assistant {
+    background: rgba(0, 0, 255, 0.4);
+}
+
+@keyframes wave {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0); }
+}
+
+.typing-animation {
+    border-right: 2px solid;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typing 4s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #00d2ff; }
+}
+   </style>
+</head>
+<body>
+    <div id="assistant">
+      <center>
+      <img height="145px"width="145px"src="https://i.ibb.co.com/641zKct/Proyek-32.png">
+      </center>
+        <h1>Asisten Virtual</h1>
+        <div class="button-container">
+            <button id="send-voice-button">Kirim Suara</button>
+            <button id="live-speech-button">Berbicara Langsung</button>
+        </div>
+        <div id="output">Klik tombol di atas untuk mulai berbicara.</div>
+        <div id="wave" class="wave"></div>
+    </div>
+
+    <script>
+        const sendVoiceButton = document.getElementById('send-voice-button');
+        const liveSpeechButton = document.getElementById('live-speech-button');
+        const output = document.getElementById('output');
+        const wave = document.getElementById('wave');
+        let recognition;
+
+        function saveUserData(data) {
+            let usersData = JSON.parse(localStorage.getItem('usersData')) || [];
+            usersData.push({ data: data, timestamp: new Date() });
+            localStorage.setItem('usersData', JSON.stringify(usersData));
+        }
+
+        function getUserData() {
+            let usersData = JSON.parse(localStorage.getItem('usersData')) || [];
+            if (usersData.length === 0) return "Tidak ada data pengguna yang disimpan.";
+            return usersData.map((user, index) => `Pengguna ${index + 1}: ${user.data} pada ${new Date(user.timestamp).toLocaleString()}`).join('\n');
+        }
+
+        function getTodayUserData() {
+            let usersData = JSON.parse(localStorage.getItem('usersData')) || [];
+            const today = new Date().toDateString();
+            const todayData = usersData.filter(user => new Date(user.timestamp).toDateString() === today);
+            if (todayData.length === 0) return "Tidak ada data pengguna hari ini.";
+            return todayData.map((user, index) => `Pengguna ${index + 1}: ${user.data} pada ${new Date(user.timestamp).toLocaleTimeString()}`).join('\n');
+        }
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID'; // Bahasa Indonesia
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = event => {
+                const transcript = event.results[0][0].transcript;
+                output.textContent = `Anda berkata: ${transcript}`;
+                const response = getResponse(transcript);
+                speak(response);
+                displayTextWithTyping(`Asisten berkata: ${response}`);
+                saveUserData(transcript); // Simpan data pengguna setiap kali mereka berbicara
+                wave.className = 'wave wave-user'; // Gelombang pengguna
+                setTimeout(() => wave.className = 'wave', 1500); // Reset gelombang setelah animasi
+            };
+
+            recognition.onend = () => {
+                output.textContent += '\nSilakan berbicara lagi atau klik tombol untuk memulai pencarian baru.';
+                wave.className = 'wave'; // Reset gelombang
+            };
+
+            sendVoiceButton.addEventListener('click', () => {
+                recognition.start();
+                output.textContent = 'Mendengarkan...';
+                wave.className = 'wave wave-user'; // Gelombang pengguna
+            });
+
+            liveSpeechButton.addEventListener('click', () => {
+                recognition.start();
+                output.textContent = 'Mendengarkan secara langsung...';
+                wave.className = 'wave wave-user'; // Gelombang pengguna
+            });
+        } else {
+            output.textContent = 'Web Speech API tidak tersedia di browser Anda.';
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID'; // Bahasa Indonesia
+                window.speechSynthesis.speak(utterance);
+                wave.className = 'wave wave-assistant'; // Gelombang asisten
+                setTimeout(() => wave.className = 'wave', 1500); // Reset gelombang setelah animasi
+            } else {
+                alert('Web Speech API tidak tersedia di browser Anda.');
+            }
+        }
+
+        function getResponse(input) {
+            const responses = {
+                "tes": "Ya? Saya mendengar Anda. Apa ada yang bisa saya bantu hari ini?",
+                "halo": "Halo! Ada yang bisa saya bantu?",
+                "siapa kamu": "Saya adalah asisten virtual.",
+                "terima kasih": "Sama-sama! Jika ada yang perlu ditanyakan, silakan.",
+                "apa kabar": "Saya baik-baik saja. Terima kasih telah bertanya!",
+                "siapa yang buat kamu": "Saya dibuat oleh seseorang yang tiap harinya mengotak-atik coding, bernama Ade Ikhsan Nur Rahman.",
+                "data hari ini": getTodayUserData(),
+                "cek data": getUserData()};
+                for (const key in responses) {
+        if (input.toLowerCase().includes(key)) {
+            return responses[key];
+        }
+    }
+
+    if (input.toLowerCase().startsWith("cari")) {
+        const query = input.toLowerCase().replace("cari", "").trim();
+        if (query) {
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+            return `Mencari di Google untuk: ${query}`;
+        } else {
+            return "Silakan beri saya istilah pencarian.";
+        }
+    }
+
+    return "Maaf, saya tidak mengerti. Bisa ulangi pertanyaannya?";
+}
+
+        function displayTextWithTyping(text) {
+            output.innerHTML = '';
+            let index = 0;
+            const speed = 50; // Kecepatan mengetik
+            function type() {
+                if (index < text.length) {
+                    output.innerHTML += text.charAt(index);
+                    index++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+    </script>
+</body>
+</html>
