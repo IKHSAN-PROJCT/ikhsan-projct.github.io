@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peringatan Darurat</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background-image: url('https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/raw/main/images__4_-removebg-preview.png'); /* Latar belakang glitch */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
+        .warning-container {
+            background-color: rgba(0, 0, 0, 0.8); /* Latar belakang semi-transparan */
+            border: 3px solid red;
+            padding: 20px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+            animation: flicker 1.5s infinite, glitch 1s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.1;
+            }
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+            20% {
+                transform: translate(-5px, -5px);
+            }
+            40% {
+                transform: translate(5px, 5px);
+            }
+            60% {
+                transform: translate(-5px, 5px);
+            }
+            80% {
+                transform: translate(5px, -5px);
+            }
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        .warning-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: red;
+        }
+
+        .warning-code, .warning-date {
+            font-size: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ffcc00;
+            animation: glitchText 2s infinite;
+        }
+
+        .code-box {
+            border: 2px solid #ffcc00;
+            padding: 5px;
+            font-size: 18px;
+            background-color: black;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .warning-text {
+            font-size: 18px;
+            margin-top: 20px;
+            color: white;
+            line-height: 1.5;
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .logo {
+            width: 50px;
+            height: auto;
+            margin-left: 10px;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes glitchText {
+            0% {
+                text-shadow: -2px 2px red, 2px -2px blue;
+            }
+            50% {
+                text-shadow: -5px 5px red, 5px -5px blue;
+            }
+            100% {
+                text-shadow: -2px 2px red, 2px -2px blue;
+            }
+        }
+
+        .signature {
+            font-size: 12px;
+            color: #888;
+            margin-top: 50px;
+            animation: glitchText 3s infinite;
+        }
+
+        /* Media Queries */
+        @media (max-width: 600px) {
+            .warning-title {
+                font-size: 24px;
+            }
+
+            .warning-code, .warning-date {
+                font-size: 16px;
+            }
+
+            .code-box {
+                font-size: 16px;
+                padding: 4px;
+            }
+
+            .warning-text {
+                font-size: 16px;
+            }
+
+            .logo {
+                width: 40px;
+            }
+
+            .signature {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-container">
+        <div class="warning-title">⚠️ PERINGATAN DARURAT ⚠️</div>
+        <div class="warning-code">
+            KODE: <span class="code-box">IND-7-1/ANM-021</span>
+            <img src="https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/raw/main/images__4_-removebg-preview.png" class="logo" alt="Garuda">
+        </div>
+        <div class="warning-date">PERINGATAN HINGGA 24/10/1991</div>
+        <div class="warning-text">
+            Dalam situasi politik dinasti yang sedang memanas di Indonesia saat ini, kami dari kelompok-kelompok berikut:
+            <br><br>
+            <ul style="list-style-type: none; padding: 0;">
+                <li>- Jakarta Ghost</li>
+                <li>- Garuda Security</li>
+                <li>- Kawal Keputusan MK</li>
+                <li>- Ether Sec Cyber Team</li>
+                <li>- Kalimalang Black Hat</li>
+                <li>- From Lamer Mastah</li>
+                <li>- Ketapang Grethat</li>
+                <li>- Luzsec Indonesia</li>
+            </ul>
+            ingin menegaskan pentingnya transparansi dan keadilan dalam proses politik. Jangan biarkan politik dinasti yang semakin mendalam merusak integritas sistem demokrasi kita. Kami akan terus memantau setiap langkah yang diambil dan memastikan bahwa keputusan-keputusan penting diambil dengan objektivitas dan keadilan.
+            <br><br>
+            Teruslah kritis dan waspada terhadap setiap tindakan yang mempengaruhi masa depan bangsa. Integritas dan demokrasi adalah hak setiap warga negara.
+        </div>
+        <div class="signature">Hacked by SanzProject</div>
+    </div>
+
+    <!-- Audio Latar Belakang -->
+    <audio autoplay loop>
+        <source src="https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/raw/main/PERINGATAN%20DARURAT.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+</body>
+</html>
