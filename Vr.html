@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Controller</title>
+    <style>
+        body, html {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1b1b1b, #434343);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 50px 40px;
+            border-radius: 15px;
+            background: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 2s ease;
+        }
+        h1 {
+            margin: 0 0 30px;
+            font-size: 2em;
+            animation: glow 1.5s infinite alternate;
+        }
+        .project-name {
+            margin: 30px 0 0;
+            font-size: 1.2em;
+            animation: glow 1.5s infinite alternate;
+        }
+        .toggle-button {
+            width: 80px;
+            height: 80px;
+            margin-top: 20px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            border: none;
+            color: white;
+            background-color: #444;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s;
+            animation: pulse 2s infinite;
+        }
+        .toggle-button.on {
+            background-color: #76ff03;
+        }
+        .mode-button {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .mode-button button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            background-color: #444;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .mode-button button.active {
+            background-color: #76ff03;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ff00; }
+            to { text-shadow: 0 0 20px #76ff03; }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(118, 255, 3, 0.7); }
+            70% { box-shadow: 0 0 20px 15px rgba(118, 255, 3, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(118, 255, 3, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flash Light</h1>
+        <button id="flashToggle" class="toggle-button">OFF</button>
+        <div class="mode-button">
+            <button id="normalMode" class="active">Normal</button>
+            <button id="strobeMode">Strobe</button>
+            <button id="rapidMode">Rapid</button>
+        </div>
+        <div class="project-name">SANZPROJECT</div>
+    </div>
+    <script>
+        const flashToggleButton = document.getElementById('flashToggle');
+        const normalModeButton = document.getElementById('normalMode');
+        const strobeModeButton = document.getElementById('strobeMode');
+        const rapidModeButton = document.getElementById('rapidMode');
+        
+        let isFlashOn = false;
+        let stream;
+        let strobeInterval;
+        
+        flashToggleButton.addEventListener('click', toggleFlash);
+        normalModeButton.addEventListener('click', () => setMode('normal'));
+        strobeModeButton.addEventListener('click', () => setMode('strobe'));
+        rapidModeButton.addEventListener('click', () => setMode('rapid'));
+        
+        async function toggleFlash() {
+            try {
+                if (isFlashOn) {
+                    flashToggleButton.textContent = 'OFF';
+                    flashToggleButton.classList.remove('on');
+                    isFlashOn = false;
+                    stopFlash();
+                } else {
+                    await startFlash();
+                    flashToggleButton.textContent = 'ON';
+                    flashToggleButton.classList.add('on');
+                    isFlashOn = true;
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Flash tidak dapat dinyalakan pada perangkat ini.');
+            }
+        }
+
+        async function startFlash() {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const track = stream.getVideoTracks()[0];
+            await track.applyConstraints({ advanced: [{ torch: true }] });
+            speak("Flash dinyalakan.");
+        }
+
+        function stopFlash() {
+            stream.getTracks()[0].stop();
+            clearInterval(strobeInterval);
+            speak("Flash dimatikan.");
+        }
+
+        function setMode(mode) {
+            clearInterval(strobeInterval);
+            normalModeButton.classList.remove('active');
+            strobeModeButton.classList.remove('active');
+            rapidModeButton.classList.remove('active');
+
+            if (mode === 'normal') {
+                normalModeButton.classList.add('active');
+                if (isFlashOn) startFlash();
+            } else if (mode === 'strobe') {
+                strobeModeButton.classList.add('active');
+                strobeInterval = setInterval(() => toggleFlash(), 500);
+            } else if (mode === 'rapid') {
+                rapidModeButton.classList.add('active');
+                strobeInterval = setInterval(() => toggleFlash(), 100);
+            }
+        }
+
+        function speak(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = 'id-ID';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Voice recognition for clapping sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        const microphone = navigator.mediaDevices.getUserMedia({ audio: true });
+        const scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
+        
+        microphone.then(stream => {
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.connect(scriptProcessor);
+            scriptProcessor.connect(audioContext.destination);
+            scriptProcessor.onaudioprocess = detectClap;
+        });
+
+        function detectClap() {
+            const bufferLength = analyser.fftSize;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(dataArray);
+
+            const clapThreshold = 200; // Kurangi threshold untuk meningkatkan sensitivitas
+            const maxVolume = Math.max(...dataArray);
+
+            if (maxVolume > clapThreshold && !isFlashOn) {
+                toggleFlash();
+            }
+        }
+    </script>
+</body>
+</html>
