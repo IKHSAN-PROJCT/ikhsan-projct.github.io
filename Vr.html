@@ -13,6 +13,7 @@
             align-items: center;
             height: 100vh;
             background: linear-gradient(135deg, #1b1b1b, #434343);
+            overflow: hidden;
             color: white;
         }
         .container {
@@ -22,15 +23,12 @@
             background: rgba(30, 30, 30, 0.9);
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             animation: fadeIn 2s ease;
+            position: relative;
+            z-index: 1;
         }
         h1 {
             margin: 0 0 30px;
             font-size: 2em;
-            animation: glow 1.5s infinite alternate;
-        }
-        .project-name {
-            margin: 30px 0 0;
-            font-size: 1.2em;
             animation: glow 1.5s infinite alternate;
         }
         .toggle-button {
@@ -49,23 +47,10 @@
         .toggle-button.on {
             background-color: #76ff03;
         }
-        .mode-button {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .mode-button button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-size: 1em;
-            background-color: #444;
-            color: white;
-            transition: background-color 0.3s;
-        }
-        .mode-button button.active {
-            background-color: #76ff03;
+        .project-name {
+            margin: 30px 0 0;
+            font-size: 1.2em;
+            animation: glow 1.5s infinite alternate;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -80,34 +65,63 @@
             70% { box-shadow: 0 0 20px 15px rgba(118, 255, 3, 0); }
             100% { box-shadow: 0 0 0 0 rgba(118, 255, 3, 0); }
         }
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('https://www.transparenttextures.com/patterns/black-linen.png');
+            background-size: cover;
+            animation: backgroundMove 30s linear infinite;
+            z-index: 0;
+        }
+        @keyframes backgroundMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 100% 100%; }
+        }
     </style>
 </head>
 <body>
+    <div class="background-animation"></div>
     <div class="container">
         <h1>Flash Light</h1>
         <button id="flashToggle" class="toggle-button">OFF</button>
-        <div class="mode-button">
-            <button id="normalMode" class="active">Normal</button>
-            <button id="strobeMode">Strobe</button>
-            <button id="rapidMode">Rapid</button>
-        </div>
         <div class="project-name">SANZPROJECT</div>
     </div>
     <script>
+        const CACHE_NAME = 'ikhsan-projct.github.io';
+        const urlsToCache = [
+            '/',
+            '/Vr.html',
+            // Tambahkan file lainnya jika diperlukan
+        ];
+
+        self.addEventListener('install', (event) => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then((cache) => {
+                        return cache.addAll(urlsToCache);
+                    })
+            );
+        });
+
+        self.addEventListener('fetch', (event) => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then((response) => {
+                        return response || fetch(event.request);
+                    })
+            );
+        });
+
         const flashToggleButton = document.getElementById('flashToggle');
-        const normalModeButton = document.getElementById('normalMode');
-        const strobeModeButton = document.getElementById('strobeMode');
-        const rapidModeButton = document.getElementById('rapidMode');
         
         let isFlashOn = false;
         let stream;
-        let strobeInterval;
         
         flashToggleButton.addEventListener('click', toggleFlash);
-        normalModeButton.addEventListener('click', () => setMode('normal'));
-        strobeModeButton.addEventListener('click', () => setMode('strobe'));
-        rapidModeButton.addEventListener('click', () => setMode('rapid'));
-        
+
         async function toggleFlash() {
             try {
                 if (isFlashOn) {
@@ -123,7 +137,7 @@
                 }
             } catch (err) {
                 console.error('Error:', err);
-                alert('Flash tidak dapat dinyalakan pada perangkat ini.');
+                speak('Flash tidak dapat dinyalakan pada perangkat ini.');
             }
         }
 
@@ -131,65 +145,29 @@
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             const track = stream.getVideoTracks()[0];
             await track.applyConstraints({ advanced: [{ torch: true }] });
-            speak("Flash dinyalakan.");
+            speak('Flash dinyalakan.');
         }
 
         function stopFlash() {
             stream.getTracks()[0].stop();
-            clearInterval(strobeInterval);
-            speak("Flash dimatikan.");
-        }
-
-        function setMode(mode) {
-            clearInterval(strobeInterval);
-            normalModeButton.classList.remove('active');
-            strobeModeButton.classList.remove('active');
-            rapidModeButton.classList.remove('active');
-
-            if (mode === 'normal') {
-                normalModeButton.classList.add('active');
-                if (isFlashOn) startFlash();
-            } else if (mode === 'strobe') {
-                strobeModeButton.classList.add('active');
-                strobeInterval = setInterval(() => toggleFlash(), 500);
-            } else if (mode === 'rapid') {
-                rapidModeButton.classList.add('active');
-                strobeInterval = setInterval(() => toggleFlash(), 100);
-            }
+            speak('Flash dimatikan.');
         }
 
         function speak(message) {
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.lang = 'id-ID';
+            utterance.onend = () => console.log('Speech finished.');
             window.speechSynthesis.speak(utterance);
         }
 
-        // Voice recognition for clapping sound
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
-        const microphone = navigator.mediaDevices.getUserMedia({ audio: true });
-        const scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
-        
-        microphone.then(stream => {
-            const source = audioContext.createMediaStreamSource(stream);
-            source.connect(analyser);
-            analyser.connect(scriptProcessor);
-            scriptProcessor.connect(audioContext.destination);
-            scriptProcessor.onaudioprocess = detectClap;
-        });
-
-        function detectClap() {
-            const bufferLength = analyser.fftSize;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteTimeDomainData(dataArray);
-
-            const clapThreshold = 200; // Kurangi threshold untuk meningkatkan sensitivitas
-            const maxVolume = Math.max(...dataArray);
-
-            if (maxVolume > clapThreshold && !isFlashOn) {
-                toggleFlash();
-            }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+                    console.log('Service Worker registrasi berhasil:', registration);
+                }).catch((error) => {
+                    console.error('Service Worker registrasi gagal:', error);
+                });
+            });
         }
     </script>
 </body>
