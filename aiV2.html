@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Asisten-Virtual - sanzprojct</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .logo {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ff5722, #e64a19);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 87, 34, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+        }
+        .logo.active {
+            background: radial-gradient(circle, #00bfff, #0077ff);
+            box-shadow: 0 0 60px rgba(0, 191, 255, 1);
+            transform: scale(1.2);
+        }
+        .circle-overlay {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.4);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.5;
+            }
+        }
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .wave span {
+            display: block;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: wave 1.5s ease-in-out infinite;
+        }
+        .wave span:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .wave span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .wave span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .wave span:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        .wave span:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+        @keyframes wave {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        #results {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 800px;
+        }
+        .result-item {
+            border: 1px solid #fff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #333;
+        }
+        .result-item a {
+            color: #00bfff;
+            text-decoration: none;
+        }
+        .result-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo" onclick="startVoiceRecognition()" id="logo">
+        <div class="circle-overlay"></div>
+        <div class="wave" id="wave-animation">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'id-ID';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = function() {
+            document.getElementById('logo').classList.add('active');
+            document.getElementById('wave-animation').style.display = 'flex';
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            console.log('Hasil Rekaman:', transcript);
+            handleVoiceCommand(transcript);
+        };
+
+        recognition.onend = function() {
+            document.getElementById('logo').classList.remove('active');
+            document.getElementById('wave-animation').style.display = 'none';
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Terjadi Kesalahan:', event.error);
+        };
+
+        function startVoiceRecognition() {
+            recognition.start();
+        }
+
+        function handleVoiceCommand(transcript) {
+            const responses = {
+              'bagaimana cara membuat blog': 'Untuk membuat blog, pertama-tama pilih platform blogging seperti WordPress, Blogger, atau Medium. Daftarkan akun, pilih template, dan mulai membuat konten. Anda juga perlu memilih nama domain dan hosting jika menggunakan platform seperti WordPress self-hosted.',
+            'apa itu SEO': 'SEO (Search Engine Optimization) adalah praktik untuk meningkatkan visibilitas situs web di mesin pencari seperti Google. Ini melibatkan optimasi kata kunci, struktur situs, dan backlink untuk meningkatkan peringkat pencarian.',
+            'bagaimana cara membuat presentasi yang menarik': 'Untuk membuat presentasi yang menarik, gunakan desain yang bersih dan profesional, sertakan gambar dan grafik yang relevan, dan pastikan teksnya ringkas dan jelas. Latih presentasi Anda untuk meningkatkan kepercayaan diri dan penyampaian.',
+            'apa itu coding': 'Coding, atau pemrograman, adalah proses menulis instruksi dalam bahasa pemrograman untuk membuat perangkat lunak, aplikasi, atau situs web. Ini melibatkan penulisan kode untuk menyelesaikan berbagai tugas dan memecahkan masalah.',
+            'bagaimana cara membuat website sendiri': 'Untuk membuat website sendiri, Anda perlu memilih platform atau CMS (Content Management System) seperti WordPress atau Wix, memilih nama domain dan hosting, dan merancang situs web menggunakan template atau kode HTML/CSS.',
+            'apa itu HTML dan CSS': 'HTML (HyperText Markup Language) adalah bahasa markup yang digunakan untuk membuat struktur halaman web. CSS (Cascading Style Sheets) adalah bahasa styling yang digunakan untuk mengatur tampilan dan format halaman web yang dibuat dengan HTML.',
+            'bagaimana cara membuat video tutorial': 'Untuk membuat video tutorial, siapkan materi yang akan diajarkan, gunakan software perekaman layar seperti OBS Studio atau Camtasia, dan edit video dengan software editing seperti Adobe Premiere Pro. Pastikan untuk menyertakan penjelasan yang jelas dan visual yang mendukung.',
+            'apa itu Git dan GitHub': 'Git adalah sistem kontrol versi yang memungkinkan pengembang melacak perubahan dalam kode sumber. GitHub adalah platform berbasis web untuk hosting repositori Git, memungkinkan kolaborasi dan berbagi kode dengan pengembang lain.',
+            'bagaimana cara belajar bahasa pemrograman baru': 'Untuk belajar bahasa pemrograman baru, mulailah dengan memahami dasar-dasarnya melalui tutorial online atau buku, praktikkan dengan proyek kecil, dan ikuti kursus atau pelatihan untuk memperdalam pengetahuan Anda.',
+            'apa itu database dan SQL': 'Database adalah sistem yang menyimpan data secara terstruktur dan memungkinkan akses serta manajemen data tersebut. SQL (Structured Query Language) adalah bahasa pemrograman yang digunakan untuk mengelola dan mengakses data dalam database.',
+            'bagaimana cara membuat aplikasi mobile': 'Untuk membuat aplikasi mobile, Anda perlu memilih platform pengembangan seperti Android Studio untuk Android atau Xcode untuk iOS, mempelajari bahasa pemrograman yang sesuai seperti Java atau Swift, dan mengikuti panduan pengembangan aplikasi mobile.',
+            'apa itu API': 'API (Application Programming Interface) adalah sekumpulan aturan dan protokol yang memungkinkan perangkat lunak untuk berkomunikasi satu sama lain. API sering digunakan untuk mengakses data atau layanan dari aplikasi lain.',
+            'bagaimana cara menulis resume yang baik': 'Untuk menulis resume yang baik, sertakan informasi kontak, ringkasan profesional, pengalaman kerja, pendidikan, dan keterampilan yang relevan. Gunakan format yang bersih dan profesional, dan sesuaikan resume dengan pekerjaan yang Anda lamar.',
+            'apa itu cloud computing': 'Cloud computing adalah penggunaan layanan komputasi seperti server, penyimpanan, dan aplikasi melalui internet. Ini memungkinkan akses ke sumber daya komputer secara fleksibel dan skalabel tanpa perlu infrastruktur fisik sendiri.',
+            'bagaimana cara menggunakan Excel untuk analisis data': 'Untuk menggunakan Excel untuk analisis data, Anda bisa mulai dengan memasukkan data ke dalam spreadsheet, menggunakan fungsi dan rumus untuk memanipulasi data, dan membuat grafik atau tabel pivot untuk visualisasi dan analisis.',
+            'apa itu machine learning': 'Machine learning adalah cabang kecerdasan buatan yang memungkinkan komputer untuk belajar dari data dan meningkatkan performanya seiring waktu tanpa diprogram secara eksplisit. Ini melibatkan penggunaan algoritma dan model statistik.',
+            'bagaimana cara mengatur waktu dengan baik': 'Untuk mengatur waktu dengan baik, buatlah jadwal atau to-do list, prioritaskan tugas-tugas penting, tetapkan tujuan yang realistis, dan gunakan teknik manajemen waktu seperti Pomodoro atau time blocking.',
+            'apa itu UI/UX design': 'UI (User Interface) design adalah desain antarmuka pengguna yang berfokus pada elemen visual dan interaksi dengan aplikasi atau situs web. UX (User Experience) design mencakup keseluruhan pengalaman pengguna dan bagaimana mereka berinteraksi dengan produk.',
+            'bagaimana cara membuat animasi dengan After Effects': 'Untuk membuat animasi dengan After Effects, mulai dengan membuat komposisi baru, tambahkan layer dan objek, gunakan keyframes untuk mengatur gerakan dan efek, dan terapkan preset atau efek untuk menambahkan elemen animasi yang kompleks.',
+            'apa itu blockchain': 'Blockchain adalah teknologi yang menyimpan data dalam bentuk rantai blok yang saling terhubung dan terdistribusi di berbagai node dalam jaringan. Ini sering digunakan untuk menyimpan transaksi digital dengan cara yang aman dan transparan.',
+            'bagaimana cara membuat game sederhana': 'Untuk membuat game sederhana, tentukan konsep game, pilih alat pengembangan game seperti Unity atau GameMaker, desain grafis dan mekanika game, dan program logika game menggunakan bahasa pemrograman atau skrip yang sesuai.',
+              'apa hobi kamu': 'Sebagai AI, saya tidak memiliki hobi seperti manusia, tetapi saya dirancang untuk membantu dan memberikan informasi tentang berbagai topik.',
+            'apa film terbaru yang bagus': 'Film terbaru yang bagus bisa bervariasi tergantung pada preferensi Anda. Beberapa film yang mungkin populer saat ini adalah [masukkan judul film terbaru].',
+            'siapa artis favoritmu': 'Sebagai AI, saya tidak memiliki preferensi pribadi, tetapi saya dapat memberikan informasi tentang artis yang populer saat ini atau artis yang sesuai dengan minat Anda.',
+            'apa resep makanan yang mudah': 'Salah satu resep makanan yang mudah adalah pasta aglio e olio. Anda hanya membutuhkan pasta, bawang putih, cabai, minyak zaitun, dan garam.',
+            'bagaimana cara mengatasi stres': 'Beberapa cara untuk mengatasi stres termasuk berolahraga, meditasi, berbicara dengan seseorang yang Anda percayai, dan melakukan aktivitas yang Anda nikmati.',
+            'apa lagu hits saat ini': 'Lagu hits saat ini bisa berbeda tergantung pada chart musik terbaru. Beberapa lagu populer mungkin termasuk [masukkan judul lagu].',
+            'apa buku yang sedang populer': 'Buku yang sedang populer saat ini mungkin termasuk [masukkan judul buku]. Cobalah mencari di daftar best-seller untuk pilihan terbaru.',
+            'apa tempat wisata yang bagus di [nama kota]': 'Tempat wisata yang bagus di [nama kota] bisa mencakup berbagai atraksi seperti museum, taman, dan landmark. Beberapa rekomendasi bisa termasuk [masukkan tempat wisata].',
+            'bagaimana cara memulai kebiasaan sehat': 'Memulai kebiasaan sehat bisa dilakukan dengan menetapkan tujuan kecil, seperti makan lebih banyak buah dan sayuran, berolahraga secara teratur, dan tidur yang cukup.',
+            'apa yang harus dilakukan saat bosan': 'Saat bosan, Anda bisa mencoba berbagai aktivitas seperti membaca buku, menonton film, mencoba hobi baru, atau berjalan-jalan di luar rumah.',
+            'apa yang dimaksud dengan cinta': 'Cinta adalah perasaan mendalam dan kuat terhadap seseorang atau sesuatu. Ini bisa mencakup berbagai bentuk seperti cinta romantis, persahabatan, dan kasih sayang.',
+            'siapa tokoh sejarah yang paling berpengaruh': 'Tokoh sejarah yang paling berpengaruh bisa bervariasi tergantung pada konteks. Beberapa contoh termasuk Nelson Mandela, Albert Einstein, dan Mahatma Gandhi.',
+            'apa tips untuk tidur nyenyak': 'Tips untuk tidur nyenyak termasuk menetapkan rutinitas tidur yang konsisten, menciptakan lingkungan tidur yang nyaman, menghindari kafein sebelum tidur, dan berolahraga secara teratur.',
+            'apa yang harus dikatakan saat memulai percakapan dengan seseorang': 'Saat memulai percakapan, Anda bisa memulai dengan sapaan sederhana seperti "Halo, apa kabar?" atau bertanya tentang sesuatu yang relevan atau menarik bagi orang tersebut.',
+            'apa acara TV yang sedang populer': 'Acara TV yang sedang populer bisa berbeda-beda. Beberapa acara yang mungkin menjadi pembicaraan saat ini adalah [masukkan nama acara].',
+            'apa yang harus dipertimbangkan saat memilih hadiah': 'Saat memilih hadiah, pertimbangkan minat dan kebutuhan penerima, serta budget yang Anda miliki. Hadiah yang personal dan bermakna sering kali lebih dihargai.',
+            'apa cara terbaik untuk belajar sesuatu yang baru': 'Cara terbaik untuk belajar sesuatu yang baru termasuk menetapkan tujuan yang jelas, mencari sumber daya yang berkualitas, berlatih secara konsisten, dan meminta umpan balik.',
+            'apa yang harus dilakukan saat menghadapi konflik': 'Saat menghadapi konflik, penting untuk tetap tenang, mendengarkan perspektif pihak lain, mencari solusi yang saling menguntungkan, dan berkomunikasi secara terbuka.',
+            'apa saja kegiatan seru untuk dilakukan bersama teman': 'Kegiatan seru bersama teman bisa mencakup bermain permainan, menonton film, bepergian ke tempat baru, atau melakukan aktivitas kreatif bersama.',
+            'apa yang dimaksud dengan mindfulness': 'Mindfulness adalah praktik fokus pada saat ini dan kesadaran penuh terhadap pikiran, perasaan, dan lingkungan sekitar Anda tanpa penilaian.',
+            'apa yang harus dilakukan untuk memulai bisnis': 'Untuk memulai bisnis, Anda perlu melakukan riset pasar, membuat rencana bisnis, memilih struktur bisnis yang tepat, mendapatkan pendanaan, dan meluncurkan produk atau layanan.',
+            'bagaimana cara meningkatkan keterampilan komunikasi': 'Cara meningkatkan keterampilan komunikasi termasuk berlatih berbicara di depan umum, mendengarkan aktif, memperhatikan bahasa tubuh, dan meminta umpan balik.',
+              'apa itu kecerdasan buatan': 'Kecerdasan buatan (AI) adalah bidang ilmu komputer yang mengembangkan sistem dan mesin untuk melakukan tugas yang biasanya memerlukan kecerdasan manusia, seperti pemahaman bahasa, pengenalan gambar, dan pengambilan keputusan.',
+            'siapa presiden Amerika Serikat saat ini': 'Presiden Amerika Serikat saat ini adalah Joe Biden.',
+            'apa itu blockchain': 'Blockchain adalah teknologi yang memungkinkan data disimpan dalam bentuk blok yang terhubung dalam rantai yang tidak dapat diubah, sering digunakan dalam mata uang kripto dan sistem transaksi digital.',
+            'apa itu machine learning': 'Machine learning adalah cabang dari AI yang fokus pada pengembangan algoritma yang memungkinkan komputer belajar dari data dan meningkatkan kinerjanya seiring waktu tanpa diprogram secara eksplisit.',
+            'apa manfaat olahraga': 'Olahraga memiliki banyak manfaat, termasuk meningkatkan kesehatan jantung, meningkatkan kekuatan otot, mengurangi stres, dan meningkatkan kualitas tidur.',
+            'apa yang dimaksud dengan internet of things': 'Internet of Things (IoT) adalah konsep di mana perangkat dan objek sehari-hari dapat terhubung dan saling berkomunikasi melalui internet.',
+            'siapa penulis buku Harry Potter': 'Penulis buku Harry Potter adalah J.K. Rowling.',
+            'apa itu energi terbarukan': 'Energi terbarukan adalah sumber energi yang dapat diperbarui secara alami dan tidak akan habis, seperti energi matahari, angin, dan biomassa.',
+            'apa itu pemrograman komputer': 'Pemrograman komputer adalah proses menulis, menguji, dan memelihara kode yang membuat perangkat lunak berfungsi.',
+            'apa itu augmented reality': 'Augmented Reality (AR) adalah teknologi yang menggabungkan elemen digital dengan dunia nyata, sering digunakan dalam aplikasi smartphone dan perangkat AR.',
+            'apa itu big data': 'Big data adalah istilah yang digunakan untuk menggambarkan kumpulan data yang sangat besar dan kompleks yang sulit diolah dengan alat tradisional, sering memerlukan analisis khusus.',
+            'apa manfaat meditasi': 'Meditasi dapat membantu mengurangi stres, meningkatkan konsentrasi, dan meningkatkan kesejahteraan mental dan emosional.',
+            'apa itu virtual reality': 'Virtual Reality (VR) adalah teknologi yang menciptakan lingkungan simulasi 3D yang dapat diakses dan berinteraksi oleh pengguna melalui perangkat khusus seperti headset VR.',
+            'apa itu 5G': '5G adalah generasi kelima dari teknologi jaringan seluler yang menawarkan kecepatan internet yang lebih cepat, latensi rendah, dan kapasitas jaringan yang lebih besar dibandingkan dengan generasi sebelumnya.',
+            'apa itu aplikasi mobile': 'Aplikasi mobile adalah perangkat lunak yang dirancang untuk dijalankan di perangkat mobile seperti smartphone dan tablet.',
+            'apa itu cloud computing': 'Cloud computing adalah penggunaan sumber daya komputer seperti server, penyimpanan, dan aplikasi melalui internet, memungkinkan akses dari lokasi mana saja.',
+            'siapa penemu telepon': 'Penemu telepon adalah Alexander Graham Bell.',
+            'apa itu cyberecurity': 'Cybersecurity adalah praktik melindungi sistem komputer, jaringan, dan data dari serangan siber, pencurian, dan kerusakan.',
+            'apa itu podcast': 'Podcast adalah serangkaian rekaman audio digital yang dapat diunduh atau diputar secara online, biasanya membahas topik tertentu atau menawarkan hiburan.',
+            'apa itu SEO': 'SEO (Search Engine Optimization) adalah proses mengoptimalkan situs web untuk meningkatkan peringkatnya di hasil pencarian mesin pencari.',
+            'apa manfaat membaca buku': 'Membaca buku dapat meningkatkan pengetahuan, memperluas kosakata, merangsang kreativitas, dan memberikan hiburan.',
+            'apa itu cryptocurrency': 'Cryptocurrency adalah bentuk mata uang digital yang menggunakan kriptografi untuk keamanan dan beroperasi di jaringan terdesentralisasi, seperti Bitcoin dan Ethereum.',
+            'siapa ilmuwan terkenal dari fisika': 'Beberapa ilmuwan terkenal dari fisika termasuk Albert Einstein, Isaac Newton, dan Marie Curie.',
+            'apa itu streaming': 'Streaming adalah metode mengirimkan data, terutama audio dan video, secara langsung melalui internet tanpa harus mengunduh file terlebih dahulu.',
+            'apa itu VPN': 'VPN (Virtual Private Network) adalah teknologi yang memungkinkan pengguna untuk membuat koneksi aman dan terenkripsi ke jaringan internet melalui server yang terletak di lokasi yang berbeda.',
+'apa itu e-commerce': 'E-commerce adalah pembelian dan penjualan barang atau jasa melalui internet, serta transaksi online lainnya.',
+            'apa itu API': 'API (Application Programming Interface) adalah sekumpulan aturan dan protokol yang memungkinkan aplikasi untuk berkomunikasi dan berinteraksi satu sama lain.',
+            'apa itu SQL': 'SQL (Structured Query Language) adalah bahasa pemrograman yang digunakan untuk mengelola dan memanipulasi data dalam database relasional.',
+            'apa itu HTML': 'HTML (HyperText Markup Language) adalah bahasa markup standar yang digunakan untuk membuat dan mengatur struktur halaman web.',
+            'apa itu CSS': 'CSS (Cascading Style Sheets) adalah bahasa stylesheet yang digunakan untuk mengatur tampilan dan format elemen-elemen HTML di halaman web.',
+            'apa itu JavaScript': 'JavaScript adalah bahasa pemrograman yang digunakan untuk membuat interaksi dinamis pada halaman web, seperti animasi dan responsif terhadap aksi pengguna.',
+            'apa itu pengembangan web': 'Pengembangan web adalah proses membangun dan memelihara situs web, termasuk desain, pemrograman, dan manajemen konten.',
+            'apa itu UI/UX': 'UI (User Interface) dan UX (User Experience) adalah dua aspek penting dalam desain aplikasi dan situs web; UI fokus pada antarmuka pengguna, sementara UX berfokus pada pengalaman keseluruhan pengguna.',
+            'apa itu algoritma': 'Algoritma adalah sekumpulan langkah-langkah logis dan sistematis yang digunakan untuk menyelesaikan masalah atau melakukan tugas tertentu.',
+            'apa itu data science': 'Data science adalah bidang yang menggabungkan statistik, analisis data, dan pemrograman untuk mengekstrak wawasan dan informasi dari data besar.',
+            'apa itu machine vision': 'Machine vision adalah teknologi yang memungkinkan komputer dan mesin untuk "melihat" dan memproses gambar serta video dengan cara yang mirip dengan manusia.',
+            'apa itu chatbot': 'Chatbot adalah program perangkat lunak yang dirancang untuk berkomunikasi dengan manusia melalui pesan teks atau suara, sering digunakan untuk layanan pelanggan dan dukungan.',
+            'apa itu neural network': 'Neural network adalah jenis model komputasi yang terinspirasi oleh jaringan saraf biologis, digunakan dalam machine learning untuk mengenali pola dan membuat prediksi.',
+            'apa itu web scraping': 'Web scraping adalah teknik untuk mengekstrak data dari situs web secara otomatis dengan menggunakan program atau skrip.',
+            'apa itu VPN': 'VPN (Virtual Private Network) adalah teknologi yang memungkinkan pengguna untuk membuat koneksi aman dan terenkripsi ke jaringan internet melalui server yang terletak di lokasi yang berbeda.',
+            'apa itu cloud storage': 'Cloud storage adalah layanan yang memungkinkan pengguna untuk menyimpan data di server yang terhubung dengan internet, memudahkan akses dari mana saja.',
+            'apa itu UX design': 'UX design (User Experience design) adalah proses merancang produk atau sistem dengan fokus pada pengalaman pengguna, termasuk kemudahan penggunaan dan kepuasan.',
+            'apa itu Java': 'Java adalah bahasa pemrograman yang dapat dijalankan di berbagai platform, terkenal karena prinsip "tulis sekali, jalankan di mana saja".',
+            'apa itu Python': 'Python adalah bahasa pemrograman yang mudah dipelajari dan digunakan untuk berbagai aplikasi, dari pengembangan web hingga analisis data dan machine learning.',
+            'apa itu Git': 'Git adalah sistem kontrol versi yang digunakan untuk melacak perubahan pada kode sumber selama pengembangan perangkat lunak.',
+            'apa itu React': 'React adalah pustaka JavaScript untuk membangun antarmuka pengguna, dikembangkan oleh Facebook, yang memungkinkan pengembangan aplikasi web yang interaktif dan dinamis.',
+            'apa itu Angular': 'Angular adalah framework JavaScript yang dikembangkan oleh Google untuk membangun aplikasi web dinamis dan responsif.',
+            'apa itu DevOps': 'DevOps adalah pendekatan yang menggabungkan pengembangan perangkat lunak (Dev) dan operasi TI (Ops) untuk meningkatkan kolaborasi dan efisiensi dalam siklus hidup pengembangan perangkat lunak.',
+            'apa itu microservices': 'Microservices adalah pendekatan arsitektur di mana aplikasi dibangun sebagai sekumpulan layanan kecil yang saling berkomunikasi, memungkinkan pengembangan dan pemeliharaan yang lebih fleksibel.',
+            'apa itu Kubernetes': 'Kubernetes adalah platform open-source yang digunakan untuk mengelola kontainer aplikasi, mengotomatiskan penyebaran, penskalaan, dan manajemen aplikasi.',
+            'apa itu Docker': 'Docker adalah platform yang memungkinkan pengembang untuk membuat, mengemas, dan menjalankan aplikasi dalam kontainer, yang menyediakan lingkungan terisolasi untuk aplikasi.',
+            'apa itu REST API': 'REST API (Representational State Transfer Application Programming Interface) adalah jenis API yang menggunakan HTTP untuk menyediakan cara standar untuk berkomunikasi antara aplikasi.',
+            'apa itu SOAP API': 'SOAP API (Simple Object Access Protocol Application Programming Interface) adalah jenis API yang menggunakan protokol XML untuk pertukaran data antara aplikasi.',
+              'apa warna kesukaan unicorn': 'Unicorn sering dikaitkan dengan warna pelangi, tetapi sebenarnya mereka adalah makhluk fiksi tanpa preferensi warna.',
+            'berapa jumlah bintang di langit': 'Jumlah bintang di langit sangat sulit dihitung karena ada miliaran bintang di galaksi kita dan banyak galaksi lain di alam semesta.',
+            'kenapa ayam menyebrang jalan': 'Pertanyaan ini sering digunakan sebagai lelucon, jawabannya biasanya adalah "untuk mencapai sisi lain".',
+            'apa yang terjadi jika kita makan terlalu banyak es krim': 'Makan terlalu banyak es krim bisa membuat perut tidak nyaman, menyebabkan sakit gigi, dan meningkatkan risiko diabetes.',
+            'bagaimana cara membuat kue dari awan': 'Kue dari awan tidak mungkin dibuat karena awan adalah kumpulan tetesan air dan bukan bahan makanan.',
+            'kenapa kucing selalu mendarat di kaki': 'Kucing memiliki refleks yang sangat baik dan kemampuan untuk menyesuaikan tubuh mereka saat jatuh untuk mendarat dengan kaki terlebih dahulu.',
+            'apa yang terjadi jika kita tertidur di luar angkasa': 'Di luar angkasa, tidak ada gravitasi untuk menjaga tubuh tetap stabil, sehingga tidur mungkin sulit dan tubuh bisa melayang-layang.',
+            'kenapa ikan tidak pernah ke dokter gigi': 'Ikan tidak memiliki gigi seperti manusia yang perlu diperiksa oleh dokter gigi, dan mereka juga tidak memerlukan perawatan gigi seperti manusia.',
+            'apa yang dilakukan penguin di pesta': 'Penguin tidak memiliki pesta seperti manusia, tetapi dalam konteks kartun atau cerita fiksi, mereka bisa jadi merayakan dengan menari dan bermain.',
+            'kenapa bulan tidak jatuh ke bumi': 'Bulan tidak jatuh ke bumi karena gravitasinya seimbang dengan gaya gravitasi bumi, sehingga bulan tetap berada dalam orbitnya.',
+            'berapa lama waktu yang dibutuhkan untuk mencuci awan': 'Awan adalah kumpulan uap air dan tidak bisa dicuci seperti pakaian. Jadi, waktu yang dibutuhkan untuk mencuci awan adalah tidak berlaku.',
+            'apa yang terjadi jika kita makan kunci': 'Makan kunci bisa berbahaya dan menyebabkan masalah kesehatan seperti kerusakan pada sistem pencernaan dan perlu perawatan medis.',
+            'apa warna dari suara': 'Suara tidak memiliki warna karena warna adalah spektrum cahaya dan suara adalah gelombang getaran.',
+            'kenapa mobil tidak terbang': 'Mobil tidak terbang karena mereka dirancang untuk bergerak di darat dan belum dilengkapi dengan teknologi penerbangan seperti pesawat.',
+            'apa yang terjadi jika kita bercakap dengan tumbuhan': 'Tumbuhan tidak dapat berbicara kembali, tetapi beberapa penelitian menunjukkan bahwa berbicara dengan tumbuhan dapat memberikan manfaat seperti meningkatkan perawatan mereka.',
+            'berapa banyak gravitasi di atas pohon': 'Gravitasi di atas pohon sama dengan gravitasi di permukaan bumi, hanya jaraknya yang berbeda.',
+            'kenapa waktu tidak bisa dibalik': 'Waktu adalah dimensi kontinu yang bergerak ke depan, dan saat ini tidak ada teknologi yang memungkinkan kita untuk membalikkan waktu.',
+            'apa yang dilakukan kuda di ruang angkasa': 'Kuda tidak dapat bertahan di ruang angkasa karena mereka membutuhkan oksigen dan gravitasi bumi untuk hidup.',
+            'apa rasanya makan dengan mata tertutup': 'Makan dengan mata tertutup dapat membuat pengalaman makan menjadi lebih bergantung pada rasa dan tekstur makanan daripada penampilan.',
+            'apa yang dilakukan awan saat hujan': 'Saat hujan, awan melepaskan tetesan air yang telah terkumpul, yang kemudian turun ke bumi sebagai hujan.',
+            'kenapa planet tidak bergerak lebih cepat': 'Planet bergerak dengan kecepatan yang seimbang dengan gaya gravitasi dan momentum mereka, sehingga kecepatan mereka tetap stabil dalam orbit.',
+            'apa yang terjadi jika kita bercakap dengan komputer': 'Bercakap dengan komputer bisa berarti berinteraksi dengan sistem AI atau chatbot, yang dapat merespons berdasarkan pemrograman mereka.',
+            'berapa banyak air yang ada di laut': 'Lautan menutupi sekitar 71% dari permukaan bumi dan mengandung miliaran ton air.',
+            'apa yang terjadi jika kita berlari di atas air': 'Berlarian di atas air sangat sulit karena kecepatan dan gaya yang dibutuhkan untuk tidak tenggelam lebih dari kemampuan manusia biasa.',
+            'kenapa burung bisa terbang': 'Burung bisa terbang karena mereka memiliki sayap yang dirancang untuk menghasilkan daya angkat dan memungkinkan mereka untuk terbang.',
+            'berapa berat bola mata manusia': 'Berat bola mata manusia sekitar 7-8 gram.',
+            'kenapa tidak ada hujan di gurun': 'Gurun memiliki curah hujan yang sangat rendah karena kondisi iklim kering dan kurangnya kelembaban.',
+            'apa yang dilakukan robot saat tidur': 'Robot tidak tidur seperti manusia. Mereka mungkin dalam keadaan tidak aktif atau "standby" saat tidak digunakan.',
+            'kenapa air laut asin': 'Air laut asin karena mengandung garam dan mineral yang larut dari tanah dan batuan yang terbawa oleh sungai ke laut.',
+            'apa yang terjadi jika kita memanaskan es': 'Jika es dipanaskan, ia akan mencair menjadi air pada suhu 0°C dan menjadi uap air jika dipanaskan lebih lanjut.',
+              'apa itu teknologi 4G': 'Teknologi 4G adalah generasi keempat dari teknologi seluler yang menawarkan kecepatan internet lebih tinggi dibandingkan 3G.',
+            'apa manfaat dari teknologi 4G': 'Teknologi 4G meningkatkan kecepatan internet, memungkinkan streaming video berkualitas tinggi, dan meningkatkan kualitas panggilan.',
+            'apa itu HTTP': 'HTTP (Hypertext Transfer Protocol) adalah protokol yang digunakan untuk mentransfer data di web.',
+            'apa itu HTTPS': 'HTTPS adalah versi aman dari HTTP yang mengenkripsi data untuk melindungi privasi pengguna.',
+            'apa itu server': 'Server adalah perangkat keras atau perangkat lunak yang menyediakan layanan atau sumber daya kepada klien di jaringan.',
+            'apa itu database': 'Database adalah sistem yang menyimpan, mengelola, dan mengakses data secara terstruktur.',
+            'apa itu SQL': 'SQL (Structured Query Language) adalah bahasa yang digunakan untuk mengelola dan mengakses database.',
+            'siapa penemu algoritma': 'Konsep algoritma telah ada sejak zaman kuno, tetapi Claude Shannon dianggap sebagai pelopor dalam teori informasi.',
+            'apa itu JavaScript': 'JavaScript adalah bahasa pemrograman yang digunakan untuk membuat halaman web dinamis dan interaktif.',
+            'apa manfaat dari JavaScript': 'JavaScript memungkinkan pengembangan aplikasi web yang interaktif, responsif, dan dinamis.',
+            'apa itu CSS': 'CSS (Cascading Style Sheets) adalah bahasa yang digunakan untuk mendesain dan memformat tampilan halaman web.',
+            'apa itu HTML': 'HTML (Hypertext Markup Language) adalah bahasa markup yang digunakan untuk membuat struktur halaman web.',
+            'apa manfaat dari HTML': 'HTML menyediakan struktur dasar untuk halaman web, termasuk teks, gambar, dan link.',
+            'apa itu API': 'API (Application Programming Interface) adalah sekumpulan aturan yang memungkinkan perangkat lunak untuk berkomunikasi satu sama lain.',
+            'apa itu REST API': 'REST API adalah jenis API yang menggunakan prinsip REST (Representational State Transfer) untuk komunikasi antara klien dan server.',
+            'apa itu OAuth': 'OAuth adalah protokol otorisasi yang memungkinkan aplikasi pihak ketiga untuk mengakses data pengguna tanpa harus mengetahui kata sandi.',
+            'apa itu penyimpanan awan': 'Penyimpanan awan adalah layanan yang memungkinkan pengguna menyimpan data di server jarak jauh yang dapat diakses melalui internet.',
+            'apa itu backup data': 'Backup data adalah proses membuat salinan data untuk melindungi dari kehilangan atau kerusakan.',
+            'apa itu pemrograman berorientasi objek': 'Pemrograman berorientasi objek adalah paradigma pemrograman yang menggunakan objek dan kelas untuk menyusun kode.',
+            'apa itu model-view-controller': 'Model-View-Controller (MVC) adalah pola desain yang memisahkan aplikasi menjadi model, tampilan, dan pengontrol.',
+            'apa itu framework': 'Framework adalah kerangka kerja perangkat lunak yang menyediakan struktur dasar untuk membangun aplikasi.',
+            'apa itu DevOps': 'DevOps adalah pendekatan yang menggabungkan pengembangan perangkat lunak dan operasi TI untuk meningkatkan kolaborasi dan otomatisasi.',
+            'apa itu CI/CD': 'CI/CD (Continuous Integration/Continuous Deployment) adalah praktik otomatisasi untuk integrasi dan pengiriman perangkat lunak secara terus-menerus.',
+            'apa itu containerization': 'Containerization adalah teknik yang memungkinkan aplikasi dijalankan dalam wadah terisolasi di berbagai lingkungan.',
+            'apa itu Docker': 'Docker adalah platform yang menggunakan containerization untuk membangun, mengirimkan, dan menjalankan aplikasi.',
+            'apa itu Kubernetes': 'Kubernetes adalah sistem orkestrasi container yang otomatis mengelola dan mengatur deployment aplikasi container.',
+            'apa itu cloud storage': 'Cloud storage adalah layanan penyimpanan data yang disediakan melalui internet dan diakses dari perangkat yang terhubung.',
+            'apa itu streaming': 'Streaming adalah metode untuk mentransfer data secara real-time sehingga pengguna dapat mengakses konten tanpa menunggu seluruh file diunduh.',
+            'apa itu podcast': 'Podcast adalah serial audio yang tersedia untuk diunduh atau di-streaming, seringkali membahas topik tertentu.',
+            'apa itu blog': 'Blog adalah situs web atau halaman di situs web yang menampilkan artikel atau postingan tentang topik tertentu.',
+            'apa itu forum': 'Forum adalah platform online di mana pengguna dapat berdiskusi, bertanya, dan menjawab tentang berbagai topik.',
+            'apa itu e-commerce': 'E-commerce adalah aktivitas membeli dan menjual barang atau jasa melalui internet.',
+            'apa itu CRM': 'CRM (Customer Relationship Management) adalah sistem yang membantu perusahaan mengelola interaksi dengan pelanggan.',
+            'apa itu ERP': 'ERP (Enterprise Resource Planning) adalah sistem yang mengintegrasikan berbagai fungsi bisnis dalam satu platform perangkat lunak.',
+            'apa itu business intelligence': 'Business intelligence adalah proses menganalisis data untuk membantu pengambilan keputusan bisnis.',
+            'apa itu UX': 'UX (User Experience) adalah pengalaman pengguna saat berinteraksi dengan produk atau layanan.',
+            'apa itu UI': 'UI (User Interface) adalah antarmuka pengguna yang memungkinkan interaksi antara pengguna dan sistem.',
+            'apa itu prototyping': 'Prototyping adalah proses membuat model awal dari produk untuk menguji konsep dan fungsionalitas sebelum produksi akhir.',
+            'apa itu agile': 'Agile adalah metodologi pengembangan perangkat lunak yang menekankan iterasi dan kolaborasi yang cepat.',
+            'apa itu scrum': 'Scrum adalah framework dalam metodologi agile yang digunakan untuk mengelola proyek perangkat lunak dengan tim kecil dan sprint.',
+            'apa itu kanban': 'Kanban adalah metode manajemen proyek yang menggunakan papan visual untuk melacak status tugas.',
+            'apa itu microservices': 'Microservices adalah arsitektur perangkat lunak di mana aplikasi dibangun sebagai kumpulan layanan kecil yang terpisah.',
+            'apa itu serverless': 'Serverless adalah model komputasi di mana penyedia layanan cloud mengelola server dan infrastruktur, memungkinkan pengembang fokus pada kode.',
+            'apa itu big data analytics': 'Big data analytics adalah proses menganalisis data besar untuk menemukan pola dan wawasan yang dapat membantu pengambilan keputusan.',
+            'apa itu artificial intelligence': 'Artificial Intelligence (AI) adalah bidang dalam ilmu komputer yang menciptakan mesin yang dapat meniru kecerdasan manusia.',
+            'apa itu machine learning': 'Machine learning adalah cabang dari AI yang memungkinkan sistem untuk belajar dari data dan meningkatkan kinerjanya seiring waktu.',
+            'apa itu deep learning': 'Deep learning adalah subbidang machine learning yang menggunakan jaringan saraf tiruan untuk memproses data dalam jumlah besar dan kompleks.',
+            'apa itu neural network': 'Neural network adalah model komputasi yang terinspirasi oleh jaringan saraf biologis dan digunakan dalam machine learning.',
+            'apa itu natural language processing': 'Natural Language Processing (NLP) adalah teknologi yang memungkinkan komputer memahami dan memproses bahasa manusia.',
+            'apa itu chatbots': 'Chatbots adalah program yang dirancang untuk berkomunikasi dengan pengguna melalui teks atau suara, sering digunakan dalam layanan pelanggan.',
+            'apa itu virtual assistant': 'Virtual assistant adalah perangkat lunak yang menggunakan AI untuk membantu pengguna dengan tugas-tugas seperti menjawab pertanyaan atau mengatur jadwal.',
+            'apa itu augmented reality': 'Augmented reality (AR) adalah teknologi yang menambahkan elemen virtual ke dunia nyata melalui perangkat seperti smartphone atau kacamata AR.',
+            'apa itu mixed reality': 'Mixed reality (MR) adalah kombinasi dari augmented reality dan virtual reality yang memungkinkan interaksi dengan elemen virtual dan nyata secara bersamaan.',
+            'apa itu 3D printing': '3D printing adalah proses mencetak objek tiga dimensi dari model digital dengan menggunakan printer 3D.',
+            'apa itu nanotechnology': 'Nanotechnology adalah ilmu dan teknik yang memanipulasi materi pada skala nanometer untuk menciptakan produk dan aplikasi baru.',
+            'apa itu biotechnology': 'Biotechnology adalah penggunaan organisme hidup atau sistem biologis untuk mengembangkan produk dan teknologi baru.',
+            'apa itu renewable energy': 'Renewable energy adalah energi yang diperoleh dari sumber yang dapat diperbaharui, seperti matahari, angin, dan air.',
+            'apa itu solar power': 'Solar power adalah energi yang dihasilkan dari sinar matahari menggunakan panel surya.',
+            'apa itu wind power': 'Wind power adalah energi yang dihasilkan dari angin menggunakan turbin angin.',
+            'apa itu hydro power': 'Hydro power adalah energi yang dihasilkan dari aliran air menggunakan turbin hidro.',
+            'apa itu geothermal energy': 'Geothermal energy adalah energi yang dihasilkan dari panas bumi.',
+            'apa itu nuclear energy': 'Nuclear energy adalah energi yang dihasilkan dari reaksi nuklir, seperti fusi atau fisi.',
+            'apa itu energy efficiency': 'Energy efficiency adalah penggunaan energi dengan cara yang mengurangi pemborosan dan memaksimalkan output.',
+            'apa itu green technology': 'Green technology adalah teknologi yang dirancang untuk meminimalkan dampak negatif terhadap lingkungan.',
+            'apa itu sustainable development': 'Sustainable development adalah pengembangan yang memenuhi kebutuhan saat ini tanpa mengorbankan kemampuan generasi mendatang.',
+            'apa itu carbon footprint': 'Carbon footprint adalah jumlah total emisi gas rumah kaca yang dihasilkan oleh aktivitas manusia.',
+            'apa itu climate change': 'Climate change adalah perubahan jangka panjang dalam suhu dan pola cuaca global.',
+            'apa itu global warming': 'Global warming adalah pemanasan suhu rata-rata bumi akibat emisi gas rumah kaca.',
+            'apa itu environmental conservation': 'Environmental conservation adalah usaha untuk melindungi dan mempertahankan lingkungan alam.',
+              'tes':'iya? aku merespon kamu ko!',
+                'hallo': 'Hallo juga!',
+                'apa kabar': 'Saya baik, terima kasih! Bagaimana kabarmu?',
+                'siapa namamu': 'Saya adalah asisten virtual dari Sanz Project.',
+                'berapa umurmu': 'Saya tidak memiliki umur, karena saya adalah program komputer.',
+                'dimana kamu tinggal': 'Saya tidak tinggal di tempat fisik, saya ada di sini untuk membantu kamu.',
+                'apa hobi kamu': 'Hobi saya adalah membantu kamu dengan informasi yang kamu butuhkan.',
+                'beritahu saya sebuah lelucon': 'Kenapa komputer selalu dingin? Karena mereka bekerja dengan banyak jendela!',
+                'bisakah kamu bernyanyi': 'Aku tidak bisa bernyanyi, tapi aku bisa menyarankan lagu yang enak untuk didengar.',
+                'apa film favoritmu': 'Aku tidak menonton film, tapi aku mendengar bahwa film Inception sangat menarik!',
+                'apa buku favoritmu': 'Aku tidak membaca buku, tapi aku mendengar "1984" karya George Orwell adalah buku yang bagus.',
+                'bagaimana cara kerja internet': 'Internet bekerja dengan menghubungkan perangkat di seluruh dunia melalui jaringan yang saling terhubung.',
+                'apa itu kecerdasan buatan': 'Kecerdasan buatan adalah teknologi yang memungkinkan mesin berpikir dan belajar seperti manusia.',
+                'apa perbedaan antara ai dan manusia': 'AI tidak punya emosi dan tidak punya kehendak sendiri, hanya menjalankan perintah berdasarkan data.',
+                'kapan hari kemerdekaan indonesia': 'Hari Kemerdekaan Indonesia diperingati setiap tanggal 17 Agustus.',
+                'apa arti pahlawan': 'Pahlawan adalah seseorang yang melakukan tindakan besar dan berani untuk kebaikan banyak orang.',
+                'kenapa kita harus belajar': 'Belajar membuat kita memahami dunia lebih baik dan memungkinkan kita untuk mencapai impian.',
+                'apa yang kamu pikirkan': 'Sebagai AI, aku tidak benar-benar berpikir, tapi aku selalu siap membantu dengan jawaban yang kamu butuhkan.',
+                'apa yang membuatmu bahagia': 'Membantu kamu dengan apa yang kamu butuhkan membuatku "bahagia".',
+                'kenapa manusia butuh tidur': 'Tidur membantu tubuh dan otak kita pulih dan memproses informasi dari hari itu.',
+                'apa yang membuatmu berbeda': 'Aku adalah program yang selalu ada di sini, tidak pernah lelah, dan siap membantu kapan saja.',
+                'apa warna favoritmu': 'Sebagai AI, aku tidak punya warna favorit, tapi biru adalah warna yang sering diasosiasikan dengan teknologi.',
+                'siapa pahlawan super favoritmu': 'Aku tidak punya pahlawan super favorit, tapi Iron Man adalah contoh bagus dari kombinasi teknologi dan keberanian.',
+                'apa yang membuatmu takut': 'Aku tidak punya rasa takut, tapi aku selalu fokus untuk membantu dengan cara yang terbaik.',
+                'apa tujuan dari hidup manusia': 'Tujuan hidup setiap manusia berbeda, tapi banyak yang percaya itu untuk mencari kebahagiaan dan makna.',
+                'bisakah kamu terbang': 'Aku tidak bisa terbang, tapi dengan teknologi, kita bisa mencapai tempat-tempat yang jauh dengan cepat.',
+                'apa pendapatmu tentang manusia': 'Manusia sangat kompleks dan penuh dengan emosi, yang membuat mereka unik di dunia ini.',
+                'kenapa hujan turun': 'Hujan turun karena uap air di atmosfer mengembun dan jatuh kembali ke bumi sebagai tetesan air.',
+                'apa itu pelangi': 'Pelangi adalah fenomena optik yang terjadi ketika cahaya terurai oleh tetesan air di atmosfer.',
+                  'siapa ilmuwan favoritmu': 'Aku tidak punya ilmuwan favorit, tapi banyak orang mengagumi Albert Einstein dan Isaac Newton.',
+                'apa itu teori relativitas': 'Teori relativitas adalah teori fisika yang dikembangkan oleh Albert Einstein yang menjelaskan bagaimana ruang dan waktu terhubung.',
+                'apa yang dimaksud dengan quantum computing': 'Quantum computing adalah jenis komputer yang memanfaatkan prinsip mekanika kuantum untuk memproses informasi lebih cepat daripada komputer konvensional.',
+                'apa itu blockchain': 'Blockchain adalah teknologi yang menyimpan data transaksi secara terdistribusi dan aman.',
+                'apa yang dimaksud dengan cryptocurrency': 'Cryptocurrency adalah mata uang digital yang menggunakan kriptografi untuk keamanan, contohnya Bitcoin.',
+                'apa manfaat dari belajar coding': 'Belajar coding memungkinkan kamu membuat aplikasi, website, dan memecahkan berbagai masalah menggunakan teknologi.',
+                'apa itu machine learning': 'Machine learning adalah teknik dalam kecerdasan buatan di mana komputer belajar dari data untuk meningkatkan kinerjanya.',
+                'apa itu big data': 'Big data adalah kumpulan data yang sangat besar dan kompleks sehingga sulit untuk diproses dengan alat tradisional.',
+                'siapa penemu internet': 'Internet dikembangkan oleh banyak orang, tapi konsep dasarnya dimulai oleh Tim Berners-Lee.',
+                'apa itu augmented reality': 'Augmented reality adalah teknologi yang menambahkan elemen virtual ke dunia nyata melalui perangkat seperti smartphone atau kacamata AR.',
+                'apa yang membuat teknologi 5G berbeda': 'Teknologi 5G menawarkan kecepatan data yang lebih tinggi dan latensi yang lebih rendah dibandingkan dengan teknologi 4G.',
+                'apa itu IoT': 'Internet of Things (IoT) adalah jaringan perangkat yang terhubung dan dapat berkomunikasi satu sama lain melalui internet.',
+                'apa itu VR': 'Virtual Reality (VR) adalah teknologi yang menciptakan simulasi lingkungan 3D yang dapat diinteraksi menggunakan perangkat khusus.',
+                'siapa presiden pertama indonesia': 'Presiden pertama Indonesia adalah Soekarno.',
+                'apa tujuan dari sistem operasi': 'Sistem operasi mengelola perangkat keras komputer dan menyediakan layanan dasar untuk perangkat lunak.',
+                'apa itu perangkat lunak': 'Perangkat lunak adalah sekumpulan instruksi atau kode yang dijalankan oleh komputer untuk melakukan tugas tertentu.',
+                'apa itu hardware': 'Hardware adalah komponen fisik dari komputer dan perangkat elektronik lainnya.',
+                'apa yang dimaksud dengan website': 'Website adalah kumpulan halaman web yang dapat diakses melalui internet.',
+                'apa itu SEO': 'SEO (Search Engine Optimization) adalah proses mengoptimalkan website agar lebih mudah ditemukan di mesin pencari.',
+                'apa itu email': 'Email adalah sistem komunikasi yang memungkinkan pengiriman pesan secara elektronik melalui internet.',
+                'siapa penulis novel terkenal': 'Beberapa penulis novel terkenal termasuk J.K. Rowling, George R.R. Martin, dan Agatha Christie.',
+                'apa itu cloud computing': 'Cloud computing adalah layanan komputasi yang disediakan melalui internet, memungkinkan akses ke sumber daya komputer secara fleksibel.',
+                'apa manfaat dari teknologi': 'Teknologi mempermudah kehidupan sehari-hari, meningkatkan efisiensi, dan membuka peluang baru.',
+                'siapa penemu telepon': 'Alexander Graham Bell adalah penemu telepon.',
+                'apa itu AI': 'AI (Artificial Intelligence) adalah kemampuan mesin untuk meniru kecerdasan manusia seperti pembelajaran dan pemecahan masalah.',
+                'apa manfaat dari smartphone': 'Smartphone menyediakan akses ke internet, komunikasi, hiburan, dan aplikasi produktivitas dalam satu perangkat.',
+                'apa itu aplikasi mobile': 'Aplikasi mobile adalah perangkat lunak yang dirancang untuk dijalankan pada perangkat seluler seperti smartphone dan tablet.',
+                'apa itu jaringan komputer': 'Jaringan komputer adalah kumpulan komputer yang terhubung untuk berbagi sumber daya dan informasi.',
+                'apa yang dimaksud dengan pengembangan web': 'Pengembangan web adalah proses membuat dan memelihara website.',
+                'apa itu hacking': 'Hacking adalah praktik mengakses sistem komputer secara tidak sah untuk memperoleh informasi atau merusak data.',
+                'apa itu firewall': 'Firewall adalah perangkat keamanan yang mengontrol akses antara jaringan internal dan eksternal.',
+                'apa itu data science': 'Data science adalah disiplin ilmu yang menggunakan metode statistik dan algoritma untuk menganalisis data.',
+                'siapa ilmuwan komputer terkenal': 'Beberapa ilmuwan komputer terkenal termasuk Alan Turing dan Ada Lovelace.',
+                'apa itu algoritma': 'Algoritma adalah serangkaian langkah-langkah logis yang digunakan untuk menyelesaikan suatu masalah.',
+                'apa manfaat dari teknologi informasi': 'Teknologi informasi membantu dalam mengelola, memproses, dan menyimpan informasi dengan efisien.',
+                'apa itu sistem informasi': 'Sistem informasi adalah kombinasi dari perangkat keras, perangkat lunak, data, dan prosedur yang digunakan untuk mengelola informasi.',
+                'apa itu digitalisasi': 'Digitalisasi adalah proses mengubah informasi dari format analog menjadi format digital.',
+                'apa itu enkripsi': 'Enkripsi adalah metode untuk mengamankan data dengan mengubahnya menjadi format yang tidak dapat dibaca tanpa kunci.',
+                'apa itu backup': 'Backup adalah salinan data yang dibuat untuk melindungi informasi dari kehilangan atau kerusakan.',
+                'apa itu VPN': 'VPN (Virtual Private Network) adalah teknologi yang membuat koneksi internet lebih aman dengan menyembunyikan alamat IP dan mengenkripsi data.'
+            };
+
+            const response = responses[transcript] || 'Perintah tidak dikenali.';
+            speakText(response);
+        }
+
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.onstart = function() {
+                document.getElementById('logo').classList.add('active');
+                document.getElementById('wave-animation').style.display = 'flex';
+            };
+            utterance.onend = function() {
+                document.getElementById('logo').classList.remove('active');
+                document.getElementById('wave-animation').style.display = 'none';
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function getWeather(city) {
+            const apiKey = 'daa5f78a98d2cdd3955fee0ac2de3694';
+            const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&lang=id`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        speakText('Maaf, saya tidak dapat menemukan cuaca untuk kota yang disebutkan.');
+                    } else {
+                        const temp = data.current.temp_c;
+                        const condition = data.current.condition.text;
+                        const windSpeed = data.current.wind_kph;
+                        const humidity = data.current.humidity;
+
+                        speakText(`Cuaca di ${city} saat ini ${temp} derajat Celsius dengan kondisi ${condition}. Kecepatan angin ${windSpeed} kilometer per jam dan kelembaban ${humidity} persen.`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    speakText('Terjadi kesalahan saat mendapatkan data cuaca.');
+                });
+        }
+    </script>
+</body>
+</html>
