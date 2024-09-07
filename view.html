@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lihat File</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: black;
+      color: #ecf0f1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 3em;
+      animation: fadeIn 2s ease-in-out;
+    }
+    .upload-container {
+      background-color: gray;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    label {
+      padding: 10px 20px;
+      background-color: green;
+      color: white;
+      font-size: 1.2em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+    label:hover {
+      background-color: #c0392b;
+    }
+    svg {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border: 2px solid #e74c3c;
+      border-radius: 10px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .anim-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .loader {
+      width: 80px;
+      height: 80px;
+      border: 10px solid #f3f3f3;
+      border-top: 10px solid #e74c3c;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Silahkan Upload file<br>svg/cdr</h1>
+  <div class="upload-container">
+    <input type="file" id="file-input" accept=".svg" />
+    <label for="file-input">Upload SVG</label>
+    <div id="svg-container" class="anim-container"></div>
+    <div id="loader" class="loader" style="display: none;"></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const svgContainer = document.getElementById('svg-container');
+    const loader = document.getElementById('loader');
+
+    fileInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file && file.type === 'image/svg+xml') {
+        const reader = new FileReader();
+        loader.style.display = 'block';
+        reader.onload = function(e) {
+          svgContainer.innerHTML = e.target.result;
+          loader.style.display = 'none';
+        }
+        reader.readAsText(file);
+      } else {
+        alert('Only SVG files are supported for preview.');
+      }
+    });
+  </script>
+</body>
+</html>
