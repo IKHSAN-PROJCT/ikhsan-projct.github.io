@@ -3,92 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visitor Data Display</title>
+  <title>Visitor Display</title>
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f0f0f0;
-      padding: 20px;
-      color: #333;
+      font-family: 'Arial', sans-serif;
+      background: #121212;
+      color: #e0e0e0;
       margin: 0;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 40px;
-    }
-    .visitor-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
     }
     .visitor {
-      background-color: #ffffff;
+      background: #1e1e1e;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      text-align: center;
-      transition: transform 0.3s;
+      margin-bottom: 20px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+      position: relative;
+      transition: transform 0.3s ease-in-out;
     }
     .visitor:hover {
-      transform: scale(1.05);
+      transform: scale(1.02);
     }
     .visitor img {
       width: 100%;
-      height: auto;
-      border-radius: 8px;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
     }
-    .visitor a {
-      color: #007bff;
+    .info {
+      margin-top: 10px;
+    }
+    .info p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    .info a {
+      color: #00bcd4;
       text-decoration: none;
-      font-weight: bold;
-      display: block;
-      margin: 10px 0;
     }
-    .visitor p {
-      margin: 10px 0;
-      color: #666;
+    .info a:hover {
+      text-decoration: underline;
+    }
+    .animation {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      animation: pulse 6s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.1); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 0.4; }
     }
     footer {
-      margin-top: 40px;
+      position: fixed;
+      bottom: 10px;
+      font-size: 14px;
+      color: #aaa;
+      width: 100%;
       text-align: center;
-      color: #777;
+    }
+
+    /* Media Queries */
+    @media (max-width: 600px) {
+      .info p {
+        font-size: 12px;
+      }
+      footer {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container" id="visitor-container">
+    <!-- Konten pengunjung akan dimuat di sini -->
+  </div>
 
-  <h1>Data Pengunjung</h1>
-  <div class="visitor-container" id="visitorData"></div>
-
-  <footer>&copy; 2024 Digital Clock Visitor System</footer>
+  <footer>Modern Visitor Display</footer>
 
   <script>
-    function displayVisitorData() {
-      const visitorDataDiv = document.getElementById('visitorData');
+    // Ambil data pengunjung dari localStorage
+    function loadVisitors() {
       const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
+      const container = document.getElementById('visitor-container');
 
-      visitors.forEach((visitor, index) => {
+      if (visitors.length === 0) {
+        container.innerHTML = '<p style="color: #aaa; text-align: center;">No visitors yet.</p>';
+        return;
+      }
+
+      visitors.forEach(visitor => {
         const visitorDiv = document.createElement('div');
-        visitorDiv.classList.add('visitor');
+        visitorDiv.className = 'visitor';
+        
+        const img = document.createElement('img');
+        img.src = visitor.cameraImage;
+        img.alt = 'Visitor Photo';
+        
+        const info = document.createElement('div');
+        info.className = 'info';
+        
+        const time = document.createElement('p');
+        time.textContent = `Timestamp: ${new Date(visitor.timestamp).toLocaleString()}`;
+        
+        const location = document.createElement('p');
+        location.innerHTML = `Location: <a href="${visitor.location}" target="_blank">View on Maps</a> (Lat: ${visitor.latitude}, Lon: ${visitor.longitude})`;
+        
+        info.appendChild(time);
+        info.appendChild(location);
+        visitorDiv.appendChild(img);
+        visitorDiv.appendChild(info);
 
-        visitorDiv.innerHTML = `
-          <p>🖼️ Gambar ${index + 1}</p>
-          <img src="${visitor.cameraImage}" alt="Visitor Image">
-          <a href="${visitor.location}" target="_blank">Lihat Lokasi di Google Maps</a>
-          <p><strong>Latitude:</strong> ${visitor.latitude}</p>
-          <p><strong>Longitude:</strong> ${visitor.longitude}</p>
-          <p><strong>Tanggal Kunjungan:</strong> ${new Date(visitor.timestamp).toLocaleString()}</p>
-        `;
-
-        visitorDataDiv.appendChild(visitorDiv);
+        const animationDiv = document.createElement('div');
+        animationDiv.className = 'animation';
+        
+        visitorDiv.appendChild(animationDiv);
+        container.appendChild(visitorDiv);
       });
     }
 
-    window.onload = () => {
-      displayVisitorData();
-    };
+    window.onload = loadVisitors;
   </script>
-  
 </body>
 </html>
