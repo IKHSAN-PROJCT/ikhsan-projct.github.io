@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Display</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 5px solid #ff5f6d;
+        }
+        .location {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gambar Selfie & Lokasi Kamu</h1>
+    <img id="selfieImage" src="" alt="Selfie" />
+    <div class="location" id="location"></div>
+
+    <script>
+        // Ambil gambar dari localStorage
+        const imgElement = document.getElementById('selfieImage');
+        const locationElement = document.getElementById('location');
+        const imageData = localStorage.getItem('selfieImage');
+        const userLocation = localStorage.getItem('userLocation');
+
+        if (imageData) {
+            imgElement.src = imageData;
+        } else {
+            imgElement.alt = 'Tidak ada gambar yang tersedia.';
+        }
+
+        if (userLocation) {
+            const { latitude, longitude } = JSON.parse(userLocation);
+            locationElement.innerHTML = `Lokasi kamu: Latitude ${latitude}, Longitude ${longitude}`;
+        } else {
+            locationElement.innerHTML = 'Lokasi tidak tersedia.';
+        }
+    </script>
+</body>
+</html>
