@@ -2,260 +2,353 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emo Mimo Watching TV Enhanced</title>
 <style>
-    body {
-        margin: 0;
-        background: black;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    background: black;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: sans-serif;
+}
 
-    /* ===== EMO FACE ===== */
-    .emo-face {
-        position: relative;
-        width: 90vw;
-        max-width: 350px;
-        aspect-ratio: 1 / 1;
-        z-index: 5;
-        transition: transform 0.3s ease;
-    }
+/* ===== EMO FACE ===== */
+.emo-face {
+    position: relative;
+    width: 90vw;
+    max-width: 350px;
+    aspect-ratio: 1 / 1;
+    z-index: 5;
+    transition: transform 0.3s ease;
+}
 
-    /* MATA */
-    .eye {
-        position: absolute;
-        width: 30%;
-        height: 30%;
-        background: cyan;
-        border-radius: 45% 45% 40% 40%;
-        top: 18%;
-        filter: drop-shadow(0 0 15px cyan);
-        transition: all 0.05s linear;
-    }
-    .eye.left { left: 10%; }
-    .eye.right { right: 10%; }
+/* EYES */
+.eye {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    background: cyan;
+    border-radius: 45% 45% 40% 40%;
+    top: 18%;
+    filter: drop-shadow(0 0 15px cyan);
+    transition: all 0.1s linear;
+}
+.eye.left { left: 10%; }
+.eye.right { right: 10%; }
+.eye.look-tv { transform: translateY(25%) scaleY(0.85); }
 
-    /* Lihat TV */
-    .eye.look-tv {
-        transform: translateY(25%) scaleY(0.85);
-    }
+/* MOUTH */
+.mouth {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 4%;
+    background: cyan;
+    border-radius: 20px;
+    box-shadow: 0 0 14px cyan;
+    transition: all 0.1s linear;
+    animation: mouthThinGlow 3s infinite ease-in-out;
+}
 
-    /* MULUT */
-    .mouth {
-        position: absolute;
-        bottom: 20%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40%;
-        height: 4%;
-        background: cyan;
-        border-radius: 20px;
-        box-shadow: 0 0 14px cyan;
-        transition: all 0.1s linear;
-        animation: mouthThinGlow 3s infinite ease-in-out;
-    }
+/* ===== TV BODY ===== */
+.tv-body {
+    position: absolute;
+    width: 250px;
+    height: 180px;
+    bottom: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, #1a0033, #000033); /* Ungu gelap ke biru tua */
+    border: 6px solid #6a0dad; /* Border ungu */
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(106,13,173,0.6), inset 0 0 60px rgba(106,13,173,0.25); /* Glow lebih terang */
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
 
-    /* ===== TV BODY ===== */
-    .tv-body {
-        position: absolute;
-        width: 320px;
-        height: 240px;
-        bottom: -10%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(145deg, #1a1a1a, #000);
-        border: 6px solid #0ff;
-        border-radius: 20px;
-        box-shadow: 0 0 25px rgba(0,255,255,0.4), inset 0 0 40px rgba(0,255,255,0.15);
-        z-index: 1;
-        opacity: 0; /* Sembunyikan TV Body awal */
-        transition: opacity 0.5s ease;
-    }
+/* ===== BACK PANEL ===== */
+.tv-back {
+    position: absolute;
+    width: 220px;
+    height: 160px;
+    background: #0b0033; /* Ungu tua */
+    border-radius: 18px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 0 40px rgba(106,13,173,0.2), 0 0 40px rgba(106,13,173,0.25); /* Glow ungu */
+}
 
-    /* BACK PANEL */
-    .tv-back {
-        position: absolute;
-        width: 290px;
-        height: 220px;
-        background: #0b0b0b;
-        border-radius: 18px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: inset 0 0 40px rgba(0,255,255,0.2), 0 0 40px rgba(0,255,255,0.25);
-    }
+/* ===== ANTENNA ===== */
+.antenna {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    transform: translateX(-50%);
+}
+.antenna::before,
+.antenna::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 45px;
+    background: #6a0dad; /* Ungu */
+    top: 0;
+    transform-origin: bottom;
+    box-shadow: 0 0 15px rgba(106,13,173,0.7);
+}
+.antenna::before { left: 10px; transform: rotate(-30deg); }
+.antenna::after { right: 10px; transform: rotate(30deg); }
+.antenna-ball {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #6a0dad; /* Ungu */
+    border-radius: 50%;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 25px rgba(166,77,255,0.9); /* Lebih terang */
+}
 
-    /* ===== ANTENNA ===== */
-    .antenna {
-        position: absolute;
-        top: -45px;
-        left: 50%;
-        width: 80px;
-        height: 80px;
-        transform: translateX(-50%);
-    }
+/* ===== TV SCREEN ===== */
+.tv-box {
+    position: absolute;
+    width: 55%;
+    height: 30%;
+    bottom: -15%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    background: linear-gradient(160deg, rgba(106,13,173,0.5), rgba(0,0,139,0.2)); /* Ungu ke biru tua lebih terang */
+    border: 4px solid #6a0dad; /* Border ungu */
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    z-index: 8;
+    box-shadow: 0 0 60px rgba(106,13,173,0.7), inset 0 0 80px rgba(106,13,173,0.3); /* Glow super terang */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.tv-box .tv-glitch {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent 85%, rgba(106,13,173,0.2) 100%); /* Glitch ungu lebih terang */
+    mix-blend-mode: screen;
+    opacity: 0.15;
+    animation: glitchFlicker 0.05s infinite alternate;
+}
 
-    .antenna::before,
-    .antenna::after {
-        content: "";
-        position: absolute;
-        width: 3px;
-        height: 60px;
-        background: #0ff;
-        top: 0;
-        transform-origin: bottom;
-        box-shadow: 0 0 15px rgba(0,255,255,0.7);
-    }
+/* ===== TV LIGHT CONE SUPER TERANG ===== */
+.tv-light-cone {
+    position: absolute;
+    width: 500px;
+    height: 180px;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-15deg);
+    background: radial-gradient(ellipse 70% 50% at center, rgba(106,13,173,0.8) 0%, rgba(0,0,139,0.05) 100%);
+    pointer-events: none;
+    z-index: 3;
+    filter: blur(50px);
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    mix-blend-mode: screen;
+    animation: tvLightPulse 1.5s infinite ease-in-out;
+}
 
-    .antenna::before { left: 15px; transform: rotate(-30deg); }
-    .antenna::after { right: 15px; transform: rotate(30deg); }
+/* ===== TV FLASH SUPER TERANG ===== */
+.tv-flash::before {
+    background: #a64dff; /* Ungu lebih cerah */
+    box-shadow: 0 0 25px rgba(166,77,255,0.9);
+}
 
-    .antenna-ball {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        background: #0ff;
-        border-radius: 50%;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        box-shadow: 0 0 15px rgba(0,255,255,0.9);
-    }
+/* BALON LIRIK */
+.lyric-bubble {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background: rgba(0,255,255,0.2);
+    border: 1px solid cyan;
+    border-radius: 12px;
+    color: cyan;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    text-align: center;
+    filter: drop-shadow(0 0 10px cyan);
+    transition: opacity 0.5s, transform 0.5s;
+}
 
-    /* ===== TV SCREEN ===== */
-    .tv-box {
-        position: absolute;
-        width: 60%;
-        height: 35%;
-        bottom: -15%;
-        left: 50%;
-        transform: translateX(-50%) scale(0.8); /* Skala awal kecil */
-        background: linear-gradient(160deg, rgba(0,255,255,0.3), rgba(0,255,255,0.1));
-        border: 4px solid cyan;
-        border-radius: 12px;
-        overflow: hidden;
-        opacity: 0; /* Sembunyikan awal */
-        z-index: 8;
-        box-shadow: 0 0 30px rgba(0,255,255,0.4), inset 0 0 50px rgba(0,255,255,0.15);
-        transition: opacity 0.5s ease, transform 0.5s ease;
-    }
+/* HEARTS */
+.heart {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: rgba(0,255,255,0.6);
+    transform: rotate(-45deg);
+    border-radius: 2px;
+    opacity: 0;
+    pointer-events: none;
+}
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: rgba(0,255,255,0.6);
+    border-radius: 50%;
+}
+.heart::before { top: -6px; left: 0; }
+.heart::after { left: 6px; top: 0; }
 
-    /* SCANLINES & subtle static */
-    .tv-box::after {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: repeating-linear-gradient(
-            to bottom,
-            rgba(0,255,255,0.08) 0 1px,
-            rgba(0,255,255,0.02) 1px 3px
-        );
-        mix-blend-mode: screen;
-        animation: scanline 4s linear infinite;
-    }
+/* ===== TV LIGHT CONE ===== */
+/* ===== TV LIGHT CONE (Enhanced) ===== */
+.tv-light-cone {
+    position: absolute;
+    width: 400px; /* Lebar lebih besar untuk cahaya menyebar ke samping */
+    height: 150px; /* Tinggi lebih kecil */
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-15deg);
+    background: radial-gradient(ellipse 70% 50% at center, rgba(0,255,255,0.4) 0%, rgba(0,255,255,0.05) 100%);
+    pointer-events: none;
+    z-index: 3;
+    filter: blur(40px);
+    opacity: 0.5;
+    transition: opacity 0.5s ease;
+    mix-blend-mode: screen;
+    animation: tvLightPulse 2s infinite ease-in-out;
+}
 
-    /* GLOW effect */
-    .tv-glow {
-        position: absolute;
-        width: 250%;
-        height: 250%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) rotate(1deg);
-        background: radial-gradient(
-            circle,
-            rgba(0,255,255,0.6),
-            rgba(0,255,255,0.25),
-            rgba(0,255,255,0.1),
-            transparent 90%
-        );
-        filter: blur(120px) contrast(1.5);
-        opacity: 0; /* Sembunyikan awal */
-        mix-blend-mode: screen;
-        pointer-events: none;
-        transition: opacity 0.5s ease;
-        z-index: 2;
-    }
+/* ===== Z PETIR ===== */
+.tv-flash {
+    position: absolute;
+    width: 12px;
+    height: 24px;
+    pointer-events: none;
+    z-index: 9;
+    opacity: 0;
+    background: transparent;
+    transform-origin: top left;
+    filter: drop-shadow(0 0 10px cyan);
+}
+.tv-flash::before {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: cyan;
+    clip-path: polygon(
+        0% 0%, 100% 0%, 
+        40% 50%, 100% 50%, 
+        0% 100%, 40% 50%
+    );
+}
 
-    /* Subtle flicker/glitch overlay */
-    .tv-box .tv-glitch {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        background: linear-gradient(to right, transparent 85%, rgba(0,255,255,0.12) 100%);
-        mix-blend-mode: screen;
-        opacity: 0;
-        animation: glitchFlicker 0.1s infinite alternate;
-    }
+/* ===== KEYFRAMES ===== */
+@keyframes glitchFlicker {0%{opacity:0;transform:translateX(0);}25%{opacity:0.2;transform:translateX(-1px);}50%{opacity:0.05;transform:translateX(1px);}75%{opacity:0.15;transform:translateX(-2px);}100%{opacity:0;transform:translateX(0);}}
+@keyframes mouthThinGlow {0%,100%{box-shadow:0 0 10px cyan;}50%{box-shadow:0 0 22px cyan;}}
+@keyframes mouthLaugh {0%{transform:translateX(-50%) translateY(0) scaleY(1) scaleX(1);}20%{transform:translateX(-50%) translateY(-5px) scaleY(1.8) scaleX(1.4) rotate(-5deg);}40%{transform:translateX(-50%) translateY(-8px) scaleY(2) scaleX(1.6) rotate(5deg);}60%{transform:translateX(-50%) translateY(-6px) scaleY(1.9) scaleX(1.5) rotate(-5deg);}80%{transform:translateX(-50%) translateY(-4px) scaleY(1.7) scaleX(1.4) rotate(3deg);}100%{transform:translateX(-50%) translateY(0) scaleY(1) scaleX(1) rotate(0deg);}}
+@keyframes eyesLaugh {0%,100%{transform:scaleY(1);}50%{transform:scaleY(0.5);}}
+@keyframes floatHeart {0%{transform:translate(0,0) rotate(-45deg);opacity:0.8;}100%{transform:translate(var(--x,0px),-120px) rotate(-45deg);opacity:0;}}
+@keyframes tvLightPulse {
+    0%   { transform: translateX(-50%) rotate(-15deg) scale(0.9); opacity: 0.3; }
+    50%  { transform: translateX(-50%) rotate(-15deg) scale(1.1); opacity: 0.6; }
+    100% { transform: translateX(-50%) rotate(-15deg) scale(0.9); opacity: 0.3; }
+}
+/* ===== BATTERY MODE ===== */
+.battery-mode {
+    position: absolute;
+    width: 60%;
+    height: 35%;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid cyan;
+    border-radius: 12px;
+    box-shadow: 0 0 25px cyan, inset 0 0 30px rgba(0,255,255,0.4);
+    background: rgba(0,255,255,0.15);
+    display: none;
+}
 
-    /* ===== KEYFRAMES ===== */
-    @keyframes scanline {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100%); }
-    }
+.battery-fill {
+    height: 100%;
+    width: 20%;
+    background: cyan;
+    border-radius: 8px;
+    box-shadow: 0 0 20px cyan;
+    transition: width 0.4s ease-in-out;
+    animation: batteryPulse 1.8s infinite ease-in-out;
+}
 
-    @keyframes glitchFlicker {
-        0% { opacity: 0; transform: translateX(0); }
-        25% { opacity: 0.1; transform: translateX(-1px); }
-        50% { opacity: 0.05; transform: translateX(1px); }
-        75% { opacity: 0.08; transform: translateX(-2px); }
-        100% { opacity: 0; transform: translateX(0); }
-    }
+@keyframes batteryPulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+@keyframes yawnMouth {
+    0% { height: 4%; width: 40%; }
+    30% { height: 20%; width: 45%; }
+    60% { height: 28%; width: 50%; }
+    100% { height: 4%; width: 40%; }
+}
 
-    @keyframes mouthThinGlow {
-        0%, 100% { box-shadow: 0 0 10px cyan; }
-        50% { box-shadow: 0 0 22px cyan; }
-    }
-
-    @keyframes mouthLaugh {
-        0% { transform: translateX(-50%) translateY(0) scaleY(1) scaleX(1); }
-        20% { transform: translateX(-50%) translateY(-5px) scaleY(1.8) scaleX(1.4) rotate(-5deg); }
-        40% { transform: translateX(-50%) translateY(-8px) scaleY(2) scaleX(1.6) rotate(5deg); }
-        60% { transform: translateX(-50%) translateY(-6px) scaleY(1.9) scaleX(1.5) rotate(-5deg); }
-        80% { transform: translateX(-50%) translateY(-4px) scaleY(1.7) scaleX(1.4) rotate(3deg); }
-        100% { transform: translateX(-50%) translateY(0) scaleY(1) scaleX(1) rotate(0deg); }
-    }
-
-    @keyframes eyesLaugh {
-        0%, 100% { transform: scaleY(1); }
-        50% { transform: scaleY(0.5); }
-    }
-
-    @keyframes tvLightPulse {
-        0% { opacity: 0.10; }
-        50% { opacity: 0.50; }
-        100% { opacity: 0.12; }
-    }
-
+@keyframes yawnEyes {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.2); }
+    100% { transform: scaleY(1); }
+}
 </style>
 </head>
 <body>
 <div class="emo-face">
+    <div class="tv-light-cone"></div>
+    <div class="tv-flash"></div>
+
+    <!-- EYES -->
     <div class="eye left"></div>
     <div class="eye right"></div>
+
+    <!-- MOUTH -->
     <div class="mouth"></div>
 
-    <!-- TV Glow -->
     <div class="tv-glow"></div>
 
-    <!-- TV Screen -->
+    <!-- TV -->
     <div class="tv-box">
         <div class="tv-glitch"></div>
     </div>
 
-    <!-- TV Body & Antenna -->
     <div class="tv-body">
         <div class="tv-back"></div>
         <div class="antenna">
             <div class="antenna-ball"></div>
         </div>
     </div>
+
+    <div class="lyric-bubble"></div>
+
+    <!-- ★★★★★ BATTERY MODE (BARU) ★★★★★ -->
+    <div class="battery-mode">
+        <div class="battery-fill"></div>
+    </div>
+    <!-- ★★★★★ END BATTERY MODE ★★★★★ -->
+
 </div>
 
 <script>
@@ -265,155 +358,217 @@ const mouth = document.querySelector('.mouth');
 const tv = document.querySelector('.tv-box');
 const glow = document.querySelector('.tv-glow');
 const tvBody = document.querySelector('.tv-body');
+const tvCone = document.querySelector('.tv-light-cone');
+const lyricBubble = document.querySelector('.lyric-bubble');
 
-let idleScaleY = 1;
-let tickleScaleY = 1;
-let tickleRadius = "45% 45% 40% 40%";
-let isLaughing = false;
-let isWatchingTV = false;
-let idleTimeout;
-let tvExpressionInterval;
+let idleScaleY=1, tickleScaleY=1, tickleRadius="45% 45% 40% 40%";
+let tvExpressionInterval, moodInterval;
 
-// Render Mata
+// Eyes & Mouth
 function renderEyesMouth(offsetX=0, offsetY=0){
-    eyes.forEach(eye=>{
-        eye.style.transform = `translateX(${offsetX}%) translateY(${offsetY}%) scaleY(${idleScaleY*tickleScaleY})`;
-        eye.style.borderRadius = tickleRadius;
+    eyes.forEach(e=>{
+        e.style.transform = `translateX(${offsetX}%) translateY(${offsetY}%) scaleY(${idleScaleY*tickleScaleY})`;
+        e.style.borderRadius = tickleRadius;
     });
 }
+function yawnBeforeBattery(callback){
+    // Tampilkan bubble
+    lyricBubble.textContent = "Haaah... ngantuk~";
+    lyricBubble.style.opacity = 1;
 
-// Kedipan normal
+    // Animasi mulut
+    mouth.style.animation = "yawnMouth 1.5s ease-in-out";
+
+    // Animasi mata
+    eyes.forEach(e => {
+        e.style.animation = "yawnEyes 1.5s ease-in-out";
+    });
+
+    // Setelah selesai, jalankan callback (masuk battery mode)
+    setTimeout(() => {
+        lyricBubble.style.opacity = 0;
+        mouth.style.animation = "";
+        eyes.forEach(e => e.style.animation = "");
+        callback();
+    }, 1500);
+}
+// Blink
 function randomBlink(){
     setTimeout(()=>{
-        if(!isWatchingTV){
-            idleScaleY=0.1; renderEyesMouth();
-            setTimeout(()=>{ idleScaleY=1; renderEyesMouth(); },120);
-        }
+        idleScaleY=0.1; renderEyesMouth();
+        setTimeout(()=>{idleScaleY=1; renderEyesMouth();},120);
         randomBlink();
-    }, 2000 + Math.random()*4000);
+    },2000+Math.random()*4000);
 }
 randomBlink();
+// ===== CHARGING SYSTEM =====
+const batteryBox = document.querySelector('.battery-mode');
+const batteryFill = document.querySelector('.battery-fill');
 
-// Ketawa
+function enterBatteryMode(level = 1){
+    clearTimeout(idleTimeout);
+    stopWatchingTV();
+
+    face.style.opacity = 0.1;
+    eyes.forEach(e => e.style.opacity = 0);
+    mouth.style.opacity = 0;
+    tv.style.opacity = 0;
+    tvBody.style.opacity = 0;
+    tvCone.style.opacity = 0;
+
+    batteryBox.style.display = 'block';
+    batteryFill.style.width = (level * 100) + '%';
+}
+
+function exitBatteryMode(){
+    // Kembalikan EMO
+    face.style.opacity = 1;
+    eyes.forEach(e => e.style.opacity = 1);
+    mouth.style.opacity = 1;
+    tvCone.style.opacity = 0.5;
+
+    batteryBox.style.display = 'none';
+}
+
+navigator.getBattery().then(battery => {
+    function updateCharge(){
+        if(battery.charging){
+    yawnBeforeBattery(() => {
+        enterBatteryMode(battery.level);
+    });
+} else {
+            exitBatteryMode();
+        }
+    }
+
+    // Saat status charging berubah
+    battery.addEventListener('chargingchange', updateCharge);
+
+    // Saat persentase berubah
+    battery.addEventListener('levelchange', ()=>{
+        batteryFill.style.width = (battery.level * 100) + '%';
+    });
+
+    updateCharge();
+});
+// Ketawa hover
 function tickleFace(){
-    if(isWatchingTV) return;
-    isLaughing=true;
-    tickleScaleY=0.5;
-    tickleRadius="50% 50% 0 0";
+    tickleScaleY=0.5; tickleRadius="50% 50% 0 0";
     renderEyesMouth();
     mouth.style.animation="mouthLaugh 0.6s ease-in-out";
-    eyes.forEach(e=> e.style.animation="eyesLaugh 0.6s ease-in-out");
+    eyes.forEach(e=>e.style.animation="eyesLaugh 0.6s ease-in-out");
     setTimeout(()=>{
-        tickleScaleY=1;
-        tickleRadius="45% 45% 40% 40%";
+        tickleScaleY=1; tickleRadius="45% 45% 40% 40%";
         renderEyesMouth();
         mouth.style.animation="mouthThinGlow 3s infinite ease-in-out";
-        eyes.forEach(e=> e.style.animation="");
-        isLaughing=false;
-        resetIdleTimer();
+        eyes.forEach(e=>e.style.animation="");
     },600);
 }
-face.addEventListener('mouseenter',tickleFace);
-face.addEventListener('touchstart',tickleFace);
+face.addEventListener('mouseenter', tickleFace);
+face.addEventListener('touchstart', tickleFace);
 
-// Ekspresi TV acak
-function tvRandomExpression(){
-    if(!isWatchingTV) return;
-    eyes.forEach(e=> e.classList.remove("look-tv"));
-    const pick=Math.floor(Math.random()*5);
-    switch(pick){
-        case 0: eyes.forEach(e=> e.style.transform="translateY(25%) scaleY(0.6)"); break;
-        case 1: eyes.forEach(e=> e.style.transform="translateY(10%) scaleY(1.2)"); break;
-        case 2: eyes.forEach(e=> e.style.transform="translateX(-10%) translateY(25%)"); break;
-        case 3: eyes.forEach(e=> e.style.transform="translateX(10%) translateY(25%)"); break;
-        case 4: eyes.forEach(e=> e.style.transform="translateY(5%) scaleY(1.4)"); break;
-    }
-    setTimeout(()=>{
-        if(isWatchingTV){
-            eyes.forEach(e=> e.style.transform="");
-            eyes.forEach(e=> e.classList.add("look-tv"));
-        }
-    },350);
-}
-
-// Start watching TV (TV muncul)
+// TV Watching
 function startWatchingTV(){
-    if(isLaughing) return;
-    isWatchingTV=true;
-    tv.style.opacity=1;
-    tv.style.transform="translateX(-50%) scale(1)";
-    tvBody.style.opacity=1;
-    glow.style.opacity=1;
-    glow.style.animation="tvLightPulse 3s infinite ease-in-out";
-    mouth.style.opacity=0;
-    mouth.style.animation="";
-    eyes.forEach(e=> e.classList.add("look-tv"));
-    tvExpressionInterval=setInterval(tvRandomExpression,2000 + Math.random()*2000);
+    tv.style.opacity = 1;
+    tv.style.transform = "translateX(-50%) scale(1)";
+    tvBody.style.opacity = 1;
+    glow.style.opacity = 1;
+    glow.style.animation = "tvLightPulse 3s infinite ease-in-out";
+    mouth.style.opacity = 0;
+    tvCone.style.opacity = 1;
+    eyes.forEach(e => e.classList.add("look-tv"));
+
+    function spawnFlash(){
+        const flash = document.createElement('div');
+        flash.className = 'tv-flash';
+        const tvRect = tv.getBoundingClientRect();
+        flash.style.left = `${tvRect.left + tvRect.width * (0.1 + Math.random()*0.8)}px`;
+        flash.style.top = `${tvRect.top - tvRect.height * (0.1 + Math.random()*0.2)}px`;
+        flash.style.opacity = 1;
+        flash.style.transform = `scale(${0.5 + Math.random()}) rotate(${Math.random()*30-15}deg)`;
+        document.body.appendChild(flash);
+        setTimeout(()=>{
+            flash.style.opacity = 0;
+            flash.remove();
+        }, 200 + Math.random()*300);
+    }
+
+    tvExpressionInterval = setInterval(()=>{
+        // Mata bergerak acak ke arah TV
+        eyes.forEach(e=>{
+            const randX = Math.random()*15 - 7;
+            const randY = Math.random()*10 + 20;
+            const randScale = 0.8 + Math.random()*0.2;
+            e.style.transform = `translateX(${randX}%) translateY(${randY}%) scaleY(${randScale})`;
+        });
+        // Mulut random subtle
+        const randHeight = 4 + Math.random()*3;
+        const randWidth = 35 + Math.random()*10;
+        mouth.style.height = `${randHeight}%`;
+        mouth.style.width = `${randWidth}%`;
+        // Random flash
+        if(Math.random() < 0.4) spawnFlash();
+    }, 500);
 }
 
-// Stop watching TV (TV hilang)
+// Stop TV
 function stopWatchingTV(){
-    isWatchingTV=false;
-    clearInterval(tvExpressionInterval);
-    mouth.style.opacity=1;
+    tvCone.style.opacity = 0;
+    mouth.style.opacity=1; mouth.style.height="4%"; mouth.style.width="40%";
     mouth.style.animation="mouthThinGlow 3s infinite ease-in-out";
-    eyes.forEach(e=>{
-        e.classList.remove("look-tv");
-        e.style.transform="";
-    });
-    tv.style.opacity=0;
-    tv.style.transform="translateX(-50%) scale(0.8)";
-    tvBody.style.opacity=0;
-    glow.style.opacity=0;
-    glow.style.animation="";
+    eyes.forEach(e=>{e.classList.remove("look-tv"); e.style.transform="";});
+    tv.style.opacity=0; tv.style.transform="translateX(-50%) scale(0.8)";
+    tvBody.style.opacity=0; glow.style.opacity=0; glow.style.animation="";
+    clearInterval(tvExpressionInterval);
 }
 
-// Idle timer
+// Random Mood
+function randomMood(){
+    const moods=["sleep","eat","music","idle"];
+    const mood=moods[Math.floor(Math.random()*moods.length)];
+    if(mood==="sleep"){ idleScaleY=0.2; renderEyesMouth(); mouth.style.width="30%"; mouth.style.height="2%"; lyricBubble.textContent="Zzz..."; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
+    else if(mood==="eat"){ mouth.style.width="30%"; mouth.style.height="6%"; lyricBubble.textContent="Nom Nom!"; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
+    else if(mood==="music"){ const randHeight=4+Math.random()*3; const randWidth=35+Math.random()*10; mouth.style.height=`${randHeight}%`; mouth.style.width=`${randWidth}%`; lyricBubble.textContent="La la la~"; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
+    else { idleScaleY=1; renderEyesMouth(); mouth.style.width="40%"; mouth.style.height="4%"; }
+}
+moodInterval=setInterval(randomMood,7000);
+
+// Idle Timer
+let idleTimeout;
 function resetIdleTimer(){
     clearTimeout(idleTimeout);
     stopWatchingTV();
-    idleTimeout=setTimeout(startWatchingTV,5000);
+    idleTimeout = setTimeout(()=>{
+        startWatchingTV();
+    }, 15000);
 }
-
 face.addEventListener('mouseenter', resetIdleTimer);
 face.addEventListener('touchstart', resetIdleTimer);
-
 resetIdleTimer();
 
-// ===== VOICE COMMAND =====
-const synth = window.speechSynthesis;
-const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-if(recognition){
-    const voiceRec = new recognition();
-    voiceRec.continuous = true;
-    voiceRec.interimResults = false;
-    voiceRec.lang = 'id-ID';
-
-    voiceRec.onresult = (event) => {
-        for(let i = event.resultIndex; i < event.results.length; i++){
-            if(event.results[i].isFinal){
-                const transcript = event.results[i][0].transcript.toLowerCase().trim();
-                console.log("Terdeteksi suara:", transcript);
-
-                if(transcript.includes("hei mimo")){
-                    // reset ke idle
-                    stopWatchingTV();
-                    // respon TTS
-                    const utterThis = new SpeechSynthesisUtterance("Iya? Ada apa?");
-                    utterThis.lang = 'id-ID';
-                    synth.speak(utterThis);
-                }
-            }
-        }
+// Heart animation
+function spawnHearts(){
+    for(let i=0;i<5;i++){
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.style.left = `${40 + Math.random()*20}%`;
+        heart.style.bottom = '20%';
+        heart.style.setProperty('--x', `${Math.random()*40-20}px`);
+        face.appendChild(heart);
+        heart.style.animation = `floatHeart ${3 + Math.random()*2}s forwards`;
+        setTimeout(()=>{ heart.remove(); }, 5000);
     }
-
-    voiceRec.onerror = (e) => console.error("Voice recognition error:", e);
-    voiceRec.onend = () => voiceRec.start();
-    voiceRec.start();
-}else{
-    console.warn("Browser tidak mendukung SpeechRecognition API");
 }
+setInterval(spawnHearts,4000);
+
+// Flicker TV Cone hidup
+function flickerCone() {
+    const flickerOpacity = 0.3 + Math.random() * 0.5;
+    const flickerScale = 0.8 + Math.random() * 0.4;
+    tvCone.style.opacity = flickerOpacity;
+    tvCone.style.transform = `translateX(-50%) rotate(-15deg) scale(${flickerScale})`;
+}
+setInterval(flickerCone, 150);
 
 </script>
 </body>
