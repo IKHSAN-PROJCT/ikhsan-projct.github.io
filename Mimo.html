@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emo Mimo Watching TV Enhanced</title>
+<title>Emo By sanz</title>
 <style>
 body {
     margin: 0;
@@ -27,6 +27,7 @@ body {
 
 /* EYES */
 .eye {
+    transition: transform 0.25s ease;
     position: absolute;
     width: 30%;
     height: 30%;
@@ -34,11 +35,21 @@ body {
     border-radius: 45% 45% 40% 40%;
     top: 18%;
     filter: drop-shadow(0 0 15px cyan);
-    transition: all 0.1s linear;
+    transition: transform 0.25s ease;   /* agar gerakan smooth */
 }
-.eye.left { left: 10%; }
-.eye.right { right: 10%; }
-.eye.look-tv { transform: translateY(25%) scaleY(0.85); }
+
+.eye.left { 
+    left: 10%; 
+}
+
+.eye.right { 
+    right: 10%; 
+}
+
+/* ■ MODE LIHAT TV */
+.eye.look-tv { 
+    transform: translateY(25%) scaleY(0.85); 
+}
 
 /* MOUTH */
 .mouth {
@@ -313,13 +324,130 @@ body {
     50% { transform: scaleY(0.2); }
     100% { transform: scaleY(1); }
 }
+/* ==== BOW STRING & ARROW ==== */
+.bow-container {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: 0.3s ease;
+}
+
+/* Bow curve */
+.bow {
+    position: absolute;
+    left: 10%;
+    top: 50%;
+    width: 8px;
+    height: 180px;
+    background: cyan;
+    border-radius: 50px;
+    transform: translateY(-50%) rotate(-12deg);
+    box-shadow: 0 0 20px cyan;
+}
+
+/* Arrow */
+.arrow {
+    position: absolute;
+    width: 120px;
+    height: 4px;
+    background: cyan;
+    top: 50%;
+    left: 18%;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    box-shadow: 0 0 15px cyan;
+}
+
+.arrow::after {
+    content: "";
+    position: absolute;
+    right: -10px;
+    top: -4px;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 12px solid cyan;
+    filter: drop-shadow(0 0 10px cyan);
+}
+
+/* String */
+.string {
+    position: absolute;
+    width: 2px;
+    height: 180px;
+    background: cyan;
+    left: 13%;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 15px cyan;
+}
+
+/* Hand pulling string */
+.string-handle {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: cyan;
+    border-radius: 50%;
+    left: 13%;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 20px cyan;
+    transition: transform 0.25s ease;
+}
+/* Shake kecil biar ketawa lebih hidup */
+@keyframes laughShake {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-3px); }
+  50% { transform: translateY(2px); }
+  75% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+.laughShake {
+  animation: laughShake 0.25s infinite;
+}
+
+/* Mulut membuka besar lalu menutup cepat */
+@keyframes laughMouthOpen {
+  0% { transform: scaleY(0.3); }
+  40% { transform: scaleY(1.2); }
+  70% { transform: scaleY(0.6); }
+  100% { transform: scaleY(1); }
+}
+
+.laughMouth {
+  animation: laughMouthOpen 0.8s ease-in-out;
+}
+
+/* Mata menyipit + sedikit goyang */
+@keyframes laughEye {
+  0% { transform: scaleY(1); }
+  40% { transform: scaleY(0.4); }
+  70% { transform: scaleY(0.7); }
+  100% { transform: scaleY(1); }
+}
+
+.laughEyes {
+  animation: laughEye 0.8s ease-in-out;
+}
 </style>
 </head>
 <body>
 <div class="emo-face">
     <div class="tv-light-cone"></div>
     <div class="tv-flash"></div>
-
+<!-- BOW STRING & ARROW ANIMATION -->
+<div class="bow-container">
+    <div class="bow"></div>
+    <div class="arrow"></div>
+    <div class="string"></div>
+    <div class="string-handle"></div>
+</div>
     <!-- EYES -->
     <div class="eye left"></div>
     <div class="eye right"></div>
@@ -347,6 +475,8 @@ body {
     <div class="battery-mode">
         <div class="battery-fill"></div>
     </div>
+  
+</div>
     <!-- ★★★★★ END BATTERY MODE ★★★★★ -->
 
 </div>
@@ -363,6 +493,86 @@ const lyricBubble = document.querySelector('.lyric-bubble');
 
 let idleScaleY=1, tickleScaleY=1, tickleRadius="45% 45% 40% 40%";
 let tvExpressionInterval, moodInterval;
+// ====== EAR TRANSFORMATION MODE ======
+let earMode = false;
+const bigEars = document.querySelector('.big-ears');
+
+function activateEarMode() {
+    if (earMode) return;
+    earMode = true;
+
+    stopWatchingTV();
+    clearInterval(moodInterval);
+
+    face.classList.add("face-ear-mode");
+
+    lyricBubble.textContent = "Mendengarkan...";
+    lyricBubble.style.opacity = 1;
+
+    startVoiceRecognition();
+}
+
+function deactivateEarMode() {
+    earMode = false;
+    face.classList.remove("face-ear-mode");
+
+    lyricBubble.style.opacity = 0;
+
+    moodInterval = setInterval(randomMood, 7000);
+}
+
+// Long press
+let longPressTimer;
+face.addEventListener("mousedown", () => {
+    longPressTimer = setTimeout(activateEarMode, 600);
+});
+face.addEventListener("mouseup", () => clearTimeout(longPressTimer));
+
+face.addEventListener("touchstart", () => {
+    longPressTimer = setTimeout(activateEarMode, 600);
+});
+face.addEventListener("touchend", () => clearTimeout(longPressTimer));
+
+
+// ====== VOICE COMMAND SYSTEM ======
+function startVoiceRecognition() {
+    if (!("webkitSpeechRecognition" in window)) {
+        lyricBubble.textContent = "Browser tidak support voice";
+        setTimeout(()=> lyricBubble.style.opacity=0,1500);
+        deactivateEarMode();
+        return;
+    }
+
+    const rec = new webkitSpeechRecognition();
+    rec.lang = "id-ID";
+    rec.continuous = false;
+
+    rec.onstart = () => {
+        lyricBubble.textContent = "Aku mendengarkan...";
+    };
+
+    rec.onresult = (e) => {
+        let speech = e.results[0][0].transcript.toLowerCase();
+
+        lyricBubble.textContent = "Kamu bilang: " + speech;
+
+        if (speech.includes("ketawa")) tickleFace();
+        if (speech.includes("nonton")) startWatchingTV();
+        if (speech.includes("tidur")) {
+            idleScaleY = 0.2;
+            renderEyesMouth();
+            mouth.style.width="20%";
+        }
+
+        setTimeout(()=> lyricBubble.style.opacity=0,2000);
+    };
+
+    rec.onend = () => {
+        deactivateEarMode();
+    };
+
+    rec.start();
+}
 
 // Eyes & Mouth
 function renderEyesMouth(offsetX=0, offsetY=0){
@@ -371,20 +581,17 @@ function renderEyesMouth(offsetX=0, offsetY=0){
         e.style.borderRadius = tickleRadius;
     });
 }
+
 function yawnBeforeBattery(callback){
-    // Tampilkan bubble
     lyricBubble.textContent = "Haaah... ngantuk~";
     lyricBubble.style.opacity = 1;
 
-    // Animasi mulut
     mouth.style.animation = "yawnMouth 1.5s ease-in-out";
 
-    // Animasi mata
     eyes.forEach(e => {
         e.style.animation = "yawnEyes 1.5s ease-in-out";
     });
 
-    // Setelah selesai, jalankan callback (masuk battery mode)
     setTimeout(() => {
         lyricBubble.style.opacity = 0;
         mouth.style.animation = "";
@@ -392,6 +599,7 @@ function yawnBeforeBattery(callback){
         callback();
     }, 1500);
 }
+
 // Blink
 function randomBlink(){
     setTimeout(()=>{
@@ -401,7 +609,8 @@ function randomBlink(){
     },2000+Math.random()*4000);
 }
 randomBlink();
-// ===== CHARGING SYSTEM =====
+
+// ===== BATTERY MODE =====
 const batteryBox = document.querySelector('.battery-mode');
 const batteryFill = document.querySelector('.battery-fill');
 
@@ -421,7 +630,6 @@ function enterBatteryMode(level = 1){
 }
 
 function exitBatteryMode(){
-    // Kembalikan EMO
     face.style.opacity = 1;
     eyes.forEach(e => e.style.opacity = 1);
     mouth.style.opacity = 1;
@@ -433,39 +641,52 @@ function exitBatteryMode(){
 navigator.getBattery().then(battery => {
     function updateCharge(){
         if(battery.charging){
-    yawnBeforeBattery(() => {
-        enterBatteryMode(battery.level);
-    });
-} else {
+            yawnBeforeBattery(() => {
+                enterBatteryMode(battery.level);
+            });
+        } else {
             exitBatteryMode();
         }
     }
 
-    // Saat status charging berubah
     battery.addEventListener('chargingchange', updateCharge);
-
-    // Saat persentase berubah
     battery.addEventListener('levelchange', ()=>{
         batteryFill.style.width = (battery.level * 100) + '%';
     });
 
     updateCharge();
 });
-// Ketawa hover
-function tickleFace(){
-    tickleScaleY=0.5; tickleRadius="50% 50% 0 0";
+
+// Ketawa
+function tickleFace() {
+    if (face.classList.contains("laughing")) return;
+    face.classList.add("laughing");
+
+    tickleScaleY = 0.3;
+    tickleRadius = "60% 60% 0 0";
     renderEyesMouth();
-    mouth.style.animation="mouthLaugh 0.6s ease-in-out";
-    eyes.forEach(e=>e.style.animation="eyesLaugh 0.6s ease-in-out");
-    setTimeout(()=>{
-        tickleScaleY=1; tickleRadius="45% 45% 40% 40%";
+
+    face.classList.add("laughShake");
+    mouth.classList.add("laughMouth");
+    eyes.forEach(e => e.classList.add("laughEyes"));
+
+    setTimeout(() => {
+        tickleScaleY = 1;
+        tickleRadius = "45% 45% 40% 40%";
         renderEyesMouth();
-        mouth.style.animation="mouthThinGlow 3s infinite ease-in-out";
-        eyes.forEach(e=>e.style.animation="");
-    },600);
+
+        face.classList.remove("laughShake");
+        mouth.classList.remove("laughMouth");
+        eyes.forEach(e => e.classList.remove("laughEyes"));
+
+        face.classList.remove("laughing");
+
+        mouth.style.animation = "mouthThinGlow 3s infinite ease-in-out";
+    }, 900);
 }
-face.addEventListener('mouseenter', tickleFace);
-face.addEventListener('touchstart', tickleFace);
+
+face.addEventListener("mouseenter", tickleFace);
+face.addEventListener("touchstart", tickleFace);
 
 // TV Watching
 function startWatchingTV(){
@@ -494,24 +715,22 @@ function startWatchingTV(){
     }
 
     tvExpressionInterval = setInterval(()=>{
-        // Mata bergerak acak ke arah TV
         eyes.forEach(e=>{
             const randX = Math.random()*15 - 7;
             const randY = Math.random()*10 + 20;
             const randScale = 0.8 + Math.random()*0.2;
             e.style.transform = `translateX(${randX}%) translateY(${randY}%) scaleY(${randScale})`;
         });
-        // Mulut random subtle
+
         const randHeight = 4 + Math.random()*3;
         const randWidth = 35 + Math.random()*10;
         mouth.style.height = `${randHeight}%`;
         mouth.style.width = `${randWidth}%`;
-        // Random flash
+
         if(Math.random() < 0.4) spawnFlash();
     }, 500);
 }
 
-// Stop TV
 function stopWatchingTV(){
     tvCone.style.opacity = 0;
     mouth.style.opacity=1; mouth.style.height="4%"; mouth.style.width="40%";
@@ -526,10 +745,32 @@ function stopWatchingTV(){
 function randomMood(){
     const moods=["sleep","eat","music","idle"];
     const mood=moods[Math.floor(Math.random()*moods.length)];
-    if(mood==="sleep"){ idleScaleY=0.2; renderEyesMouth(); mouth.style.width="30%"; mouth.style.height="2%"; lyricBubble.textContent="Zzz..."; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
-    else if(mood==="eat"){ mouth.style.width="30%"; mouth.style.height="6%"; lyricBubble.textContent="Nom Nom!"; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
-    else if(mood==="music"){ const randHeight=4+Math.random()*3; const randWidth=35+Math.random()*10; mouth.style.height=`${randHeight}%`; mouth.style.width=`${randWidth}%`; lyricBubble.textContent="La la la~"; lyricBubble.style.opacity=1; setTimeout(()=>{lyricBubble.style.opacity=0;},2000); }
-    else { idleScaleY=1; renderEyesMouth(); mouth.style.width="40%"; mouth.style.height="4%"; }
+    if(mood==="sleep"){ 
+        idleScaleY=0.2; renderEyesMouth(); 
+        mouth.style.width="30%"; mouth.style.height="2%"; 
+        lyricBubble.textContent="Zzz..."; 
+        lyricBubble.style.opacity=1; 
+        setTimeout(()=>{lyricBubble.style.opacity=0;},2000); 
+    }
+    else if(mood==="eat"){ 
+        mouth.style.width="30%"; mouth.style.height="6%"; 
+        lyricBubble.textContent="Nom Nom!"; 
+        lyricBubble.style.opacity=1; 
+        setTimeout(()=>{lyricBubble.style.opacity=0;},2000); 
+    }
+    else if(mood==="music"){ 
+        const randHeight=4+Math.random()*3; 
+        const randWidth=35+Math.random()*10; 
+        mouth.style.height=`${randHeight}%`; 
+        mouth.style.width=`${randWidth}%`; 
+        lyricBubble.textContent="La la la~"; 
+        lyricBubble.style.opacity=1; 
+        setTimeout(()=>{lyricBubble.style.opacity=0;},2000); 
+    }
+    else { 
+        idleScaleY=1; renderEyesMouth(); 
+        mouth.style.width="40%"; mouth.style.height="4%"; 
+    }
 }
 moodInterval=setInterval(randomMood,7000);
 
@@ -570,6 +811,36 @@ function flickerCone() {
 }
 setInterval(flickerCone, 150);
 
+
+
+// ==================================================
+// ★★★ RANDOM EYE MOVEMENT (REALTIME & ACAK) ★★★
+// ==================================================
+function randomEyeMove() {
+    // Jangan lirik kalau sedang TV mode / ear mode / ketawa / charging
+    if (
+        face.classList.contains("laughing") ||
+        earMode ||
+        batteryBox.style.display === "block" ||
+        eyes[0].classList.contains("look-tv")
+    ) {
+        return setTimeout(randomEyeMove, 800);
+    }
+
+    eyes.forEach(eye => {
+        // Gerakan acak mata keseluruhan
+        let x = Math.random() * 14 - 7; // kiri-kanan
+        let y = Math.random() * 10 - 5; // atas-bawah
+
+        eye.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+    // Delay acak
+    let delay = Math.random() * 1500 + 300;
+    setTimeout(randomEyeMove, delay);
+}
+
+randomEyeMove();
 </script>
 </body>
 </html>
