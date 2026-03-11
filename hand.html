@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Hand Scroll Control</title>
+<title>Index Finger Scroll Control</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -44,7 +44,7 @@ font-size:14px;
 <canvas id="canvas"></canvas>
 
 <div id="info">
-Hand Scroll Control
+Index Finger Scroll Control
 </div>
 
 <script>
@@ -56,31 +56,41 @@ const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 
-let lastY=null;
+/* posisi telunjuk sebelumnya */
+
+let lastFingerY=null;
+
+/* jeda gesture */
+
 let lastGesture=0;
 
-const MOVE_THRESHOLD=0.06;
-const COOLDOWN=400;
+const MOVE_THRESHOLD=0.04;
+const COOLDOWN=350;
+
+/* fungsi scroll */
 
 function runScroll(currentY){
 
-if(lastY==null){
-lastY=currentY;
+if(lastFingerY==null){
+lastFingerY=currentY;
 return;
 }
 
-const diff=currentY-lastY;
+const diff=currentY-lastFingerY;
+
 const now=Date.now();
 
 if(now-lastGesture < COOLDOWN){
-lastY=currentY;
+lastFingerY=currentY;
 return;
 }
 
 if(!window.Android){
-lastY=currentY;
+lastFingerY=currentY;
 return;
 }
+
+/* telunjuk naik */
 
 if(diff < -MOVE_THRESHOLD){
 
@@ -89,6 +99,8 @@ lastGesture=now;
 
 }
 
+/* telunjuk turun */
+
 if(diff > MOVE_THRESHOLD){
 
 Android.swipeDown();
@@ -96,9 +108,11 @@ lastGesture=now;
 
 }
 
-lastY=currentY;
+lastFingerY=currentY;
 
 }
+
+/* mediapipe */
 
 const hands=new Hands({
 
@@ -130,12 +144,18 @@ results.multiHandLandmarks.forEach((lm)=>{
 drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:3});
 drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2});
 
-const wrist=lm[0];
+/* telunjuk */
 
-runScroll(wrist.y);
+const finger=lm[8];
 
-const x=Math.floor(wrist.x*screen.width);
-const y=Math.floor(wrist.y*screen.height);
+/* jalankan scroll */
+
+runScroll(finger.y);
+
+/* gerakkan floating window */
+
+const x=Math.floor(finger.x*screen.width);
+const y=Math.floor(finger.y*screen.height);
 
 if(window.Android){
 Android.move(x,y);
@@ -146,6 +166,8 @@ Android.move(x,y);
 }
 
 });
+
+/* kamera */
 
 const camera=new Camera(video,{
 
