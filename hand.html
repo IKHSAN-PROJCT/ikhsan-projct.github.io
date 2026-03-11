@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Hand Gesture Control</title>
+<title>Hand Scroll Control</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -44,7 +44,7 @@ font-size:14px;
 <canvas id="canvas"></canvas>
 
 <div id="info">
-Hand Gesture Control
+Hand Scroll Control
 </div>
 
 <script>
@@ -56,52 +56,47 @@ const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 
+let lastY=null;
 let lastGesture=0;
 
-function countFingers(lm){
+const MOVE_THRESHOLD=0.06;
+const COOLDOWN=400;
 
-let fingers=0;
+function runScroll(currentY){
 
-if(lm[8].y < lm[6].y) fingers++;
-if(lm[12].y < lm[10].y) fingers++;
-if(lm[16].y < lm[14].y) fingers++;
-if(lm[20].y < lm[18].y) fingers++;
-
-if(lm[4].x > lm[3].x) fingers++;
-
-return fingers;
-
+if(lastY==null){
+lastY=currentY;
+return;
 }
 
-function runGesture(fingers){
-
+const diff=currentY-lastY;
 const now=Date.now();
 
-if(now-lastGesture < 1200) return;
+if(now-lastGesture < COOLDOWN){
+lastY=currentY;
+return;
+}
 
+if(!window.Android){
+lastY=currentY;
+return;
+}
+
+if(diff < -MOVE_THRESHOLD){
+
+Android.swipeUp();
 lastGesture=now;
 
-if(!window.Android) return;
-
-if(fingers==1){
-Android.swipeUp();
 }
 
-if(fingers==2){
+if(diff > MOVE_THRESHOLD){
+
 Android.swipeDown();
+lastGesture=now;
+
 }
 
-if(fingers==3){
-Android.swipeLeft();
-}
-
-if(fingers==4){
-Android.swipeRight();
-}
-
-if(fingers==5){
-Android.click();
-}
+lastY=currentY;
 
 }
 
@@ -135,16 +130,16 @@ results.multiHandLandmarks.forEach((lm)=>{
 drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:3});
 drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2});
 
-const x=Math.floor(lm[0].x*screen.width);
-const y=Math.floor(lm[0].y*screen.height);
+const wrist=lm[0];
+
+runScroll(wrist.y);
+
+const x=Math.floor(wrist.x*screen.width);
+const y=Math.floor(wrist.y*screen.height);
 
 if(window.Android){
 Android.move(x,y);
 }
-
-const fingers=countFingers(lm);
-
-runGesture(fingers);
 
 });
 
@@ -157,6 +152,7 @@ const camera=new Camera(video,{
 onFrame:async ()=>{
 await hands.send({image:video});
 },
+
 width:640,
 height:480
 
