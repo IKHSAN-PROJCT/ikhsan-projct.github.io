@@ -2,19 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Hand Gesture Control</title>
+<title>Hand Detection Info</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <style>
-
 body{
 margin:0;
+overflow:hidden;
 background:black;
 color:white;
 font-family:Arial;
-overflow:hidden;
 }
 
 video,canvas{
@@ -27,125 +26,158 @@ height:100%;
 position:absolute;
 top:20px;
 left:20px;
+font-size:18px;
 background:rgba(0,0,0,0.6);
 padding:15px;
 border-radius:10px;
+line-height:1.6;
 }
-
 </style>
 </head>
 
 <body>
 
-<div id="info">Hand control active</div>
+<div id="info">Menunggu kamera...</div>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
 <script>
 
-const video=document.getElementById("video")
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-const info=document.getElementById("info")
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const info=document.getElementById("info");
 
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
 async function startCamera(){
 
-const stream=await navigator.mediaDevices.getUserMedia({video:true})
-video.srcObject=stream
+const stream=await navigator.mediaDevices.getUserMedia({video:true});
+video.srcObject=stream;
 
 video.onloadedmetadata=()=>{
-video.play()
-detect()
-}
+video.play();
+detect();
+};
 
 }
 
 const hands=new Hands({
 locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-})
+});
 
 hands.setOptions({
-maxNumHands:1,
+maxNumHands:2,
 modelComplexity:1,
 minDetectionConfidence:0.7,
 minTrackingConfidence:0.7
-})
+});
 
 function countFingers(lm){
 
-let count=0
+let count=0;
 
-if(lm[8].y<lm[6].y)count++
-if(lm[12].y<lm[10].y)count++
-if(lm[16].y<lm[14].y)count++
-if(lm[20].y<lm[18].y)count++
-if(lm[4].x<lm[3].x)count++
+if(lm[8].y < lm[6].y) count++;
+if(lm[12].y < lm[10].y) count++;
+if(lm[16].y < lm[14].y) count++;
+if(lm[20].y < lm[18].y) count++;
+if(lm[4].x < lm[3].x) count++;
 
-return count
+return count;
 
 }
 
-let lastGesture=0
+/* delay gesture supaya tidak spam */
+
+let lastGesture=0;
 
 hands.onResults(results=>{
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
-ctx.drawImage(video,0,0,canvas.width,canvas.height)
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.drawImage(video,0,0,canvas.width,canvas.height);
 
 if(results.multiHandLandmarks){
 
-const lm=results.multiHandLandmarks[0]
+let text="Jumlah tangan: "+results.multiHandLandmarks.length+"<br><br>";
 
-drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:4})
-drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2})
+results.multiHandLandmarks.forEach((lm,i)=>{
 
-const fingers=countFingers(lm)
+drawConnectors(ctx,lm,HAND_CONNECTIONS,{
+color:"#00FF00",
+lineWidth:4
+});
 
-info.innerHTML="Jari terbuka: "+fingers
+drawLandmarks(ctx,lm,{
+color:"#FF0000",
+lineWidth:2
+});
 
-const now=Date.now()
+const fingers=countFingers(lm);
 
-if(now-lastGesture>1500){
+const x=Math.floor(lm[0].x*canvas.width);
+const y=Math.floor(lm[0].y*canvas.height);
+
+const posisi=x<canvas.width/2?"Kiri layar":"Kanan layar";
+
+text+="Tangan "+(i+1)+"<br>";
+text+="Jari terbuka: "+fingers+"<br>";
+text+="Posisi: "+posisi+"<br>";
+text+="Koordinat: "+x+", "+y+"<br><br>";
+
+/* =====================
+   GESTURE CONTROL
+===================== */
+
+const now=Date.now();
+
+if(now-lastGesture>1200){
 
 if(fingers==1){
-Android.swipeUp()
+Android.swipeUp();
 }
 
 if(fingers==2){
-Android.swipeDown()
+Android.swipeDown();
 }
 
 if(fingers==3){
-Android.swipeLeft()
+Android.swipeLeft();
 }
 
 if(fingers==4){
-Android.swipeRight()
+Android.swipeRight();
 }
 
 if(fingers==5){
-Android.click()
+Android.click();
 }
 
-lastGesture=now
-}
+lastGesture=now;
 
 }
 
-})
+});
+
+info.innerHTML=text;
+
+}else{
+
+info.innerHTML="Tidak ada tangan ❌";
+
+}
+
+});
 
 async function detect(){
 
-await hands.send({image:video})
-requestAnimationFrame(detect)
+await hands.send({image:video});
+requestAnimationFrame(detect);
 
 }
 
-startCamera()
+startCamera();
 
 </script>
 
