@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hand Gesture Control</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+<style>
+
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial;
+overflow:hidden;
+}
+
+video,canvas{
+position:absolute;
+width:100%;
+height:100%;
+}
+
+#info{
+position:absolute;
+top:20px;
+left:20px;
+background:rgba(0,0,0,0.6);
+padding:15px;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="info">Hand control active</div>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+
+<script>
+
+const video=document.getElementById("video")
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
+const info=document.getElementById("info")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+async function startCamera(){
+
+const stream=await navigator.mediaDevices.getUserMedia({video:true})
+video.srcObject=stream
+
+video.onloadedmetadata=()=>{
+video.play()
+detect()
+}
+
+}
+
+const hands=new Hands({
+locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+})
+
+hands.setOptions({
+maxNumHands:1,
+modelComplexity:1,
+minDetectionConfidence:0.7,
+minTrackingConfidence:0.7
+})
+
+function countFingers(lm){
+
+let count=0
+
+if(lm[8].y<lm[6].y)count++
+if(lm[12].y<lm[10].y)count++
+if(lm[16].y<lm[14].y)count++
+if(lm[20].y<lm[18].y)count++
+if(lm[4].x<lm[3].x)count++
+
+return count
+
+}
+
+let lastGesture=0
+
+hands.onResults(results=>{
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+ctx.drawImage(video,0,0,canvas.width,canvas.height)
+
+if(results.multiHandLandmarks){
+
+const lm=results.multiHandLandmarks[0]
+
+drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:4})
+drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2})
+
+const fingers=countFingers(lm)
+
+info.innerHTML="Jari terbuka: "+fingers
+
+const now=Date.now()
+
+if(now-lastGesture>1500){
+
+if(fingers==1){
+Android.swipeUp()
+}
+
+if(fingers==2){
+Android.swipeDown()
+}
+
+if(fingers==3){
+Android.swipeLeft()
+}
+
+if(fingers==4){
+Android.swipeRight()
+}
+
+if(fingers==5){
+Android.click()
+}
+
+lastGesture=now
+}
+
+}
+
+})
+
+async function detect(){
+
+await hands.send({image:video})
+requestAnimationFrame(detect)
+
+}
+
+startCamera()
+
+</script>
+
+</body>
+</html>
