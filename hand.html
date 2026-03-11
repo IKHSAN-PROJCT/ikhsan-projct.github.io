@@ -49,78 +49,124 @@ Index Finger Scroll Control
 
 <script>
 
-const video=document.getElementById("video");
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const video=document.getElementById("video")
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
 
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
 
-/* posisi telunjuk sebelumnya */
 
-let lastFingerY=null;
+/* =========================
+   VARIABLE GESTURE
+========================= */
 
-/* jeda gesture */
+let lastFingerY=null
+let smoothedY=null
 
-let lastGesture=0;
+let lastGesture=0
+let directionLock=0
 
-const MOVE_THRESHOLD=0.04;
-const COOLDOWN=350;
+const MOVE_THRESHOLD=0.05
+const STOP_THRESHOLD=0.015
+const COOLDOWN=450
 
-/* fungsi scroll */
+
+/* =========================
+   SMOOTHING FILTER
+========================= */
+
+function smooth(value){
+
+if(smoothedY==null){
+smoothedY=value
+}else{
+
+smoothedY = smoothedY*0.7 + value*0.3
+
+}
+
+return smoothedY
+}
+
+
+/* =========================
+   SCROLL DETECTOR
+========================= */
 
 function runScroll(currentY){
 
+currentY = smooth(currentY)
+
 if(lastFingerY==null){
-lastFingerY=currentY;
-return;
+lastFingerY=currentY
+return
 }
 
-const diff=currentY-lastFingerY;
+const diff=currentY-lastFingerY
+const now=Date.now()
 
-const now=Date.now();
+/* deadzone supaya tidak bergerak saat tangan diam */
+
+if(Math.abs(diff) < STOP_THRESHOLD){
+directionLock=0
+lastFingerY=currentY
+return
+}
+
+/* cooldown supaya tidak spam swipe */
 
 if(now-lastGesture < COOLDOWN){
-lastFingerY=currentY;
-return;
+lastFingerY=currentY
+return
 }
 
 if(!window.Android){
-lastFingerY=currentY;
-return;
+lastFingerY=currentY
+return
 }
 
-/* telunjuk naik */
 
-if(diff < -MOVE_THRESHOLD){
+/* TELUNJUK NAIK -> SCROLL BAWAH */
 
-Android.swipeUp();
-lastGesture=now;
+if(diff < -MOVE_THRESHOLD && directionLock!=1){
 
-}
+Android.swipeUp()
 
-/* telunjuk turun */
-
-if(diff > MOVE_THRESHOLD){
-
-Android.swipeDown();
-lastGesture=now;
+directionLock=1
+lastGesture=now
 
 }
 
-lastFingerY=currentY;
+
+/* TELUNJUK TURUN -> SCROLL ATAS */
+
+if(diff > MOVE_THRESHOLD && directionLock!=-1){
+
+Android.swipeDown()
+
+directionLock=-1
+lastGesture=now
 
 }
 
-/* mediapipe */
+lastFingerY=currentY
+
+}
+
+
+/* =========================
+   MEDIAPIPE HANDS
+========================= */
 
 const hands=new Hands({
 
 locateFile:(file)=>{
-return "https://cdn.jsdelivr.net/npm/@mediapipe/hands/"+file;
+return "https://cdn.jsdelivr.net/npm/@mediapipe/hands/"+file
 }
 
-});
+})
+
 
 hands.setOptions({
 
@@ -129,58 +175,62 @@ modelComplexity:1,
 minDetectionConfidence:0.7,
 minTrackingConfidence:0.7
 
-});
+})
+
 
 hands.onResults((results)=>{
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,canvas.height)
 
-ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
+ctx.drawImage(results.image,0,0,canvas.width,canvas.height)
+
 
 if(results.multiHandLandmarks){
 
 results.multiHandLandmarks.forEach((lm)=>{
 
-drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:3});
-drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2});
+drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:3})
+drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2})
 
-/* telunjuk */
+/* landmark telunjuk */
 
-const finger=lm[8];
+const finger=lm[8]
 
-/* jalankan scroll */
+runScroll(finger.y)
 
-runScroll(finger.y);
 
 /* gerakkan floating window */
 
-const x=Math.floor(finger.x*screen.width);
-const y=Math.floor(finger.y*screen.height);
+const x=Math.floor(finger.x*screen.width)
+const y=Math.floor(finger.y*screen.height)
 
 if(window.Android){
-Android.move(x,y);
+Android.move(x,y)
 }
 
-});
+})
 
 }
 
-});
+})
 
-/* kamera */
+
+/* =========================
+   CAMERA
+========================= */
 
 const camera=new Camera(video,{
 
 onFrame:async ()=>{
-await hands.send({image:video});
+await hands.send({image:video})
 },
 
 width:640,
 height:480
 
-});
+})
 
-camera.start();
+camera.start()
 
 </script>
 
