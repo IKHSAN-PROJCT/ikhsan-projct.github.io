@@ -9,51 +9,73 @@
 <style>
 body { margin:0; overflow:hidden; background:black; color:white; font-family:Arial; }
 video,canvas { position:absolute; width:100%; height:100%; object-fit:cover; }
+#info { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.6); padding:10px; border-radius:10px; font-size:14px; }
 </style>
 </head>
 <body>
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-<script>
-const video=document.getElementById("video")
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
+<div id="info">Eye Gaze Control</div>
 
-function getEyeCenter(lm,left=true){
-    const indices=left?[474,475,476,477]:[469,470,471,472]
-    let cx=0,cy=0
-    for(let i of indices){ cx+=lm[i].x; cy+=lm[i].y }
-    return {x:cx/indices.length, y:cy/indices.length}
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function getEyeCenter(lm, left = true) {
+    // iris: mata kiri 474-477, mata kanan 469-472
+    const indices = left ? [474,475,476,477] : [469,470,471,472];
+    let cx=0, cy=0;
+    for(let i of indices){ cx += lm[i].x; cy += lm[i].y; }
+    return {x: cx/indices.length, y: cy/indices.length};
 }
 
 function runGaze(lm){
-    const leftEye=getEyeCenter(lm,true)
-    const rightEye=getEyeCenter(lm,false)
-    const eyeY=(leftEye.y+rightEye.y)/2
-    if(window.Android) Android.scrollEye(eyeY)
+    const leftEye = getEyeCenter(lm, true);
+    const rightEye = getEyeCenter(lm, false);
+    const eyeY = (leftEye.y + rightEye.y) / 2;
+    const eyeX = (leftEye.x + rightEye.x) / 2;
 
-    const eyeOpen = lm[159].y-lm[145].y
-    if(eyeOpen < 0.02 && window.Android) Android.click()
+    // kirim posisi mata ke Android
+    if(window.Android && typeof window.Android.scrollEye === "function") {
+        window.Android.scrollEye(eyeY);
+    }
+
+    // deteksi kedip cepat / mata tertutup → klik
+    const eyeOpen = lm[159].y - lm[145].y; // jarak kelopak mata
+    if(eyeOpen < 0.02 && window.Android && typeof window.Android.click === "function"){
+        window.Android.click();
+    }
 }
 
-const faceMesh=new FaceMesh({locateFile:(file)=>"https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/"+file})
-faceMesh.setOptions({maxNumFaces:1, refineLandmarks:true, minDetectionConfidence:0.7, minTrackingConfidence:0.7})
+const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
+faceMesh.setOptions({
+    maxNumFaces:1,
+    refineLandmarks:true,
+    minDetectionConfidence:0.7,
+    minTrackingConfidence:0.7
+});
 
 faceMesh.onResults((results)=>{
-    ctx.clearRect(0,0,canvas.width,canvas.height)
-    ctx.drawImage(results.image,0,0,canvas.width,canvas.height)
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
     if(results.multiFaceLandmarks){
         results.multiFaceLandmarks.forEach(lm=>{
-            drawConnectors(ctx,lm,FACEMESH_TESSELATION,{color:'#888888',lineWidth:1})
-            runGaze(lm)
-        })
+            drawConnectors(ctx, lm, FACEMESH_TESSELATION, {color:'#888888', lineWidth:1});
+            drawLandmarks(ctx, lm, {color:'#FF0000', lineWidth:2});
+            runGaze(lm);
+        });
     }
-})
+});
 
-const camera=new Camera(video,{onFrame:async()=>{await faceMesh.send({image:video})}, width:640,height:480})
-camera.start()
+const camera = new Camera(video, {
+    onFrame: async () => { await faceMesh.send({image: video}); },
+    width: 640,
+    height: 480
+});
+camera.start();
 </script>
 </body>
 </html>
