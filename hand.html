@@ -2,236 +2,136 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Index Finger Scroll Control</title>
+<title>Finger Count Scroll Control</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <style>
-
 body{
-margin:0;
-overflow:hidden;
-background:black;
-color:white;
-font-family:Arial;
+  margin:0;
+  overflow:hidden;
+  background:black;
+  color:white;
+  font-family:Arial;
 }
-
 video,canvas{
-position:absolute;
-width:100%;
-height:100%;
-object-fit:cover;
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
-
 #info{
-position:absolute;
-top:10px;
-left:10px;
-background:rgba(0,0,0,0.6);
-padding:10px;
-border-radius:10px;
-font-size:14px;
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,0.6);
+  padding:10px;
+  border-radius:10px;
+  font-size:14px;
 }
-
 </style>
 </head>
-
 <body>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
-<div id="info">
-Index Finger Scroll Control
-</div>
+<div id="info">Finger Count Scroll Control</div>
 
 <script>
-
-const video=document.getElementById("video")
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
-
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 /* =========================
-   VARIABLE GESTURE
+   GESTURE CONTROL
 ========================= */
 
-let lastFingerY=null
-let smoothedY=null
+let lastGesture = 0;
+const COOLDOWN = 450; // ms
 
-let lastGesture=0
-let directionLock=0
-
-const MOVE_THRESHOLD=0.05
-const STOP_THRESHOLD=0.015
-const COOLDOWN=450
-
-
-/* =========================
-   SMOOTHING FILTER
-========================= */
-
-function smooth(value){
-
-if(smoothedY==null){
-smoothedY=value
-}else{
-
-smoothedY = smoothedY*0.7 + value*0.3
-
+function fingerCount(lm){
+  let count = 0;
+  // landmark jari: 8, 12, 16, 20 = ujung jari
+  // landmark 5,9,13,17 = dasar jari
+  if(lm[8].y < lm[6].y) count++;    // telunjuk
+  if(lm[12].y < lm[10].y) count++;  // tengah
+  if(lm[16].y < lm[14].y) count++;  // manis
+  if(lm[20].y < lm[18].y) count++;  // kelingking
+  // ibu jari diukur berbeda karena horizontal
+  if(lm[4].x > lm[3].x) count++; 
+  return count;
 }
 
-return smoothedY
+function runGesture(count){
+  const now = Date.now();
+  if(now - lastGesture < COOLDOWN) return;
+
+  if(!window.Android) return;
+
+  if(count === 1){
+    Android.swipeDown(); // 1 jari = scroll bawah
+  }else if(count === 2){
+    Android.swipeUp();   // 2 jari = scroll atas
+  }
+  // 0 jari / tangan mengepal = tidak swipe
+
+  lastGesture = now;
 }
-
-
-/* =========================
-   SCROLL DETECTOR
-========================= */
-
-function runScroll(currentY){
-
-currentY = smooth(currentY)
-
-if(lastFingerY==null){
-lastFingerY=currentY
-return
-}
-
-const diff=currentY-lastFingerY
-const now=Date.now()
-
-/* deadzone supaya tidak bergerak saat tangan diam */
-
-if(Math.abs(diff) < STOP_THRESHOLD){
-directionLock=0
-lastFingerY=currentY
-return
-}
-
-/* cooldown supaya tidak spam swipe */
-
-if(now-lastGesture < COOLDOWN){
-lastFingerY=currentY
-return
-}
-
-if(!window.Android){
-lastFingerY=currentY
-return
-}
-
-
-/* TELUNJUK NAIK -> SCROLL BAWAH */
-
-if(diff < -MOVE_THRESHOLD && directionLock!=1){
-
-Android.swipeUp()
-
-directionLock=1
-lastGesture=now
-
-}
-
-
-/* TELUNJUK TURUN -> SCROLL ATAS */
-
-if(diff > MOVE_THRESHOLD && directionLock!=-1){
-
-Android.swipeDown()
-
-directionLock=-1
-lastGesture=now
-
-}
-
-lastFingerY=currentY
-
-}
-
 
 /* =========================
    MEDIAPIPE HANDS
 ========================= */
 
-const hands=new Hands({
-
-locateFile:(file)=>{
-return "https://cdn.jsdelivr.net/npm/@mediapipe/hands/"+file
-}
-
-})
-
+const hands = new Hands({
+  locateFile: (file) => "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
+});
 
 hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
 
-maxNumHands:1,
-modelComplexity:1,
-minDetectionConfidence:0.7,
-minTrackingConfidence:0.7
+hands.onResults(results => {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-})
+  if(results.multiHandLandmarks){
+    results.multiHandLandmarks.forEach(lm => {
+      drawConnectors(ctx, lm, HAND_CONNECTIONS, {color:"#00FF00", lineWidth:3});
+      drawLandmarks(ctx, lm, {color:"#FF0000", lineWidth:2});
 
+      const count = fingerCount(lm);
+      runGesture(count);
 
-hands.onResults((results)=>{
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-ctx.drawImage(results.image,0,0,canvas.width,canvas.height)
-
-
-if(results.multiHandLandmarks){
-
-results.multiHandLandmarks.forEach((lm)=>{
-
-drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#00FF00",lineWidth:3})
-drawLandmarks(ctx,lm,{color:"#FF0000",lineWidth:2})
-
-/* landmark telunjuk */
-
-const finger=lm[8]
-
-runScroll(finger.y)
-
-
-/* gerakkan floating window */
-
-const x=Math.floor(finger.x*screen.width)
-const y=Math.floor(finger.y*screen.height)
-
-if(window.Android){
-Android.move(x,y)
-}
-
-})
-
-}
-
-})
-
+      // gerakkan floating window
+      const x = Math.floor(lm[8].x * screen.width);
+      const y = Math.floor(lm[8].y * screen.height);
+      if(window.Android){
+        Android.move(x,y);
+      }
+    });
+  }
+});
 
 /* =========================
    CAMERA
 ========================= */
 
-const camera=new Camera(video,{
-
-onFrame:async ()=>{
-await hands.send({image:video})
-},
-
-width:640,
-height:480
-
-})
-
-camera.start()
-
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await hands.send({image: video});
+  },
+  width: 640,
+  height: 480
+});
+camera.start();
 </script>
 
 </body>
