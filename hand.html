@@ -22,6 +22,22 @@ const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 
+// Eye landmark indices untuk kiri & kanan
+const LEFT_EYE=[474,475,476,477,473,471];
+const RIGHT_EYE=[469,470,471,472,468,466];
+
+// Threshold EAR untuk kedipan
+const BLINK_THRESHOLD=0.2;
+let idle=false;
+
+// Hitung Eye Aspect Ratio
+function eyeAspectRatio(lm, indices){
+    const a=Math.hypot(lm[indices[1]].x-lm[indices[5]].x, lm[indices[1]].y-lm[indices[5]].y);
+    const b=Math.hypot(lm[indices[2]].x-lm[indices[4]].x, lm[indices[2]].y-lm[indices[4]].y);
+    const c=Math.hypot(lm[indices[0]].x-lm[indices[3]].x, lm[indices[0]].y-lm[indices[3]].y);
+    return (a+b)/(2*c);
+}
+
 function getEyeCenter(lm,left=true){
     const indices=left?[474,475,476,477]:[469,470,471,472];
     let cx=0,cy=0;
@@ -30,6 +46,13 @@ function getEyeCenter(lm,left=true){
 }
 
 function runGaze(lm){
+    // deteksi kedipan
+    const leftEAR=eyeAspectRatio(lm,LEFT_EYE);
+    const rightEAR=eyeAspectRatio(lm,RIGHT_EYE);
+    idle = (leftEAR<BLINK_THRESHOLD && rightEAR<BLINK_THRESHOLD); // idle saat kedipan
+
+    if(idle) return; // jika kedip, diam saja
+
     const left=getEyeCenter(lm,true);
     const right=getEyeCenter(lm,false);
     const eyeY=(left.y+right.y)/2;
