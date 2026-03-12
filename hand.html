@@ -18,67 +18,92 @@ video,canvas { position:absolute; width:100%; height:100%; object-fit:cover; }
 <div id="info">Eye Gaze Control</div>
 
 <script>
-const video=document.getElementById("video")
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-function getEyeCenter(lm,left=true){
-    // iris: mata kiri 474-477, mata kanan 469-472
-    const indices = left ? [474,475,476,477] : [469,470,471,472]
-    let cx=0,cy=0
+let lastScrollY = null;
+let blinkCooldown = 0;
+
+// Hitung posisi tengah iris
+function getEyeCenter(lm, left=true){
+    const indices = left ? [474,475,476,477] : [469,470,471,472];
+    let cx=0, cy=0;
     for(let i of indices){
-        cx += lm[i].x
-        cy += lm[i].y
+        cx += lm[i].x;
+        cy += lm[i].y;
     }
-    return {x:cx/indices.length, y:cy/indices.length}
+    return {x: cx/indices.length, y: cy/indices.length};
 }
 
+// Deteksi kedip (mata tertutup)
+function isBlink(lm){
+    const eyeDist = lm[159].y - lm[145].y; // jarak kelopak
+    return eyeDist < 0.02; // threshold
+}
+
+// Jalankan perintah berdasarkan posisi mata
 function runGaze(lm){
-    const leftEye=getEyeCenter(lm,true)
-    const rightEye=getEyeCenter(lm,false)
-    const eyeY=(leftEye.y+rightEye.y)/2
-    const eyeX=(leftEye.x+rightEye.x)/2
+    const leftEye = getEyeCenter(lm,true);
+    const rightEye = getEyeCenter(lm,false);
+    const eyeX = (leftEye.x + rightEye.x)/2;
+    const eyeY = (leftEye.y + rightEye.y)/2;
 
-    // threshold sederhana
-    if(eyeY < 0.45){ if(window.Android) Android.swipeDown() } // lihat atas → scroll bawah
-    else if(eyeY > 0.55){ if(window.Android) Android.swipeUp() } // lihat bawah → scroll atas
+    // Scroll vertikal real-time
+    if(window.Android){
+        if(lastScrollY !== null){
+            let dy = eyeY - lastScrollY;
+            if(Math.abs(dy) > 0.005) Android.scrollByFraction(dy*2); // kalibrasi kecepatan
+        }
+        lastScrollY = eyeY;
+    }
 
-    // bisa tambahkan kiri/kanan untuk swipe horizontal
-    // misal:
-    // if(eyeX < 0.4) Android.swipeRight()
-    // else if(eyeX > 0.6) Android.swipeLeft()
+    // Swipe horizontal sederhana
+    if(window.Android){
+        if(eyeX < 0.4) Android.swipeRight();
+        else if(eyeX > 0.6) Android.swipeLeft();
+    }
 
-    // deteksi kedip cepat / mata tertutup → klik
-    const eyeOpen = lm[159].y - lm[145].y // jarak kelopak mata
-    if(eyeOpen < 0.02){ if(window.Android) Android.click() } 
+    // Klik jika kedip
+    if(isBlink(lm)){
+        if(blinkCooldown <= 0){
+            Android.click();
+            blinkCooldown = 20; // cooldown ~ 20 frame (~0.3-0.5s)
+        }
+    } else {
+        if(blinkCooldown > 0) blinkCooldown--;
+    }
 }
 
-const faceMesh=new FaceMesh({locateFile:(file)=>"https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/"+file})
+const faceMesh = new FaceMesh({locateFile: (file) => 
+    "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file
+});
+
 faceMesh.setOptions({
-    maxNumFaces:1,
-    refineLandmarks:true,
-    minDetectionConfidence:0.7,
-    minTrackingConfidence:0.7
-})
+    maxNumFaces: 1,
+    refineLandmarks: true,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+});
 
 faceMesh.onResults((results)=>{
-    ctx.clearRect(0,0,canvas.width,canvas.height)
-    ctx.drawImage(results.image,0,0,canvas.width,canvas.height)
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
     if(results.multiFaceLandmarks){
         results.multiFaceLandmarks.forEach(lm=>{
-            drawConnectors(ctx,lm, FACEMESH_TESSELATION, {color:'#888888', lineWidth:1})
-            runGaze(lm)
-        })
+            drawConnectors(ctx, lm, FACEMESH_TESSELATION, {color:'#888888', lineWidth:1});
+            runGaze(lm);
+        });
     }
-})
+});
 
-const camera=new Camera(video,{
-    onFrame:async()=>{await faceMesh.send({image:video})},
-    width:640,height:480
-})
-camera.start()
+const camera = new Camera(video,{
+    onFrame: async ()=>{await faceMesh.send({image:video});},
+    width:640, height:480
+});
+camera.start();
 </script>
 </body>
 </html>
