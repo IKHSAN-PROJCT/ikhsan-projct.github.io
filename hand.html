@@ -9,101 +9,51 @@
 <style>
 body { margin:0; overflow:hidden; background:black; color:white; font-family:Arial; }
 video,canvas { position:absolute; width:100%; height:100%; object-fit:cover; }
-#info { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.6); padding:10px; border-radius:10px; font-size:14px; }
 </style>
 </head>
 <body>
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-<div id="info">Eye Gaze Control</div>
-
 <script>
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const video=document.getElementById("video")
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
 
-let lastScrollY = null;
-let blinkCooldown = 0;
-
-// Hitung posisi tengah iris
-function getEyeCenter(lm, left=true){
-    const indices = left ? [474,475,476,477] : [469,470,471,472];
-    let cx=0, cy=0;
-    for(let i of indices){
-        cx += lm[i].x;
-        cy += lm[i].y;
-    }
-    return {x: cx/indices.length, y: cy/indices.length};
+function getEyeCenter(lm,left=true){
+    const indices=left?[474,475,476,477]:[469,470,471,472]
+    let cx=0,cy=0
+    for(let i of indices){ cx+=lm[i].x; cy+=lm[i].y }
+    return {x:cx/indices.length, y:cy/indices.length}
 }
 
-// Deteksi kedip (mata tertutup)
-function isBlink(lm){
-    const eyeDist = lm[159].y - lm[145].y; // jarak kelopak
-    return eyeDist < 0.02; // threshold
-}
-
-// Jalankan perintah berdasarkan posisi mata
 function runGaze(lm){
-    const leftEye = getEyeCenter(lm,true);
-    const rightEye = getEyeCenter(lm,false);
-    const eyeX = (leftEye.x + rightEye.x)/2;
-    const eyeY = (leftEye.y + rightEye.y)/2;
+    const leftEye=getEyeCenter(lm,true)
+    const rightEye=getEyeCenter(lm,false)
+    const eyeY=(leftEye.y+rightEye.y)/2
+    if(window.Android) Android.scrollEye(eyeY)
 
-    // Scroll vertikal real-time
-    if(window.Android){
-        if(lastScrollY !== null){
-            let dy = eyeY - lastScrollY;
-            if(Math.abs(dy) > 0.005) Android.scrollByFraction(dy*2); // kalibrasi kecepatan
-        }
-        lastScrollY = eyeY;
-    }
-
-    // Swipe horizontal sederhana
-    if(window.Android){
-        if(eyeX < 0.4) Android.swipeRight();
-        else if(eyeX > 0.6) Android.swipeLeft();
-    }
-
-    // Klik jika kedip
-    if(isBlink(lm)){
-        if(blinkCooldown <= 0){
-            Android.click();
-            blinkCooldown = 20; // cooldown ~ 20 frame (~0.3-0.5s)
-        }
-    } else {
-        if(blinkCooldown > 0) blinkCooldown--;
-    }
+    const eyeOpen = lm[159].y-lm[145].y
+    if(eyeOpen < 0.02 && window.Android) Android.click()
 }
 
-const faceMesh = new FaceMesh({locateFile: (file) => 
-    "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file
-});
-
-faceMesh.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.7
-});
+const faceMesh=new FaceMesh({locateFile:(file)=>"https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/"+file})
+faceMesh.setOptions({maxNumFaces:1, refineLandmarks:true, minDetectionConfidence:0.7, minTrackingConfidence:0.7})
 
 faceMesh.onResults((results)=>{
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(results.image,0,0,canvas.width,canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+    ctx.drawImage(results.image,0,0,canvas.width,canvas.height)
     if(results.multiFaceLandmarks){
         results.multiFaceLandmarks.forEach(lm=>{
-            drawConnectors(ctx, lm, FACEMESH_TESSELATION, {color:'#888888', lineWidth:1});
-            runGaze(lm);
-        });
+            drawConnectors(ctx,lm,FACEMESH_TESSELATION,{color:'#888888',lineWidth:1})
+            runGaze(lm)
+        })
     }
-});
+})
 
-const camera = new Camera(video,{
-    onFrame: async ()=>{await faceMesh.send({image:video});},
-    width:640, height:480
-});
-camera.start();
+const camera=new Camera(video,{onFrame:async()=>{await faceMesh.send({image:video})}, width:640,height:480})
+camera.start()
 </script>
 </body>
 </html>
