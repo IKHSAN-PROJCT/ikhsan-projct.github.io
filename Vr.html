@@ -8,11 +8,15 @@ html, body {
   margin:0;
   padding:0;
   overflow:hidden;
-  background: transparent;
+  background: rgba(0,0,0,0.1); /* debug tipis */
 }
 
 video {
-  display:none;
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: scaleX(-1); /* mirror FIX */
 }
 
 canvas {
@@ -28,7 +32,6 @@ canvas {
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
-<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -36,21 +39,20 @@ canvas {
 <script>
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { alpha:true });
+const ctx = canvas.getContext('2d');
 
-canvas.width = 600;
-canvas.height = 600;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 // =========================
-// HITUNG JARI (LEBIH AKURAT)
+// HITUNG JARI (FIX ORIENTATION)
 // =========================
 function countFingers(lm) {
   let count = 0;
 
-  // Thumb (lebih aman pakai jarak)
-  if (lm[4].x > lm[3].x) count++;
+  // Thumb (dibalik karena mirror)
+  if (lm[4].x < lm[3].x) count++;
 
-  // Jari lain
   if (lm[8].y < lm[6].y) count++;
   if (lm[12].y < lm[10].y) count++;
   if (lm[16].y < lm[14].y) count++;
@@ -71,8 +73,8 @@ const hands = new Hands({
 hands.setOptions({
   maxNumHands: 1,
   modelComplexity: 1,
-  minDetectionConfidence: 0.7,
-  minTrackingConfidence: 0.7
+  minDetectionConfidence: 0.6,
+  minTrackingConfidence: 0.6
 });
 
 // =========================
@@ -87,14 +89,14 @@ hands.onResults(results => {
     const lm = results.multiHandLandmarks[0];
     const fingers = countFingers(lm);
 
-    console.log("Jumlah jari:", fingers);
+    console.log("JARI:", fingers);
 
     if(!cooldown){
 
       if(fingers === 2){
-        console.log("2 JARI → SWIPE DOWN");
+        alert("2 JARI TERDETEKSI");
 
-        if(window.Android && Android.swipeDown){
+        if(window.Android){
           Android.swipeDown();
         }
 
@@ -102,9 +104,9 @@ hands.onResults(results => {
       }
 
       if(fingers === 3){
-        console.log("3 JARI → SWIPE UP");
+        alert("3 JARI TERDETEKSI");
 
-        if(window.Android && Android.swipeUp){
+        if(window.Android){
           Android.swipeUp();
         }
 
@@ -113,36 +115,37 @@ hands.onResults(results => {
 
       setTimeout(function(){
         cooldown = false;
-      }, 1200);
+      }, 1000);
     }
 
-    // =========================
-    // GAMBAR TANGAN
-    // =========================
     drawConnectors(ctx, lm, HAND_CONNECTIONS, {
-      color: '#00FF00',
-      lineWidth: 3
+      color:'#00FF00',
+      lineWidth:4
     });
 
     drawLandmarks(ctx, lm, {
-      color: '#FF0000',
-      lineWidth: 2
+      color:'#FF0000',
+      lineWidth:2
     });
   }
 });
 
 // =========================
-// START CAMERA
+// START CAMERA (FIX)
 // =========================
-const camera = new Camera(video, {
+const camera = new Camera(video,{
   onFrame: async function () {
     await hands.send({ image: video });
   },
-  width: 640,
-  height: 480
+  width:640,
+  height:480
 });
 
-camera.start();
+// 🔥 PENTING: tunggu video ready
+video.onloadeddata = function(){
+  console.log("KAMERA READY");
+  camera.start();
+};
 
 </script>
 
