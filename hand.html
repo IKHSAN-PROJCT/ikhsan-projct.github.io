@@ -13,69 +13,39 @@
 }
 
 body {
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: black;
   overflow: hidden;
   color: white;
 }
 
-/* HEADER */
-.header {
+/* STATUS */
+.status {
   position: absolute;
-  top: 20px;
-  width: 100%;
-  text-align: center;
-}
-
-.header h1 {
-  font-size: 20px;
-  opacity: 0.8;
-}
-
-/* PANEL */
-.panel {
-  position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 350px;
-  padding: 12px;
-  border-radius: 20px;
-
-  backdrop-filter: blur(20px);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.status {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
   color: #38bdf8;
-  text-align: center;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 10px;
+  border-radius: 10px;
 }
 
 /* VIDEO + CANVAS */
 video, canvas {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h1>✋ Hand Gesture Pro</h1>
-</div>
-
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
-<div class="panel">
-  <div class="status" id="statusText">Menunggu...</div>
-</div>
+<div class="status" id="statusText">Loading...</div>
 
 <!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -83,116 +53,151 @@ video, canvas {
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <script>
-const videoElement = document.getElementById('video');
-const canvasElement = document.getElementById('canvas');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
 const statusText = document.getElementById('statusText');
-const canvasCtx = canvasElement.getContext('2d');
+const ctx = canvas.getContext('2d');
 
-canvasElement.width = window.innerWidth;
-canvasElement.height = window.innerHeight;
-
-let lastTrigger = 0;
+canvas.width = 640;
+canvas.height = 480;
 
 // =======================
-// HITUNG JARI
+// ANDROID CHECK
 // =======================
-function countFingers(landmarks) {
-  let fingers = 0;
-  const tips = [8, 12, 16, 20];
-
-  for (let tip of tips) {
-    if (landmarks[tip].y < landmarks[tip - 2].y) {
-      fingers++;
-    }
-  }
-
-  if (landmarks[4].x > landmarks[3].x) {
-    fingers++;
-  }
-
-  return fingers;
+function isAndroidReady() {
+  return window.Android && window.Android.exec;
 }
 
 // =======================
-// KIRIM KE ANDROID
+// SEND COMMAND
 // =======================
 function send(cmd) {
-  if (window.Android && window.Android.exec) {
+  if (isAndroidReady()) {
     window.Android.exec(cmd);
+  } else {
+    statusText.innerText = "❌ Android not connected";
   }
+}
+
+// =======================
+// TRACK GERAKAN TANGAN
+// =======================
+let lastY = null;
+let lastTime = 0;
+
+function detectSwipe(landmarks) {
+  const y = landmarks[0].y; // posisi tangan
+
+  if (lastY === null) {
+    lastY = y;
+    return null;
+  }
+
+  let diff = y - lastY;
+  lastY = y;
+
+  let now = Date.now();
+
+  if (now - lastTime < 800) return null;
+
+  // ↓ scroll TikTok
+  if (diff > 0.08) {
+    lastTime = now;
+    return "SCROLL_DOWN";
+  }
+
+  // ↑ scroll atas
+  if (diff < -0.08) {
+    lastTime = now;
+    return "SCROLL_UP";
+  }
+
+  return null;
+}
+
+// =======================
+// HITUNG JARI (OPTIONAL)
+// =======================
+function countFingers(lm) {
+  let fingers = 0;
+  const tips = [8,12,16,20];
+
+  for (let tip of tips) {
+    if (lm[tip].y < lm[tip - 2].y) fingers++;
+  }
+
+  if (lm[4].x > lm[3].x) fingers++;
+
+  return fingers;
 }
 
 // =======================
 // MAIN LOOP
 // =======================
 function onResults(results) {
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  ctx.save();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // ❌ NO MIRROR
-  canvasCtx.scale(-1, 1);
-  canvasCtx.drawImage(results.image, -canvasElement.width, 0,
-                      canvasElement.width, canvasElement.height);
+  ctx.scale(-1, 1);
+  ctx.drawImage(results.image, -canvas.width, 0,
+                canvas.width, canvas.height);
 
   if (results.multiHandLandmarks) {
-    for (const landmarks of results.multiHandLandmarks) {
+    for (const lm of results.multiHandLandmarks) {
 
-      drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
-        {color: '#38bdf8', lineWidth: 3});
+      drawConnectors(ctx, lm, HAND_CONNECTIONS,
+        {color: '#00FFAA', lineWidth: 2});
 
-      drawLandmarks(canvasCtx, landmarks,
-        {color: '#f43f5e', lineWidth: 2});
+      drawLandmarks(ctx, lm,
+        {color: '#FF0055', lineWidth: 1});
 
-      let fingerCount = countFingers(landmarks);
-      statusText.innerText = "Jari: " + fingerCount;
+      // =======================
+      // DETEKSI SWIPE
+      // =======================
+      let swipe = detectSwipe(lm);
 
-      let now = Date.now();
+      if (swipe === "SCROLL_DOWN") {
+        send("SCROLL_DOWN");
+        statusText.innerText = "⬇️ Scroll TikTok";
+      }
 
-      if (now - lastTrigger > 1500) {
+      else if (swipe === "SCROLL_UP") {
+        send("SCROLL_UP");
+        statusText.innerText = "⬆️ Scroll Atas";
+      }
 
-        // =======================
-        // GESTURE MAPPING
-        // =======================
+      // =======================
+      // OPTIONAL GESTURE TAMBAHAN
+      // =======================
+      let finger = countFingers(lm);
 
-        if (fingerCount === 1) {
-          send("TAP");
-          statusText.innerText = "👆 Tap";
-        }
+      if (finger === 5) {
+        send("HOME");
+        statusText.innerText = "🏠 HOME";
+      }
 
-        else if (fingerCount === 2) {
-          send("SCROLL_DOWN");
-          statusText.innerText = "⬇️ Scroll";
-        }
-
-        else if (fingerCount === 3) {
-          send("BACK");
-          statusText.innerText = "🔙 Back";
-        }
-
-        else if (fingerCount === 5) {
-          send("HOME");
-          statusText.innerText = "🏠 Home";
-        }
-
-        lastTrigger = now;
+      if (finger === 3) {
+        send("BACK");
+        statusText.innerText = "🔙 BACK";
       }
     }
   }
 
-  canvasCtx.restore();
+  ctx.restore();
 }
 
 // =======================
 // MEDIAPIPE SETUP
 // =======================
 const hands = new Hands({
-  locateFile: (file) =>
+  locateFile: file =>
     `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
 });
 
 hands.setOptions({
   maxNumHands: 1,
-  modelComplexity: 1,
+  modelComplexity: 0,
   minDetectionConfidence: 0.7,
   minTrackingConfidence: 0.5
 });
@@ -200,17 +205,33 @@ hands.setOptions({
 hands.onResults(onResults);
 
 // =======================
-// CAMERA START
+// START CAMERA
 // =======================
-const camera = new Camera(videoElement, {
-  onFrame: async () => {
-    await hands.send({image: videoElement});
-  },
-  width: 640,
-  height: 480
-});
+function startCamera() {
+  try {
+    const cam = new Camera(video, {
+      onFrame: async () => {
+        await hands.send({image: video});
+      },
+      width: 640,
+      height: 480
+    });
 
-camera.start();
+    cam.start();
+
+    statusText.innerText = isAndroidReady()
+      ? "✅ Ready (Gesture Aktif)"
+      : "⚠️ Android Bridge Error";
+
+  } catch (e) {
+    statusText.innerText = "❌ Kamera Error";
+    console.error(e);
+  }
+}
+
+// delay biar WebView siap
+setTimeout(startCamera, 500);
+
 </script>
 
 </body>
