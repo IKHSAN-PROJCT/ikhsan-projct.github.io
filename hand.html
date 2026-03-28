@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Hand Detector</title>
+  <head>
+	<meta charset="UTF-8">
+	<title>Hand Gesture Control</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
-    }
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+}
 
-    video {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
-    #status {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-family: Arial;
-    }
-  </style>
-</head>
+#status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: Arial;
+  font-size: 14px;
+}
+</style>
+  </head>
 
-<body>
+  <body>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
-<div id="status">Loading...</div>
+	<video id="video" autoplay playsinline></video>
+	<canvas id="canvas"></canvas>
+	<div id="status">Loading...</div>
 
 <script>
 const videoElement = document.getElementById('video');
@@ -56,10 +57,115 @@ const statusText = document.getElementById('status');
 canvasElement.width = window.innerWidth;
 canvasElement.height = window.innerHeight;
 
-let lastY = null;
-let lastTime = 0;
+let lastGestureTime = 0;
 
-// ================= HANDS =================
+// ================= UTIL =================
+function isFingerOpen(landmarks, tip, pip) {
+    return landmarks[tip].y < landmarks[pip].y;
+}
+
+function isOpenHand(landmarks) {
+    return (
+        isFingerOpen(landmarks, 8, 6) &&
+        isFingerOpen(landmarks, 12, 10) &&
+        isFingerOpen(landmarks, 16, 14) &&
+        isFingerOpen(landmarks, 20, 18)
+    );
+}
+
+function isFist(landmarks) {
+    return (
+        !isFingerOpen(landmarks, 8, 6) &&
+        !isFingerOpen(landmarks, 12, 10) &&
+        !isFingerOpen(landmarks, 16, 14) &&
+        !isFingerOpen(landmarks, 20, 18)
+    );
+}
+
+// ================= SEND COMMAND =================
+function send(cmd) {
+    if (window.Android) {
+        Android.exec(cmd);
+    }
+}
+
+// ================= GESTURE DETECTION =================
+function detectGesture(landmarks) {
+
+    let now = Date.now();
+    if (now - lastGestureTime < 800) return;
+
+    let wrist = landmarks[0];
+
+    let x = wrist.x;
+    let y = wrist.y;
+
+    // ================= PINCH =================
+    let thumb = landmarks[4];
+    let index = landmarks[8];
+
+    let pinchDistance = Math.hypot(
+        thumb.x - index.x,
+        thumb.y - index.y
+    );
+
+    if (pinchDistance < 0.05) {
+        statusText.innerText = "PINCH 🤏";
+        send("ZOOM");
+        lastGestureTime = now;
+        return;
+    }
+
+    // ================= FIST =================
+    if (isFist(landmarks)) {
+        statusText.innerText = "FIST ✊";
+        send("STOP");
+        lastGestureTime = now;
+        return;
+    }
+
+    // ================= OPEN HAND =================
+    if (isOpenHand(landmarks)) {
+
+        // ================= SWIPE LEFT / RIGHT =================
+        if (window.prevX !== undefined) {
+            let diffX = x - window.prevX;
+
+            if (Math.abs(diffX) > 0.15) {
+
+                if (diffX > 0) {
+                    statusText.innerText = "SWIPE RIGHT 👉";
+                    send("NEXT");
+                } else {
+                    statusText.innerText = "SWIPE LEFT 👈";
+                    send("BACK");
+                }
+
+                lastGestureTime = now;
+            }
+        }
+
+        // ================= WAVE (UP / DOWN) =================
+        if (window.prevY !== undefined) {
+            let diffY = y - window.prevY;
+
+            if (Math.abs(diffY) > 0.12) {
+
+                statusText.innerText = "WAVE ✋";
+
+                // IMPORTANT: langsung kirim WAVE, bukan scroll
+                send("WAVE");
+
+                lastGestureTime = now;
+            }
+        }
+    }
+
+    window.prevX = x;
+    window.prevY = y;
+}
+
+// ================= MEDIA PIPE =================
 const hands = new Hands({
   locateFile: (file) => {
     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -75,6 +181,23 @@ hands.setOptions({
 
 hands.onResults(onResults);
 
+function onResults(results) {
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+
+        const landmarks = results.multiHandLandmarks[0];
+
+        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS);
+        drawLandmarks(canvasCtx, landmarks);
+
+        detectGesture(landmarks);
+
+    } else {
+        statusText.innerText = "No hand detected";
+    }
+}
+
 // ================= CAMERA =================
 const camera = new Camera(videoElement, {
   onFrame: async () => {
@@ -85,69 +208,7 @@ const camera = new Camera(videoElement, {
 });
 
 camera.start();
-
-// ================= DETECTION =================
-function onResults(results) {
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-
-    const landmarks = results.multiHandLandmarks[0];
-
-    // Ambil posisi palm (landmark 0)
-    let y = landmarks[0].y * canvasElement.height;
-
-    detectGesture(y);
-
-    statusText.innerText = "Hand detected";
-
-    // Draw landmarks
-    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS);
-    drawLandmarks(canvasCtx, landmarks);
-
-  } else {
-    statusText.innerText = "No hand";
-  }
-}
-
-// ================= GESTURE LOGIC =================
-let lastScrollTime = 0;
-const SCROLL_DELAY = 400;
-
-function detectGesture(y) {
-  let now = Date.now();
-
-  if (now - lastScrollTime < SCROLL_DELAY) return;
-
-  if (lastY === null) {
-    lastY = y;
-    return;
-  }
-
-  let diff = y - lastY;
-
-  if (Math.abs(diff) > 30) {
-
-    if (diff > 0) {
-      statusText.innerText = "SCROLL DOWN";
-
-      if (window.Android) {
-        Android.exec("SCROLL_DOWN");
-      }
-
-    } else {
-      statusText.innerText = "SCROLL UP";
-
-      if (window.Android) {
-        Android.exec("SCROLL_UP");
-      }
-    }
-
-    lastScrollTime = now;
-    lastY = y;
-  }
-}
 </script>
 
-</body>
+  </body>
 </html>
