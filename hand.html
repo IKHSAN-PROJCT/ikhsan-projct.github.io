@@ -39,10 +39,9 @@ let lastGestureTime = 0;
 let lastX = null;
 let lastY = null;
 
+const smoothFactor = 0.6;
 let velocityX = 0;
 let velocityY = 0;
-
-const smoothFactor = 0.7;
 
 // ================= UTIL =================
 function isFingerOpen(lm, tip, pip){
@@ -73,7 +72,7 @@ function send(cmd){
 function detectGesture(lm){
 
     let now = Date.now();
-    if(now - lastGestureTime < 500) return;
+    if(now - lastGestureTime < 600) return;
 
     let wrist = lm[0];
     let x = wrist.x;
@@ -84,6 +83,7 @@ function detectGesture(lm){
         let dx = x - lastX;
         let dy = y - lastY;
 
+        // smoothing
         velocityX = velocityX * smoothFactor + dx * (1 - smoothFactor);
         velocityY = velocityY * smoothFactor + dy * (1 - smoothFactor);
 
@@ -114,25 +114,31 @@ function detectGesture(lm){
         // ================= OPEN HAND =================
         if(isOpenHand(lm)){
 
-            // SWIPE
-            if(Math.abs(velocityX) > 0.01){
+            let absX = Math.abs(velocityX);
+            let absY = Math.abs(velocityY);
+
+            // ================= SWIPE (HORIZONTAL) =================
+            if(absX > absY && absX > 0.015){
+
                 if(velocityX > 0){
                     statusText.innerText = "NEXT 👉";
-                    send("NEXT");
-                }else{
+                    send("NEXT"); // swipe left
+                } else {
                     statusText.innerText = "BACK 👈";
-                    send("BACK");
+                    send("BACK"); // swipe right
                 }
+
                 lastGestureTime = now;
             }
 
-            // WAVE / SCROLL
-            if(Math.abs(velocityY) > 0.01){
-                statusText.innerText = "SCROLL ✋";
+            // ================= SCROLL (VERTICAL) =================
+            else if(absY > absX && absY > 0.015){
 
                 if(velocityY > 0){
+                    statusText.innerText = "SCROLL DOWN ⬇️";
                     send("SCROLL_DOWN");
-                }else{
+                } else {
+                    statusText.innerText = "SCROLL UP ⬆️";
                     send("SCROLL_UP");
                 }
 
@@ -167,12 +173,12 @@ hands.onResults(results=>{
         drawLandmarks(canvasCtx,lm);
 
         detectGesture(lm);
-    }else{
+    } else {
         statusText.innerText = "No hand detected";
     }
 });
 
-// CAMERA
+// ================= CAMERA =================
 const camera = new Camera(videoElement,{
     onFrame: async()=>{
         await hands.send({image:videoElement});
@@ -185,22 +191,4 @@ camera.start();
 </script>
 
 </body>
-</html>   } else {
-        statusText.innerText = "No hand detected";
-    }
-}
-
-// ================= CAMERA =================
-const camera = new Camera(videoElement, {
-  onFrame: async () => {
-    await hands.send({ image: videoElement });
-  },
-  width: 640,
-  height: 480
-});
-
-camera.start();
-</script>
-
-  </body>
 </html>
