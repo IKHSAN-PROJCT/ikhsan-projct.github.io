@@ -18,7 +18,6 @@ body {
   color: white;
 }
 
-/* STATUS */
 .status {
   position: absolute;
   bottom: 10px;
@@ -31,7 +30,6 @@ body {
   border-radius: 10px;
 }
 
-/* VIDEO + CANVAS */
 video, canvas {
   position: absolute;
   top: 0;
@@ -47,7 +45,6 @@ video, canvas {
 
 <div class="status" id="statusText">Loading...</div>
 
-<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -62,31 +59,37 @@ canvas.width = 640;
 canvas.height = 480;
 
 // =======================
-// ANDROID CHECK
+// ANDROID CHECK (FIX)
 // =======================
 function isAndroidReady() {
-  return window.Android && window.Android.exec;
+  return typeof Android !== "undefined" && Android.exec;
 }
 
 // =======================
-// SEND COMMAND
+// SEND COMMAND (ANTI SPAM)
 // =======================
+let lastSend = 0;
+
 function send(cmd) {
+  let now = Date.now();
+  if (now - lastSend < 200) return;
+  lastSend = now;
+
   if (isAndroidReady()) {
-    window.Android.exec(cmd);
+    Android.exec(cmd);
   } else {
-    statusText.innerText = "❌ Android not connected";
+    statusText.innerText = "❌ Android Bridge Error";
   }
 }
 
 // =======================
-// TRACK GERAKAN TANGAN
+// TRACK GERAKAN
 // =======================
 let lastY = null;
 let lastTime = 0;
 
 function detectSwipe(landmarks) {
-  const y = landmarks[0].y; // posisi tangan
+  const y = landmarks[0].y;
 
   if (lastY === null) {
     lastY = y;
@@ -98,16 +101,16 @@ function detectSwipe(landmarks) {
 
   let now = Date.now();
 
-  if (now - lastTime < 800) return null;
+  if (now - lastTime < 600) return null;
 
-  // ↓ scroll TikTok
-  if (diff > 0.08) {
+  // ⬇️ LEBIH SENSITIF
+  if (diff > 0.03) {
     lastTime = now;
     return "SCROLL_DOWN";
   }
 
-  // ↑ scroll atas
-  if (diff < -0.08) {
+  // ⬆️
+  if (diff < -0.03) {
     lastTime = now;
     return "SCROLL_UP";
   }
@@ -116,7 +119,7 @@ function detectSwipe(landmarks) {
 }
 
 // =======================
-// HITUNG JARI (OPTIONAL)
+// HITUNG JARI
 // =======================
 function countFingers(lm) {
   let fingers = 0;
@@ -138,10 +141,8 @@ function onResults(results) {
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // ❌ NO MIRROR
   ctx.scale(-1, 1);
-  ctx.drawImage(results.image, -canvas.width, 0,
-                canvas.width, canvas.height);
+  ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
 
   if (results.multiHandLandmarks) {
     for (const lm of results.multiHandLandmarks) {
@@ -152,24 +153,18 @@ function onResults(results) {
       drawLandmarks(ctx, lm,
         {color: '#FF0055', lineWidth: 1});
 
-      // =======================
-      // DETEKSI SWIPE
-      // =======================
       let swipe = detectSwipe(lm);
 
       if (swipe === "SCROLL_DOWN") {
         send("SCROLL_DOWN");
-        statusText.innerText = "⬇️ Scroll TikTok";
+        statusText.innerText = "⬇️ Scroll";
       }
 
       else if (swipe === "SCROLL_UP") {
         send("SCROLL_UP");
-        statusText.innerText = "⬆️ Scroll Atas";
+        statusText.innerText = "⬆️ Scroll";
       }
 
-      // =======================
-      // OPTIONAL GESTURE TAMBAHAN
-      // =======================
       let finger = countFingers(lm);
 
       if (finger === 5) {
@@ -188,7 +183,7 @@ function onResults(results) {
 }
 
 // =======================
-// MEDIAPIPE SETUP
+// MEDIAPIPE
 // =======================
 const hands = new Hands({
   locateFile: file =>
@@ -198,16 +193,17 @@ const hands = new Hands({
 hands.setOptions({
   maxNumHands: 1,
   modelComplexity: 0,
-  minDetectionConfidence: 0.7,
+  minDetectionConfidence: 0.6,
   minTrackingConfidence: 0.5
 });
 
 hands.onResults(onResults);
 
 // =======================
-// START CAMERA
+// CAMERA START (ANTI ERROR)
 // =======================
 function startCamera() {
+
   try {
     const cam = new Camera(video, {
       onFrame: async () => {
@@ -219,9 +215,11 @@ function startCamera() {
 
     cam.start();
 
-    statusText.innerText = isAndroidReady()
-      ? "✅ Ready (Gesture Aktif)"
-      : "⚠️ Android Bridge Error";
+    setTimeout(() => {
+      statusText.innerText = isAndroidReady()
+        ? "✅ Ready"
+        : "⚠️ Android Bridge Error";
+    }, 1000);
 
   } catch (e) {
     statusText.innerText = "❌ Kamera Error";
@@ -229,8 +227,8 @@ function startCamera() {
   }
 }
 
-// delay biar WebView siap
-setTimeout(startCamera, 500);
+// DELAY BIAR BRIDGE MASUK
+setTimeout(startCamera, 800);
 
 </script>
 
