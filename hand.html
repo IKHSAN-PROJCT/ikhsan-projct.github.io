@@ -45,6 +45,7 @@ video, canvas {
 
 <div class="status" id="statusText">Loading...</div>
 
+<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -59,7 +60,7 @@ canvas.width = 640;
 canvas.height = 480;
 
 // =======================
-// ANDROID CHECK (FIX)
+// ANDROID CHECK
 // =======================
 function isAndroidReady() {
   return typeof Android !== "undefined" && Android.exec;
@@ -72,7 +73,8 @@ let lastSend = 0;
 
 function send(cmd) {
   let now = Date.now();
-  if (now - lastSend < 200) return;
+
+  if (now - lastSend < 250) return;
   lastSend = now;
 
   if (isAndroidReady()) {
@@ -80,42 +82,6 @@ function send(cmd) {
   } else {
     statusText.innerText = "❌ Android Bridge Error";
   }
-}
-
-// =======================
-// TRACK GERAKAN
-// =======================
-let lastY = null;
-let lastTime = 0;
-
-function detectSwipe(landmarks) {
-  const y = landmarks[0].y;
-
-  if (lastY === null) {
-    lastY = y;
-    return null;
-  }
-
-  let diff = y - lastY;
-  lastY = y;
-
-  let now = Date.now();
-
-  if (now - lastTime < 600) return null;
-
-  // ⬇️ LEBIH SENSITIF
-  if (diff > 0.03) {
-    lastTime = now;
-    return "SCROLL_DOWN";
-  }
-
-  // ⬆️
-  if (diff < -0.03) {
-    lastTime = now;
-    return "SCROLL_UP";
-  }
-
-  return null;
 }
 
 // =======================
@@ -135,16 +101,79 @@ function countFingers(lm) {
 }
 
 // =======================
+// 2 FINGER SCROLL ENGINE
+// =======================
+let lastY = null;
+let lastTime = 0;
+let gestureActive = false;
+let lastCommand = "";
+
+// =======================
+// DETECT SWIPE (2 JARI ONLY)
+// =======================
+function detectSwipe(lm, finger) {
+
+  // HARUS 2 JARI
+  if (finger !== 2) {
+    gestureActive = false;
+    lastY = null;
+    return null;
+  }
+
+  const y = lm[0].y;
+
+  // pertama kali aktif
+  if (!gestureActive) {
+    gestureActive = true;
+    lastY = y;
+    return null;
+  }
+
+  let diff = y - lastY;
+  lastY = y;
+
+  let now = Date.now();
+
+  // delay anti spam
+  if (now - lastTime < 300) return null;
+
+  // SCROLL DOWN
+  if (diff > 0.025) {
+    lastTime = now;
+
+    if (lastCommand !== "SCROLL_DOWN") {
+      lastCommand = "SCROLL_DOWN";
+      return "SCROLL_DOWN";
+    }
+  }
+
+  // SCROLL UP
+  if (diff < -0.025) {
+    lastTime = now;
+
+    if (lastCommand !== "SCROLL_UP") {
+      lastCommand = "SCROLL_UP";
+      return "SCROLL_UP";
+    }
+  }
+
+  return null;
+}
+
+// =======================
 // MAIN LOOP
 // =======================
 function onResults(results) {
+
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   ctx.scale(-1, 1);
-  ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, -canvas.width, 0,
+                canvas.width, canvas.height);
 
   if (results.multiHandLandmarks) {
+
     for (const lm of results.multiHandLandmarks) {
 
       drawConnectors(ctx, lm, HAND_CONNECTIONS,
@@ -153,37 +182,33 @@ function onResults(results) {
       drawLandmarks(ctx, lm,
         {color: '#FF0055', lineWidth: 1});
 
-      let swipe = detectSwipe(lm);
+      // HITUNG JARI
+      let finger = countFingers(lm);
+
+      // DETECT SWIPE
+      let swipe = detectSwipe(lm, finger);
 
       if (swipe === "SCROLL_DOWN") {
         send("SCROLL_DOWN");
-        statusText.innerText = "⬇️ Scroll";
+        statusText.innerText = "👇 Scroll Bawah (2 Jari)";
       }
 
       else if (swipe === "SCROLL_UP") {
         send("SCROLL_UP");
-        statusText.innerText = "⬆️ Scroll";
-      }
-
-      let finger = countFingers(lm);
-
-      if (finger === 5) {
-        send("HOME");
-        statusText.innerText = "🏠 HOME";
-      }
-
-      if (finger === 3) {
-        send("BACK");
-        statusText.innerText = "🔙 BACK";
+        statusText.innerText = "👆 Scroll Atas (2 Jari)";
       }
     }
+  } else {
+    // ❌ tangan hilang → reset total
+    gestureActive = false;
+    lastY = null;
   }
 
   ctx.restore();
 }
 
 // =======================
-// MEDIAPIPE
+// MEDIAPIPE SETUP
 // =======================
 const hands = new Hands({
   locateFile: file =>
@@ -200,7 +225,7 @@ hands.setOptions({
 hands.onResults(onResults);
 
 // =======================
-// CAMERA START (ANTI ERROR)
+// START CAMERA
 // =======================
 function startCamera() {
 
@@ -217,8 +242,8 @@ function startCamera() {
 
     setTimeout(() => {
       statusText.innerText = isAndroidReady()
-        ? "✅ Ready"
-        : "⚠️ Android Bridge Error";
+        ? "✅ Ready (2 Jari Aktif)"
+        : "⚠️ Bridge Error";
     }, 1000);
 
   } catch (e) {
@@ -227,7 +252,7 @@ function startCamera() {
   }
 }
 
-// DELAY BIAR BRIDGE MASUK
+// DELAY BIAR WEBVIEW SIAP
 setTimeout(startCamera, 800);
 
 </script>
