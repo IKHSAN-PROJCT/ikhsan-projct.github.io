@@ -9,31 +9,28 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
 }
 
 body {
   background: black;
   overflow: hidden;
-  color: white;
-}
-
-.status {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 16px;
-  color: #38bdf8;
-  background: rgba(0,0,0,0.4);
-  padding: 6px 10px;
-  border-radius: 10px;
 }
 
 video, canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+.status {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #00ffaa;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 12px;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -42,8 +39,7 @@ video, canvas {
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-
-<div class="status" id="statusText">Loading...</div>
+<div class="status" id="status">Loading...</div>
 
 <!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -53,78 +49,53 @@ video, canvas {
 <script>
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-const statusText = document.getElementById('statusText');
+const statusText = document.getElementById('status');
 const ctx = canvas.getContext('2d');
 
 canvas.width = 640;
 canvas.height = 480;
 
-// =======================
-// ANDROID CHECK
-// =======================
-function isAndroidReady() {
-  return typeof Android !== "undefined" && Android.exec;
-}
-
-// =======================
-// SEND COMMAND (ANTI SPAM)
-// =======================
-let lastSend = 0;
-
-function send(cmd) {
-  let now = Date.now();
-
-  if (now - lastSend < 250) return;
-  lastSend = now;
-
-  if (isAndroidReady()) {
-    Android.exec(cmd);
-  } else {
-    statusText.innerText = "❌ Android Bridge Error";
+// =========================
+// 🔥 ANDROID BRIDGE CHECK
+// =========================
+function send(cmd){
+  if(window.Android && window.Android.exec){
+    window.Android.exec(cmd);
+  }else{
+    statusText.innerText = "❌ Android not connected";
   }
 }
 
-// =======================
-// HITUNG JARI
-// =======================
-function countFingers(lm) {
-  let fingers = 0;
+// =========================
+// 🔥 DETEKSI 2 JARI
+// =========================
+function isTwoFinger(lm){
+  let count = 0;
   const tips = [8,12,16,20];
 
-  for (let tip of tips) {
-    if (lm[tip].y < lm[tip - 2].y) fingers++;
+  for(let t of tips){
+    if(lm[t].y < lm[t-2].y) count++;
   }
 
-  if (lm[4].x > lm[3].x) fingers++;
-
-  return fingers;
+  return count === 2;
 }
 
-// =======================
-// 2 FINGER SCROLL ENGINE
-// =======================
+// =========================
+// 🔥 SWIPE LOGIC (STABIL)
+// =========================
 let lastY = null;
 let lastTime = 0;
-let gestureActive = false;
-let lastCommand = "";
 
-// =======================
-// DETECT SWIPE (2 JARI ONLY)
-// =======================
-function detectSwipe(lm, finger) {
+function detectSwipe(lm){
 
-  // HARUS 2 JARI
-  if (finger !== 2) {
-    gestureActive = false;
+  if(!isTwoFinger(lm)){
     lastY = null;
     return null;
   }
 
   const y = lm[0].y;
 
-  // pertama kali aktif
-  if (!gestureActive) {
-    gestureActive = true;
+  if(lastY === null){
     lastY = y;
     return null;
   }
@@ -134,63 +105,103 @@ function detectSwipe(lm, finger) {
 
   let now = Date.now();
 
-  // delay anti spam
-  if (now - lastTime < 300) return null;
+  if(now - lastTime < 400) return null;
 
-  // SCROLL DOWN
-  if (diff > 0.025) {
+  // 🔥 ke bawah = scroll bawah
+  if(diff > 0.05){
     lastTime = now;
-
-    if (lastCommand !== "SCROLL_DOWN") {
-      lastCommand = "SCROLL_DOWN";
-      return "SCROLL_DOWN";
-    }
+    return "SCROLL_DOWN";
   }
 
-  // SCROLL UP
-  if (diff < -0.025) {
+  // 🔥 ke atas = scroll atas
+  if(diff < -0.05){
     lastTime = now;
-
-    if (lastCommand !== "SCROLL_UP") {
-      lastCommand = "SCROLL_UP";
-      return "SCROLL_UP";
-    }
+    return "SCROLL_UP";
   }
 
   return null;
 }
 
-// =======================
-// MAIN LOOP
-// =======================
-function onResults(results) {
+// =========================
+// 🔥 MAIN LOOP
+// =========================
+function onResults(results){
 
   ctx.save();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.scale(-1, 1);
-  ctx.drawImage(results.image, -canvas.width, 0,
-                canvas.width, canvas.height);
+  ctx.scale(-1,1);
+  ctx.drawImage(results.image,-canvas.width,0,
+                canvas.width,canvas.height);
 
-  if (results.multiHandLandmarks) {
+  if(results.multiHandLandmarks){
 
-    for (const lm of results.multiHandLandmarks) {
+    for(const lm of results.multiHandLandmarks){
 
-      drawConnectors(ctx, lm, HAND_CONNECTIONS,
-        {color: '#00FFAA', lineWidth: 2});
+      drawConnectors(ctx,lm,HAND_CONNECTIONS,
+        {color:'#00FFAA',lineWidth:2});
 
-      drawLandmarks(ctx, lm,
-        {color: '#FF0055', lineWidth: 1});
+      drawLandmarks(ctx,lm,
+        {color:'#FF0055',lineWidth:1});
 
-      // HITUNG JARI
-      let finger = countFingers(lm);
+      let cmd = detectSwipe(lm);
 
-      // DETECT SWIPE
-      let swipe = detectSwipe(lm, finger);
+      if(cmd){
+        send(cmd);
+        statusText.innerText = "Gesture: " + cmd;
+      }
+    }
 
-      if (swipe === "SCROLL_DOWN") {
-        send("SCROLL_DOWN");
-        statusText.innerText = "👇 Scroll Bawah (2 Jari)";
+  }else{
+    // 🔥 anti bug tangan hilang
+    lastY = null;
+  }
+
+  ctx.restore();
+}
+
+// =========================
+// 🔥 MEDIAPIPE
+// =========================
+const hands = new Hands({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 0,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.5
+});
+
+hands.onResults(onResults);
+
+// =========================
+// 🔥 START CAMERA
+// =========================
+function startCamera(){
+
+  const cam = new Camera(video,{
+    onFrame: async () => {
+      await hands.send({image: video});
+    },
+    width: 640,
+    height: 480
+  });
+
+  cam.start();
+
+  statusText.innerText = "✅ Gesture Ready (2 Jari)";
+}
+
+// delay biar bridge siap
+setTimeout(startCamera, 800);
+
+</script>
+
+</body>
+</html>xt = "👇 Scroll Bawah (2 Jari)";
       }
 
       else if (swipe === "SCROLL_UP") {
