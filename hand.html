@@ -1,190 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Hand Gesture Pro</title>
+  <meta charset="UTF-8">
+  <title>Hand Detector</title>
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      text-align: center;
+    }
 
-body {
-  background: black;
-  overflow: hidden;
-}
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-video, canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.status {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #00ffaa;
-  background: rgba(0,0,0,0.5);
-  padding: 6px 12px;
-  border-radius: 10px;
-}
-</style>
+    #status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
 
+<div id="status">Loading camera...</div>
+
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-<div class="status" id="status">Loading...</div>
 
-<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 
 <script>
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
+
+const videoElement = document.getElementById('video');
+const canvasElement = document.getElementById('canvas');
+const canvasCtx = canvasElement.getContext('2d');
 const statusText = document.getElementById('status');
-const ctx = canvas.getContext('2d');
 
-canvas.width = 640;
-canvas.height = 480;
+let lastGesture = "";
 
 // =========================
-// 🔥 ANDROID BRIDGE CHECK
+// INIT CAMERA
 // =========================
-function send(cmd){
-  if(window.Android && window.Android.exec){
-    window.Android.exec(cmd);
-  }else{
-    statusText.innerText = "❌ Android not connected";
-  }
+function startCamera() {
+
+  navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false
+  }).then(stream => {
+
+    videoElement.srcObject = stream;
+
+    statusText.innerText = "Camera started";
+
+  }).catch(err => {
+    statusText.innerText = "Camera error: " + err;
+  });
 }
 
 // =========================
-// 🔥 DETEKSI 2 JARI
-// =========================
-function isTwoFinger(lm){
-  let count = 0;
-  const tips = [8,12,16,20];
-
-  for(let t of tips){
-    if(lm[t].y < lm[t-2].y) count++;
-  }
-
-  return count === 2;
-}
-
-// =========================
-// 🔥 SWIPE LOGIC (STABIL)
-// =========================
-let lastY = null;
-let lastTime = 0;
-
-function detectSwipe(lm){
-
-  if(!isTwoFinger(lm)){
-    lastY = null;
-    return null;
-  }
-
-  const y = lm[0].y;
-
-  if(lastY === null){
-    lastY = y;
-    return null;
-  }
-
-  let diff = y - lastY;
-  lastY = y;
-
-  let now = Date.now();
-
-  if(now - lastTime < 400) return null;
-
-  // 🔥 ke bawah = scroll bawah
-  if(diff > 0.05){
-    lastTime = now;
-    return "SCROLL_DOWN";
-  }
-
-  // 🔥 ke atas = scroll atas
-  if(diff < -0.05){
-    lastTime = now;
-    return "SCROLL_UP";
-  }
-
-  return null;
-}
-
-// =========================
-// 🔥 MAIN LOOP
-// =========================
-function onResults(results){
-
-  ctx.save();
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  ctx.scale(-1,1);
-  ctx.drawImage(results.image,-canvas.width,0,
-                canvas.width,canvas.height);
-
-  if(results.multiHandLandmarks){
-
-    for(const lm of results.multiHandLandmarks){
-
-      drawConnectors(ctx,lm,HAND_CONNECTIONS,
-        {color:'#00FFAA',lineWidth:2});
-
-      drawLandmarks(ctx,lm,
-        {color:'#FF0055',lineWidth:1});
-
-      let cmd = detectSwipe(lm);
-
-      if(cmd){
-        send(cmd);
-        statusText.innerText = "Gesture: " + cmd;
-      }
-    }
-
-  }else{
-    // 🔥 anti bug tangan hilang
-    lastY = null;
-  }
-
-  ctx.restore();
-}
-
-// =========================
-// 🔥 MEDIAPIPE
+// MEDIA PIPE HANDS
 // =========================
 const hands = new Hands({
-  locateFile: file =>
-    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  locateFile: (file) => {
+    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+  }
 });
 
 hands.setOptions({
   maxNumHands: 1,
-  modelComplexity: 0,
+  modelComplexity: 1,
   minDetectionConfidence: 0.7,
-  minTrackingConfidence: 0.5
+  minTrackingConfidence: 0.7
 });
 
+// =========================
+// DETECT HAND
+// =========================
 hands.onResults(onResults);
 
-// =========================
-// 🔥 START CAMERA
-// =========================
-function startCamera(){
+function onResults(results) {
 
-  const cam = new Camera(video,{
-    onFrame: async () => {
-      await hands.send({image: video});
+  canvasElement.width = videoElement.videoWidth;
+  canvasElement.height = videoElement.videoHeight;
+
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+  canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+  if (results.multiHandLandmarks) {
+
+    for (const landmarks of results.multiHandLandmarks) {
+
+      drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS);
+      drawLandmarks(canvasCtx, landmarks);
+
+      detectGesture(landmarks);
+    }
+  }
+
+  canvasCtx.restore();
+}
+
+// =========================
+// SIMPLE GESTURE DETECTION
+// =========================
+function detectGesture(landmarks) {
+
+  let wrist = landmarks[0];
+  let indexTip = landmarks[8];
+
+  let dx = indexTip.x - wrist.x;
+  let dy = indexTip.y - wrist.y;
+
+  // swipe down
+  if (dy > 0.2) {
+    trigger("SCROLL_DOWN");
+  }
+
+  // swipe up
+  if (dy < -0.2) {
+    trigger("SCROLL_UP");
+  }
+}
+
+// =========================
+// SEND TO ANDROID
+// =========================
+function trigger(cmd) {
+
+  if (lastGesture === cmd) return;
+  lastGesture = cmd;
+
+  statusText.innerText = "Gesture: " + cmd;
+
+  if (window.Android && Android.exec) {
+    Android.exec(cmd);
+  }
+}
+
+// =========================
+// START
+// =========================
+startCamera();
+
+// connect camera to mediapipe
+const camera = new Camera(videoElement, {
+  onFrame: async () => {
+    await hands.send({ image: videoElement });
+  },
+  width: 640,
+  height: 480
+});
+
+camera.start();
+
+</script>
+
+</body>
+</html>e: video});
     },
     width: 640,
     height: 480
