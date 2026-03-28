@@ -1,41 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Hand Detector</title>
+<meta charset="UTF-8">
+<title>Hand Detector</title>
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: black;
-      color: white;
-      text-align: center;
-    }
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+  color: white;
+}
 
-    video, canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+video, canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    #status {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.5);
-      padding: 10px;
-      font-size: 14px;
-    }
-  </style>
+#status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+}
+</style>
 </head>
 
 <body>
 
-<div id="status">Loading camera...</div>
+<div id="status">Loading...</div>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
@@ -51,29 +47,24 @@ const canvasElement = document.getElementById('canvas');
 const canvasCtx = canvasElement.getContext('2d');
 const statusText = document.getElementById('status');
 
-let lastGesture = "";
+let lastCommand = "";
 
 // =========================
-// INIT CAMERA
+// SEND TO ANDROID
 // =========================
-function startCamera() {
+function send(cmd) {
+  if (lastCommand === cmd) return;
+  lastCommand = cmd;
 
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: false
-  }).then(stream => {
+  statusText.innerText = cmd;
 
-    videoElement.srcObject = stream;
-
-    statusText.innerText = "Camera started";
-
-  }).catch(err => {
-    statusText.innerText = "Camera error: " + err;
-  });
+  if (window.Android && Android.exec) {
+    Android.exec(cmd);
+  }
 }
 
 // =========================
-// MEDIA PIPE HANDS
+// MEDIAPIPE
 // =========================
 const hands = new Hands({
   locateFile: (file) => {
@@ -88,9 +79,6 @@ hands.setOptions({
   minTrackingConfidence: 0.7
 });
 
-// =========================
-// DETECT HAND
-// =========================
 hands.onResults(onResults);
 
 function onResults(results) {
@@ -107,10 +95,16 @@ function onResults(results) {
 
     for (const landmarks of results.multiHandLandmarks) {
 
-      drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS);
-      drawLandmarks(canvasCtx, landmarks);
+      const wrist = landmarks[0];
+      const indexTip = landmarks[8];
 
-      detectGesture(landmarks);
+      let dy = indexTip.y - wrist.y;
+
+      if (dy > 0.2) {
+        send("SCROLL_DOWN");
+      } else if (dy < -0.2) {
+        send("SCROLL_UP");
+      }
     }
   }
 
@@ -118,48 +112,8 @@ function onResults(results) {
 }
 
 // =========================
-// SIMPLE GESTURE DETECTION
+// CAMERA
 // =========================
-function detectGesture(landmarks) {
-
-  let wrist = landmarks[0];
-  let indexTip = landmarks[8];
-
-  let dx = indexTip.x - wrist.x;
-  let dy = indexTip.y - wrist.y;
-
-  // swipe down
-  if (dy > 0.2) {
-    trigger("SCROLL_DOWN");
-  }
-
-  // swipe up
-  if (dy < -0.2) {
-    trigger("SCROLL_UP");
-  }
-}
-
-// =========================
-// SEND TO ANDROID
-// =========================
-function trigger(cmd) {
-
-  if (lastGesture === cmd) return;
-  lastGesture = cmd;
-
-  statusText.innerText = "Gesture: " + cmd;
-
-  if (window.Android && Android.exec) {
-    Android.exec(cmd);
-  }
-}
-
-// =========================
-// START
-// =========================
-startCamera();
-
-// connect camera to mediapipe
 const camera = new Camera(videoElement, {
   onFrame: async () => {
     await hands.send({ image: videoElement });
@@ -170,90 +124,7 @@ const camera = new Camera(videoElement, {
 
 camera.start();
 
-</script>
-
-</body>
-</html>e: video});
-    },
-    width: 640,
-    height: 480
-  });
-
-  cam.start();
-
-  statusText.innerText = "✅ Gesture Ready (2 Jari)";
-}
-
-// delay biar bridge siap
-setTimeout(startCamera, 800);
-
-</script>
-
-</body>
-</html>xt = "👇 Scroll Bawah (2 Jari)";
-      }
-
-      else if (swipe === "SCROLL_UP") {
-        send("SCROLL_UP");
-        statusText.innerText = "👆 Scroll Atas (2 Jari)";
-      }
-    }
-  } else {
-    // ❌ tangan hilang → reset total
-    gestureActive = false;
-    lastY = null;
-  }
-
-  ctx.restore();
-}
-
-// =======================
-// MEDIAPIPE SETUP
-// =======================
-const hands = new Hands({
-  locateFile: file =>
-    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
-
-hands.setOptions({
-  maxNumHands: 1,
-  modelComplexity: 0,
-  minDetectionConfidence: 0.6,
-  minTrackingConfidence: 0.5
-});
-
-hands.onResults(onResults);
-
-// =======================
-// START CAMERA
-// =======================
-function startCamera() {
-
-  try {
-    const cam = new Camera(video, {
-      onFrame: async () => {
-        await hands.send({image: video});
-      },
-      width: 640,
-      height: 480
-    });
-
-    cam.start();
-
-    setTimeout(() => {
-      statusText.innerText = isAndroidReady()
-        ? "✅ Ready (2 Jari Aktif)"
-        : "⚠️ Bridge Error";
-    }, 1000);
-
-  } catch (e) {
-    statusText.innerText = "❌ Kamera Error";
-    console.error(e);
-  }
-}
-
-// DELAY BIAR WEBVIEW SIAP
-setTimeout(startCamera, 800);
+statusText.innerText = "Camera started";
 
 </script>
 
