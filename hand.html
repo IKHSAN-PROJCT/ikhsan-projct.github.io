@@ -36,11 +36,9 @@ canvasElement.width = window.innerWidth;
 canvasElement.height = window.innerHeight;
 
 let lastGestureTime = 0;
-let lastX = null;
 let lastY = null;
 
 const smoothFactor = 0.6;
-let velocityX = 0;
 let velocityY = 0;
 
 // ================= UTIL =================
@@ -72,20 +70,19 @@ function send(cmd){
 function detectGesture(lm){
 
     let now = Date.now();
-    if(now - lastGestureTime < 600) return;
+    if(now - lastGestureTime < 300) return;
 
     let wrist = lm[0];
-    let x = wrist.x;
     let y = wrist.y;
 
-    if(lastX !== null && lastY !== null){
+    if(lastY !== null){
 
-        let dx = x - lastX;
         let dy = y - lastY;
 
-        // smoothing
-        velocityX = velocityX * smoothFactor + dx * (1 - smoothFactor);
+        // smoothing velocity
         velocityY = velocityY * smoothFactor + dy * (1 - smoothFactor);
+
+        let absY = Math.abs(velocityY);
 
         // ================= PINCH =================
         let thumb = lm[4];
@@ -105,7 +102,7 @@ function detectGesture(lm){
 
         // ================= FIST =================
         if(isFist(lm)){
-            statusText.innerText = "FIST ✊";
+            statusText.innerText = "STOP ✊";
             send("STOP");
             lastGestureTime = now;
             return;
@@ -114,32 +111,23 @@ function detectGesture(lm){
         // ================= OPEN HAND =================
         if(isOpenHand(lm)){
 
-            let absX = Math.abs(velocityX);
-            let absY = Math.abs(velocityY);
+            // ================= SCROLL DYNAMIC =================
+            if(absY > 0.01){
 
-            // ================= SWIPE (HORIZONTAL) =================
-            if(absX > absY && absX > 0.015){
+                // velocity scaling (biar enak)
+                let velocity = Math.abs(velocityY) * 3000;
+                velocity = Math.min(Math.max(velocity, 300), 3000);
 
-                if(velocityX > 0){
-                    statusText.innerText = "NEXT 👉";
-                    send("NEXT"); // swipe left
-                } else {
-                    statusText.innerText = "BACK 👈";
-                    send("BACK"); // swipe right
-                }
-
-                lastGestureTime = now;
-            }
-
-            // ================= SCROLL (VERTICAL) =================
-            else if(absY > absX && absY > 0.015){
+                // distance scaling
+                let distance = Math.abs(velocityY) * 800;
+                distance = Math.min(Math.max(distance, 150), 800);
 
                 if(velocityY > 0){
                     statusText.innerText = "SCROLL DOWN ⬇️";
-                    send("SCROLL_DOWN");
+                    send("SCROLL_DYNAMIC:" + velocity + ":" + distance);
                 } else {
                     statusText.innerText = "SCROLL UP ⬆️";
-                    send("SCROLL_UP");
+                    send("SCROLL_DYNAMIC:" + (-velocity) + ":" + distance);
                 }
 
                 lastGestureTime = now;
@@ -147,7 +135,6 @@ function detectGesture(lm){
         }
     }
 
-    lastX = x;
     lastY = y;
 }
 
@@ -175,6 +162,23 @@ hands.onResults(results=>{
         detectGesture(lm);
     } else {
         statusText.innerText = "No hand detected";
+    }
+});
+
+// ================= CAMERA =================
+const camera = new Camera(videoElement,{
+    onFrame: async()=>{
+        await hands.send({image:videoElement});
+    },
+    width:640,
+    height:480
+});
+
+camera.start();
+</script>
+
+</body>
+</html>        statusText.innerText = "No hand detected";
     }
 });
 
