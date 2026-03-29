@@ -35,9 +35,7 @@ const statusText = document.getElementById('status');
 canvasElement.width = window.innerWidth;
 canvasElement.height = window.innerHeight;
 
-let lastGestureTime = 0;
 let lastY = null;
-
 const smoothFactor = 0.6;
 let velocityY = 0;
 
@@ -53,13 +51,6 @@ function isOpenHand(lm){
            isFingerOpen(lm,20,18);
 }
 
-function isFist(lm){
-    return !isFingerOpen(lm,8,6) &&
-           !isFingerOpen(lm,12,10) &&
-           !isFingerOpen(lm,16,14) &&
-           !isFingerOpen(lm,20,18);
-}
-
 function send(cmd){
     if(window.Android){
         Android.exec(cmd);
@@ -68,9 +59,6 @@ function send(cmd){
 
 // ================= GESTURE =================
 function detectGesture(lm){
-
-    let now = Date.now();
-    if(now - lastGestureTime < 300) return;
 
     let wrist = lm[0];
     let y = wrist.y;
@@ -84,46 +72,68 @@ function detectGesture(lm){
 
         let absY = Math.abs(velocityY);
 
-        // ================= PINCH =================
-        let thumb = lm[4];
-        let index = lm[8];
-
-        let pinch = Math.hypot(
-            thumb.x - index.x,
-            thumb.y - index.y
-        );
-
-        if(pinch < 0.05){
-            statusText.innerText = "PINCH 🤏";
-            send("ZOOM");
-            lastGestureTime = now;
-            return;
-        }
-
-        // ================= FIST =================
-        if(isFist(lm)){
-            statusText.innerText = "STOP ✊";
-            send("STOP");
-            lastGestureTime = now;
-            return;
-        }
-
-        // ================= OPEN HAND =================
         if(isOpenHand(lm)){
 
-            // ================= SCROLL DYNAMIC =================
-            if(absY > 0.01){
+            if(absY > 0.005){
 
-                // velocity scaling (biar enak)
-                let velocity = Math.abs(velocityY) * 3000;
-                velocity = Math.min(Math.max(velocity, 300), 3000);
-
-                // distance scaling
-                let distance = Math.abs(velocityY) * 800;
-                distance = Math.min(Math.max(distance, 150), 800);
+                let velocity = Math.abs(velocityY) * 4000;
+                velocity = Math.min(Math.max(velocity, 300), 4000);
 
                 if(velocityY > 0){
                     statusText.innerText = "SCROLL DOWN ⬇️";
+                    send("SCROLL_STREAM:" + velocity + ":1");
+                } else {
+                    statusText.innerText = "SCROLL UP ⬆️";
+                    send("SCROLL_STREAM:" + (-velocity) + ":1");
+                }
+            }
+        }
+    }
+
+    lastY = y;
+}
+
+// ================= MEDIAPIPE =================
+const hands = new Hands({
+  locateFile: (file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+
+hands.setOptions({
+  maxNumHands:1,
+  modelComplexity:1,
+  minDetectionConfidence:0.7,
+  minTrackingConfidence:0.7
+});
+
+hands.onResults(results=>{
+    canvasCtx.clearRect(0,0,canvasElement.width,canvasElement.height);
+
+    if(results.multiHandLandmarks.length > 0){
+        const lm = results.multiHandLandmarks[0];
+
+        drawConnectors(canvasCtx,lm,HAND_CONNECTIONS);
+        drawLandmarks(canvasCtx,lm);
+
+        detectGesture(lm);
+    } else {
+        statusText.innerText = "No hand detected";
+    }
+});
+
+// ================= CAMERA =================
+const camera = new Camera(videoElement,{
+    onFrame: async()=>{
+        await hands.send({image:videoElement});
+    },
+    width:640,
+    height:480
+});
+
+camera.start();
+</script>
+
+</body>
+</html>
                     send("SCROLL_DYNAMIC:" + velocity + ":" + distance);
                 } else {
                     statusText.innerText = "SCROLL UP ⬆️";
