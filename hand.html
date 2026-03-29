@@ -81,10 +81,15 @@ function detectGesture(lm){
 
                 if(velocityY > 0){
                     statusText.innerText = "SCROLL DOWN ⬇️";
-                    send("SCROLL_STREAM:" + velocity + ":1");
+
+                    // FIX: pakai method DOWN
+                    send("SCROLL_STREAM:DOWN:" + velocity + ":1");
+
                 } else {
                     statusText.innerText = "SCROLL UP ⬆️";
-                    send("SCROLL_STREAM:" + (-velocity) + ":1");
+
+                    // FIX: pakai method UP
+                    send("SCROLL_STREAM:UP:" + velocity + ":1");
                 }
             }
         }
@@ -134,8 +139,6 @@ camera.start();
 
 </body>
 </html>
-                    send("SCROLL_DYNAMIC:" + velocity + ":" + distance);
-                } else {
                     statusText.innerText = "SCROLL UP ⬆️";
                     send("SCROLL_DYNAMIC:" + (-velocity) + ":" + distance);
                 }
