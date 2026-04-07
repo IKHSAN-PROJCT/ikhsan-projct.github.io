@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SANZPROJECT</title>
 
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+ <!-- PERFORMANCE BOOST -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- MODERN FONT (Poppins + Inter fallback) -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Google Icons -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- MODERN ICON (Material Symbols - lebih clean) -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
+
+<!-- FONT AWESOME (LATEST STABLE) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
@@ -368,6 +373,40 @@
   text-shadow: -2px 0 cyan;
   animation: glitchBottom 2s infinite linear alternate-reverse;
 }
+/* fade anim */
+.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.6s ease;
+}
+
+.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ripple effect */
+.download-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.download-btn .ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(10);
+    opacity: 0;
+  }
+}
 /* Stats style upgrade */
 .stats .stat {
   position: relative;
@@ -484,7 +523,14 @@
   color:var(--primary);
   transform: scale(1.1);
 }
+.card {
+  position: relative;
+  z-index: 1;
+}
 
+.card:hover {
+  z-index: 10;
+}
 /* Active state */
 .menu a.active {
   background:rgba(59,130,246,0.15);
@@ -519,6 +565,42 @@
 html {
   scroll-behavior: smooth;
 }
+.download-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding:8px 12px;
+  background:var(--primary);
+  color:white;
+  border-radius:8px;
+  text-decoration:none;
+  font-size:14px;
+  transition:0.3s;
+}
+
+.download-btn:hover {
+  background:#2563eb;
+  transform:scale(1.05);
+  box-shadow:0 0 10px var(--primary);
+}
+.download-btn {
+  position: relative;
+  z-index: 100;
+  pointer-events: auto;
+}
+.download-btn {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
+}
+.material-symbols-rounded {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 500,
+  'GRAD' 0,
+  'opsz' 24;
+}
   </style>
 </head>
 
@@ -526,169 +608,324 @@ html {
 
 <div id="overlay" onclick="toggleSidebar()"></div>
 
-<!-- Sidebar -->
+<!-- ================= SIDEBAR ================= -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h2>SANZPROJECT</h2>
-    <span class="material-icons close-btn" onclick="toggleSidebar()">close</span>
+    <h2 class="logo">SANZ<span>PROJECT</span></h2>
+    <span class="material-symbols-rounded close-btn" onclick="toggleSidebar()">close</span>
   </div>
 
- <div class="menu">
-  <a href="#dashboard" class="active">
-    <span class="material-icons">dashboard</span>
-    <span>Dashboard</span>
-  </a>
+  <div class="menu">
+    <a href="#dashboard" class="active">
+      <span class="material-symbols-rounded">dashboard</span>
+      <span>Dashboard</span>
+    </a>
 
-  <a href="#">
-    <span class="material-icons">apps</span>
-    <span>My Apps</span>
-  </a>
+    <a href="#apps">
+      <span class="material-symbols-rounded">apps</span>
+      <span>My Apps</span>
+    </a>
 
-  <a href="#">
-    <span class="material-icons">explore</span>
-    <span>Explore</span>
-  </a>
+    <a href="#">
+      <span class="material-symbols-rounded">explore</span>
+      <span>Explore</span>
+    </a>
 
-  <a href="#about">
-    <span class="material-icons">person</span>
-    <span>About</span>
-  </a>
+    <a href="#about">
+      <span class="material-symbols-rounded">person</span>
+      <span>About</span>
+    </a>
+  </div>
 </div>
-</div>
 
-<!-- Main -->
+<!-- ================= MAIN ================= -->
 <div class="main" id="dashboard">
 
+  <!-- TOPBAR -->
   <div class="topbar">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-    <h1></h1>
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
 
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span></span>
+    <h1 class="page-title">Dashboard</h1>
 
-      <button class="toggle-btn" onclick="toggleMode()" id="modeIcon">
-        <span class="material-icons">dark_mode</span>
-      </button>
+    <button class="toggle-btn" onclick="toggleMode()" id="modeIcon">
+      <span class="material-symbols-rounded">dark_mode</span>
+    </button>
+  </div>
+
+  <!-- ================= PROFILE ================= -->
+  <div class="card profile modern-profile">
+    <div class="profile-img">
+      <img src="https://i.ibb.co/Sw5KgyJM/dfb1edab-f3f0-4d09-5e4f-657051d0f3bb.png">
+
+      <div class="overlay-img">
+        <span class="material-symbols-rounded">photo_camera</span>
+      </div>
     </div>
-  </div>
 
-  <!-- Profile -->
-  <div class="card profile">
-  <div class="profile-img">
- <img src="https://i.ibb.co/Sw5KgyJM/dfb1edab-f3f0-4d09-5e4f-657051d0f3bb.png"
-     draggable="false"
-     oncontextmenu="return false;"
-     onmousedown="return false;">
-
-  <div class="overlay-img">
-    <span class="material-icons">photo_camera</span>
-  </div>
-</div>
-
-    <div>
+    <div class="profile-info">
       <h2 class="glitch" data-text="SANZPROJECT">SANZPROJECT</h2>
-     <p>Indie Developer • App Reviewer</p>
+      <p>Indie Developer • App Reviewer</p>
+
+      <div class="profile-badge">
+        <span></span>
+      </div>
     </div>
   </div>
 
-<div class="grid stats">
-  <div class="card stat">
-    <span class="material-icons stat-icon">apps</span>
-    <h3>Apps</h3>
-    <p>Aplikasi yang saya buat</p>
+  <!-- ================= STATS ================= -->
+  <div class="grid stats">
+    <div class="card stat">
+      <span class="material-symbols-rounded stat-icon">apps</span>
+      <h3>Apps</h3>
+      <p>Aplikasi yang saya buat</p>
+    </div>
+
+    <div class="card stat">
+      <span class="material-symbols-rounded stat-icon">rate_review</span>
+      <h3>Reviews</h3>
+      <p>Review aplikasi</p>
+    </div>
+
+    <div class="card stat">
+      <span class="material-symbols-rounded stat-icon">timeline</span>
+      <h3>Journey</h3>
+      <p>Perjalanan belajar</p>
+    </div>
   </div>
 
-  <div class="card stat">
-    <span class="material-icons stat-icon">rate_review</span>
-    <h3>Reviews</h3>
-    <p>Review aplikasi</p>
-  </div>
+  <!-- ================= APPS ================= -->
+  <div class="card" id="apps">
+    <div class="section-header">
+      <h2>My Apps</h2>
+      <span class="badge">Latest</span>
+    </div>
 
-  <div class="card stat">
-    <span class="material-icons stat-icon">timeline</span>
-    <h3>Journey</h3>
-    <p>Perjalanan belajar</p>
-  </div>
+    <div class="grid">
+
+    <!-- APP 1 -->
+<div class="card stat">
+  <span class="material-symbols-rounded stat-icon">android</span>
+  <h3>Sanz Tools</h3>
+  <p>Aplikasi tools serbaguna</p>
+  <p>Versi 1.0 • 15MB</p>
+
+  <a href="https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/releases/download/sanzXrat/app.apk"
+     target="_blank"
+     rel="noopener"
+     class="download-btn">
+    <span class="material-symbols-rounded">download</span>
+    Download APK
+  </a>
 </div>
 
-<!-- About -->
-<div class="card" id="about">
-  <h2>About</h2>
-  <p>
-    Web ini dibuat awalnya karena gabut, tapi lama-lama jadi tempat saya untuk berbagi dan review aplikasi buatan sendiri. 
-    Saya suka eksplorasi dunia teknologi, belajar hal baru, dan mencoba bikin sesuatu walaupun kadang hasilnya tidak sesuai harapan. 
-    Di sini, saya akan share berbagai project, pengalaman, dan mungkin hal-hal random yang saya temui selama proses belajar.
-  </p>
-</div>
+      <!-- APP 2 -->
+      <div class="card stat app-card">
+        <span class="material-symbols-rounded stat-icon">android</span>
+        <h3>App Kedua</h3>
+        <p>Aplikasi kedua kamu</p>
+        <p class="app-info">Versi 1.2 • 20MB</p>
 
-<div class="footer">
-  <div class="footer-line"></div>
+        <a href="https://example.com/app2.apk"
+           target="_blank"
+           class="download-btn">
+          <span class="material-symbols-rounded">download</span>
+          Download
+        </a>
+      </div>
 
-  <p>
-   
-    © 2026 SANZPROJECT
-  </p>
-
-  <small>All Social Media</small>
-
-  <!-- Social Icons -->
-  <div class="social">
-    <a href="https://www.instagram.com/ikhsan22026?igsh=OGd4bnA3b2dkMjg5"><i class="fab fa-instagram"></i></a>
-    <a href="#"><i class="fab fa-youtube"></i></a>
-    <a href="https://wa.me/6283193038915"><i class="fab fa-whatsapp"></i></a>
+    </div>
   </div>
+
+  <!-- ================= ABOUT ================= -->
+  <div class="card" id="about">
+    <div class="section-header">
+      <h2>About</h2>
+    </div>
+
+    <p>
+      Web ini awalnya dibuat karena gabut, tapi berkembang jadi tempat berbagi
+      aplikasi, pengalaman, dan eksplorasi dunia teknologi.
+      Di sini saya share project, journey belajar, dan hal random seputar coding.
+    </p>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="footer">
+    <div class="footer-line"></div>
+
+    <p>© 2026 SANZPROJECT</p>
+    <small>All Social Media</small>
+
+    <div class="social">
+      <a href="https://www.instagram.com/ikhsan22026?igsh=OGd4bnA3b2dkMjg5">
+        <i class="fab fa-instagram"></i>
+      </a>
+
+      <a href="#">
+        <i class="fab fa-youtube"></i>
+      </a>
+
+      <a href="https://wa.me/6283193038915">
+        <i class="fab fa-whatsapp"></i>
+      </a>
+    </div>
+  </div>
+
 </div>
 
 <script>
-/* LOAD MODE */
-if(localStorage.getItem("mode") === "light"){
-  document.body.classList.add("light");
-  document.querySelector("#modeIcon span").textContent = "light_mode";
-}
-document.addEventListener("visibilitychange", function(){
-  if(document.hidden){
-    document.body.style.filter = "blur(10px)";
-  } else {
-    document.body.style.filter = "none";
-  }
-});
-/* TOGGLE MODE */
-function toggleMode(){
-  document.body.classList.toggle("light");
-  const icon = document.querySelector("#modeIcon span");
+document.addEventListener("DOMContentLoaded", () => {
 
-  if(document.body.classList.contains("light")){
-    icon.textContent = "light_mode";
-    localStorage.setItem("mode","light");
-  } else {
-    icon.textContent = "dark_mode";
-    localStorage.setItem("mode","dark");
-  }
-}
+  /* =========================
+     INIT MODE (NO ERROR SAFE)
+  ========================= */
+  const modeIcon = document.querySelector("#modeIcon span");
 
-/* SIDEBAR */
-function toggleSidebar(){
+  const savedMode = localStorage.getItem("mode");
+  if(savedMode === "light"){
+    document.body.classList.add("light");
+    if(modeIcon) modeIcon.textContent = "light_mode";
+  } else {
+    if(modeIcon) modeIcon.textContent = "dark_mode";
+  }
+
+  /* =========================
+     BLUR TAB (SMOOTH)
+  ========================= */
+  document.addEventListener("visibilitychange", () => {
+    document.body.style.transition = "0.3s";
+    document.body.style.filter = document.hidden ? "blur(8px)" : "none";
+  });
+
+  /* =========================
+     TOGGLE MODE (SMOOTH + SAVE)
+  ========================= */
+  window.toggleMode = function(){
+    document.body.classList.toggle("light");
+
+    const isLight = document.body.classList.contains("light");
+
+    if(modeIcon){
+      modeIcon.textContent = isLight ? "light_mode" : "dark_mode";
+    }
+
+    localStorage.setItem("mode", isLight ? "light" : "dark");
+
+    // animasi klik
+    document.body.animate([
+      { opacity: 0.8 },
+      { opacity: 1 }
+    ], { duration: 200 });
+  }
+
+  /* =========================
+     SIDEBAR (SAFE + SMOOTH)
+  ========================= */
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
 
-  sidebar.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
+  window.toggleSidebar = function(){
+    sidebar?.classList.toggle("active");
+    overlay?.classList.toggle("active");
+  }
 
-/* MENU ACTIVE + AUTO CLOSE */
-document.querySelectorAll(".menu a").forEach(link=>{
-  link.addEventListener("click", function(){
-    document.querySelectorAll(".menu a").forEach(l=>l.classList.remove("active"));
-    this.classList.add("active");
-
-    if(window.innerWidth <= 768){
-      toggleSidebar();
-    }
+  // klik overlay nutup sidebar
+  overlay?.addEventListener("click", () => {
+    sidebar?.classList.remove("active");
+    overlay?.classList.remove("active");
   });
+
+  /* =========================
+     MENU CLICK (SMOOTH SCROLL)
+  ========================= */
+  const navLinks = document.querySelectorAll(".menu a");
+
+  navLinks.forEach(link => {
+    link.addEventListener("click", function(e){
+      const targetId = this.getAttribute("href");
+      const target = document.querySelector(targetId);
+
+      if(target){
+        e.preventDefault();
+
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+        // active state
+        navLinks.forEach(l => l.classList.remove("active"));
+        this.classList.add("active");
+
+        // auto close mobile
+        if(window.innerWidth <= 768){
+          sidebar?.classList.remove("active");
+          overlay?.classList.remove("active");
+        }
+      }
+    });
+  });
+
+  /* =========================
+     ACTIVE MENU ON SCROLL
+  ========================= */
+  const sections = document.querySelectorAll("div[id]");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 140;
+      if(window.scrollY >= sectionTop){
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove("active");
+      if(link.getAttribute("href") === "#" + current){
+        link.classList.add("active");
+      }
+    });
+  });
+
+  /* =========================
+     SCROLL ANIMATION (FADE UP)
+  ========================= */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("show");
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll(".card").forEach(el => {
+    el.classList.add("hidden");
+    observer.observe(el);
+  });
+
+  /* =========================
+     RIPPLE EFFECT BUTTON
+  ========================= */
+  document.querySelectorAll(".download-btn").forEach(btn => {
+    btn.addEventListener("click", function(e){
+      const ripple = document.createElement("span");
+      ripple.classList.add("ripple");
+
+      const rect = this.getBoundingClientRect();
+      ripple.style.left = (e.clientX - rect.left) + "px";
+      ripple.style.top = (e.clientY - rect.top) + "px";
+
+      this.appendChild(ripple);
+
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+
 });
-
-/* UPLOAD FOTO */
-
 </script>
 
 </body>
