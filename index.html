@@ -20,7 +20,141 @@
 
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+/* CARD LAYOUT */
+.app-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 18px;
+  transition: 0.3s;
+}
 
+/* ICON LEBIH KECIL & MODERN */
+.app-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+  object-fit: cover;
+
+  /* 🔥 ANTI COPY / DRAG */
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  transition: 0.3s;
+}
+
+/* INFO */
+.app-info {
+  flex: 1;
+}
+
+.app-info h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.app-info .desc {
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.app-info .meta {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* BUTTON BULAT */
+.download-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  transition: 0.3s;
+}
+
+/* HOVER EFFECT */
+.app-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+
+.app-card:hover .app-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* BUTTON HOVER */
+.download-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px var(--primary);
+}
+/* =========================
+   RESPONSIVE APP CARD
+========================= */
+
+/* Tablet & HP */
+@media (max-width: 768px) {
+  .app-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .app-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .app-info h3 {
+    font-size: 14px;
+  }
+
+  .app-info .desc {
+    font-size: 12px;
+  }
+
+  .app-info .meta {
+    font-size: 11px;
+  }
+
+  .download-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* HP kecil banget */
+@media (max-width: 480px) {
+  .app-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .app-info {
+    width: 100%;
+  }
+
+  .download-btn {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+
+  .download-btn span {
+    margin-right: 6px;
+  }
+}
     :root {
       --bg:#0f172a;
       --card:#111827;
@@ -198,10 +332,10 @@
     }
 
     .grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-      gap:20px;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
 
     .stat { text-align:center; }
 
@@ -704,34 +838,44 @@ html {
 
     <div class="grid">
 
-    <!-- APP 1 -->
-<div class="card stat">
-  <span class="material-symbols-rounded stat-icon">android</span>
-  <h3>Sanz Tools</h3>
-  <p>Aplikasi tools serbaguna</p>
-  <p>Versi 1.0 • 15MB</p>
+ <div class="card app-card">
 
+  <!-- ICON -->
+ <img src="https://i.ibb.co.com/JFqM1YL2/logo-small.png"
+     class="app-icon"
+     draggable="false"
+     oncontextmenu="return false;"
+     onmousedown="return false;">
+
+  <!-- INFO -->
+  <div class="app-info">
+    <h3>sanzXrat</h3>
+    <p class="desc">Aplikasi Control Android</p>
+    <p class="meta">Versi 1.1</p>
+  </div>
+
+  <!-- BUTTON -->
   <a href="https://github.com/IKHSAN-PROJCT/ikhsan-projct.github.io/releases/download/sanzXrat/app.apk"
      target="_blank"
      rel="noopener"
      class="download-btn">
     <span class="material-symbols-rounded">download</span>
-    Download APK
   </a>
+
 </div>
 
       <!-- APP 2 -->
       <div class="card stat app-card">
         <span class="material-symbols-rounded stat-icon">android</span>
-        <h3>App Kedua</h3>
-        <p>Aplikasi kedua kamu</p>
-        <p class="app-info">Versi 1.2 • 20MB</p>
+        <h3>Coming Soon!</h3>
+        <p>Segera Hadir!</p>
+        <p class="app-info">Default</p>
 
-        <a href="https://example.com/app2.apk"
+        <a href="#"
            target="_blank"
            class="download-btn">
           <span class="material-symbols-rounded">download</span>
-          Download
+          
         </a>
       </div>
 
@@ -836,7 +980,13 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar?.classList.remove("active");
     overlay?.classList.remove("active");
   });
+// ❌ Disable klik kanan
+document.addEventListener("contextmenu", e => e.preventDefault());
 
+// ❌ Disable drag semua gambar
+document.querySelectorAll("img").forEach(img => {
+  img.addEventListener("dragstart", e => e.preventDefault());
+});
   /* =========================
      MENU CLICK (SMOOTH SCROLL)
   ========================= */
