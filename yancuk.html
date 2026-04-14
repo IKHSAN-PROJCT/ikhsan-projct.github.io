@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Deteksi 2 Jari + Auto Foto</title>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background: transparent; /* WAJIB */
+}
+
+video, canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#hasil {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  width: 120px;
+  border: 2px solid white;
+}
+</style>
+</head>
+
+<body>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+<img id="hasil" />
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const hasil = document.getElementById("hasil");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let lastCapture = 0;
+const cooldown = 3000;
+
+// ======================
+// DETEKSI 2 JARI ✌️
+// ======================
+function isTwoFingers(landmarks) {
+  const indexUp = landmarks[8].y < landmarks[6].y;
+  const middleUp = landmarks[12].y < landmarks[10].y;
+
+  const ringDown = landmarks[16].y > landmarks[14].y;
+  const pinkyDown = landmarks[20].y > landmarks[18].y;
+
+  return indexUp && middleUp && ringDown && pinkyDown;
+}
+
+// ======================
+// MEDIAPIPE SETUP
+// ======================
+const hands = new Hands({
+  locateFile: (file) => {
+    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+  }
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
+
+// ======================
+// HASIL DETEKSI
+// ======================
+hands.onResults(results => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+  if (results.multiHandLandmarks) {
+    for (const landmarks of results.multiHandLandmarks) {
+
+      // gambar tangan
+      drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+        color: '#00FF00',
+        lineWidth: 4
+      });
+      drawLandmarks(ctx, landmarks, {
+        color: '#FF0000',
+        lineWidth: 2
+      });
+
+      // cek 2 jari
+      if (isTwoFingers(landmarks)) {
+        const now = Date.now();
+        if (now - lastCapture > cooldown) {
+          ambilFoto();
+          lastCapture = now;
+        }
+      }
+    }
+  }
+});
+
+// ======================
+// AMBIL FOTO + KIRIM
+// ======================
+function ambilFoto() {
+  const tempCanvas = document.createElement("canvas");
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+
+  const base64 = tempCanvas.toDataURL("image/png");
+
+  // tampilkan preview kecil (optional)
+  hasil.src = base64;
+
+  // kirim ke Android
+  if (window.Android && window.Android.kirimFoto) {
+    window.Android.kirimFoto(base64);
+  }
+
+  console.log("✌️ 2 Jari terdeteksi - Foto dikirim!");
+}
+
+// ======================
+// START CAMERA
+// ======================
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await hands.send({ image: video });
+  },
+  width: 640,
+  height: 480
+});
+
+camera.start();
+</script>
+
+</body>
+  </html>
