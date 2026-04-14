@@ -2,13 +2,13 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Deteksi 2 Jari + Auto Foto</title>
+<title>Deteksi 2 Jari + HD Foto</title>
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: transparent; /* WAJIB */
+  background: transparent;
 }
 
 video, canvas {
@@ -31,7 +31,7 @@ video, canvas {
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-<img id="hasil" />
+<img id="hasil"/>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -42,9 +42,6 @@ const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const hasil = document.getElementById("hasil");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 let lastCapture = 0;
 const cooldown = 3000;
@@ -82,23 +79,28 @@ hands.setOptions({
 // HASIL DETEKSI
 // ======================
 hands.onResults(results => {
+
+  // pakai ukuran asli video (ANTI BURAM)
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
   if (results.multiHandLandmarks) {
     for (const landmarks of results.multiHandLandmarks) {
 
-      // gambar tangan
       drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
         color: '#00FF00',
         lineWidth: 4
       });
+
       drawLandmarks(ctx, landmarks, {
         color: '#FF0000',
         lineWidth: 2
       });
 
-      // cek 2 jari
+      // deteksi 2 jari
       if (isTwoFingers(landmarks)) {
         const now = Date.now();
         if (now - lastCapture > cooldown) {
@@ -111,19 +113,22 @@ hands.onResults(results => {
 });
 
 // ======================
-// AMBIL FOTO + KIRIM
+// AMBIL FOTO HD
 // ======================
 function ambilFoto() {
   const tempCanvas = document.createElement("canvas");
-  tempCanvas.width = canvas.width;
-  tempCanvas.height = canvas.height;
+
+  // 🔥 PAKAI RESOLUSI ASLI KAMERA
+  tempCanvas.width = video.videoWidth;
+  tempCanvas.height = video.videoHeight;
 
   const tempCtx = tempCanvas.getContext("2d");
-  tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+  tempCtx.drawImage(video, 0, 0);
 
-  const base64 = tempCanvas.toDataURL("image/png");
+  // kualitas tinggi
+  const base64 = tempCanvas.toDataURL("image/jpeg", 1.0);
 
-  // tampilkan preview kecil (optional)
+  // preview kecil (opsional)
   hasil.src = base64;
 
   // kirim ke Android
@@ -131,22 +136,22 @@ function ambilFoto() {
     window.Android.kirimFoto(base64);
   }
 
-  console.log("✌️ 2 Jari terdeteksi - Foto dikirim!");
+  console.log("📸 FOTO HD DIAMBIL!");
 }
 
 // ======================
-// START CAMERA
+// START CAMERA (HD)
 // ======================
 const camera = new Camera(video, {
   onFrame: async () => {
     await hands.send({ image: video });
   },
-  width: 640,
-  height: 480
+  width: 1280,
+  height: 720
 });
 
 camera.start();
 </script>
 
 </body>
-  </html>
+</html>
