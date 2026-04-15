@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Deteksi 2 Jari + HD Foto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Kamera Stabil Fix</title>
 
 <style>
 body {
@@ -29,15 +31,20 @@ video, canvas {
 
 <body>
 
-<video id="video" autoplay playsinline></video>
+<video id="video" autoplay playsinline muted></video>
 <canvas id="canvas"></canvas>
 <img id="hasil"/>
 
+<!-- FACE API -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
+<!-- MEDIAPIPE -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
 <script>
+
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -47,25 +54,102 @@ let lastCapture = 0;
 const cooldown = 3000;
 
 // ======================
-// DETEKSI 2 JARI ✌️
+// FACE DATA
 // ======================
-function isTwoFingers(landmarks) {
-  const indexUp = landmarks[8].y < landmarks[6].y;
-  const middleUp = landmarks[12].y < landmarks[10].y;
+let labeledFaceDescriptors = [];
 
-  const ringDown = landmarks[16].y > landmarks[14].y;
-  const pinkyDown = landmarks[20].y > landmarks[18].y;
+// ======================
+// ERROR DEBUG
+// ======================
+window.onerror = function(msg, source, line, col, err) {
+  console.log("❌ ERROR:", msg, line);
+};
 
-  return indexUp && middleUp && ringDown && pinkyDown;
+// ======================
+// LOAD FACE MODELS
+// ======================
+async function loadFaceModels() {
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+
+    console.log("✅ Face models loaded");
+  } catch (e) {
+    console.log("❌ Face model error:", e);
+  }
 }
 
 // ======================
-// MEDIAPIPE SETUP
+// ENROLL
+// ======================
+async function enrollUser(label, descriptor) {
+  labeledFaceDescriptors.push(
+    new faceapi.LabeledFaceDescriptors(label, [descriptor])
+  );
+
+  if (window.Android) {
+    Android.responPerintah("Wajah tersimpan untuk " + label);
+  }
+}
+
+// ======================
+// RECOGNITION
+// ======================
+function recognizeFace(descriptor) {
+  if (labeledFaceDescriptors.length === 0) return null;
+
+  const matcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.5);
+  return matcher.findBestMatch(descriptor).label;
+}
+
+// ======================
+// ✌️ 2 FINGER
+// ======================
+function isTwoFingers(landmarks) {
+  return landmarks[8].y < landmarks[6].y &&
+         landmarks[12].y < landmarks[10].y &&
+         landmarks[16].y > landmarks[14].y &&
+         landmarks[20].y > landmarks[18].y;
+}
+
+// ======================
+// CAMERA (WAJIB FIX)
+// ======================
+async function startCamera() {
+  try {
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: 1280,
+        height: 720
+      },
+      audio: false
+    });
+
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve();
+      };
+    });
+
+    console.log("✅ Kamera ON");
+
+  } catch (e) {
+    console.log("❌ Kamera error:", e);
+  }
+}
+
+// ======================
+// HANDS
 // ======================
 const hands = new Hands({
-  locateFile: (file) => {
-    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-  }
+  locateFile: (file) =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
 });
 
 hands.setOptions({
@@ -76,32 +160,55 @@ hands.setOptions({
 });
 
 // ======================
-// HASIL DETEKSI
+// LOOP
 // ======================
-hands.onResults(results => {
+hands.onResults(async (results) => {
 
-  // pakai ukuran asli video (ANTI BURAM)
+  if (!video.videoWidth) return;
+
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, 0, 0);
 
+  // FACE DETECTION SAFE
+  try {
+    const detections = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (detections) {
+
+      let label = recognizeFace(detections.descriptor);
+
+      if (label && window.Android) {
+        Android.responPerintah("Halo " + label);
+      } else {
+        await enrollUser("User1", detections.descriptor);
+      }
+    }
+
+  } catch (e) {
+    console.log("Face error:", e);
+  }
+
+  // HAND DRAW
   if (results.multiHandLandmarks) {
-    for (const landmarks of results.multiHandLandmarks) {
+    for (const lm of results.multiHandLandmarks) {
 
-      drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
-        color: '#00FF00',
+      drawConnectors(ctx, lm, HAND_CONNECTIONS, {
+        color: "#00FF00",
         lineWidth: 4
       });
 
-      drawLandmarks(ctx, landmarks, {
-        color: '#FF0000',
+      drawLandmarks(ctx, lm, {
+        color: "#FF0000",
         lineWidth: 2
       });
 
-      // deteksi 2 jari
-      if (isTwoFingers(landmarks)) {
+      if (isTwoFingers(lm)) {
         const now = Date.now();
         if (now - lastCapture > cooldown) {
           ambilFoto();
@@ -113,44 +220,57 @@ hands.onResults(results => {
 });
 
 // ======================
-// AMBIL FOTO HD
+// FOTO
 // ======================
 function ambilFoto() {
-  const tempCanvas = document.createElement("canvas");
 
-  // 🔥 PAKAI RESOLUSI ASLI KAMERA
-  tempCanvas.width = video.videoWidth;
-  tempCanvas.height = video.videoHeight;
+  const temp = document.createElement("canvas");
+  temp.width = video.videoWidth;
+  temp.height = video.videoHeight;
 
-  const tempCtx = tempCanvas.getContext("2d");
-  tempCtx.drawImage(video, 0, 0);
+  const tctx = temp.getContext("2d");
+  tctx.drawImage(video, 0, 0);
 
-  // kualitas tinggi
-  const base64 = tempCanvas.toDataURL("image/jpeg", 1.0);
+  const base64 = temp.toDataURL("image/jpeg", 1.0);
 
-  // preview kecil (opsional)
   hasil.src = base64;
 
-  // kirim ke Android
-  if (window.Android && window.Android.kirimFoto) {
-    window.Android.kirimFoto(base64);
+  if (window.Android && Android.kirimFoto) {
+    Android.kirimFoto(base64);
   }
 
-  console.log("📸 FOTO HD DIAMBIL!");
+  console.log("📸 FOTO OK");
 }
 
 // ======================
-// START CAMERA (HD)
+// START SYSTEM
 // ======================
-const camera = new Camera(video, {
-  onFrame: async () => {
-    await hands.send({ image: video });
-  },
-  width: 1280,
-  height: 720
-});
+async function start() {
 
-camera.start();
+  await loadFaceModels();
+  await startCamera();
+
+  setTimeout(() => {
+
+    const camera = new Camera(video, {
+      onFrame: async () => {
+        if (video.readyState >= 2) {
+          await hands.send({ image: video });
+        }
+      },
+      width: 1280,
+      height: 720
+    });
+
+    camera.start();
+
+    console.log("🚀 SYSTEM READY");
+
+  }, 1000);
+}
+
+start();
+
 </script>
 
 </body>
