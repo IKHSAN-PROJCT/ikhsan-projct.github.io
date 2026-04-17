@@ -3,22 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Kamera FULL STABLE</title>
+
+<title>AI Kamera Stabil Fix</title>
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: black;
+  background: transparent;
 }
 
 video, canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 #hasil {
@@ -27,7 +25,6 @@ video, canvas {
   left: 10px;
   width: 120px;
   border: 2px solid white;
-  z-index: 10;
 }
 </style>
 </head>
@@ -56,78 +53,103 @@ const hasil = document.getElementById("hasil");
 let lastCapture = 0;
 const cooldown = 3000;
 
-// ================= FACE DATA =================
+// ======================
+// FACE DATA
+// ======================
 let labeledFaceDescriptors = [];
-let faceReady = false;
 
-// ================= ERROR =================
-window.onerror = (m, s, l) => console.log("ERROR:", m, l);
+// ======================
+// ERROR DEBUG
+// ======================
+window.onerror = function(msg, source, line, col, err) {
+  console.log("❌ ERROR:", msg, line);
+};
 
-// ================= LOAD FACE MODELS =================
+// ======================
+// LOAD FACE MODELS
+// ======================
 async function loadFaceModels() {
-  const url = "https://cdn.jsdelivr.net/npm/face-api.js/models";
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
 
-  await faceapi.nets.tinyFaceDetector.loadFromUri(url);
-  await faceapi.nets.faceRecognitionNet.loadFromUri(url);
-  await faceapi.nets.faceLandmark68Net.loadFromUri(url);
-
-  faceReady = true;
-  console.log("FACE READY");
+    console.log("✅ Face models loaded");
+  } catch (e) {
+    console.log("❌ Face model error:", e);
+  }
 }
 
-// ================= CAMERA =================
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: {
-      facingMode: "user",
-      width: 1280,
-      height: 720
-    },
-    audio: false
-  });
-
-  video.srcObject = stream;
-
-  await new Promise(r => {
-    video.onloadedmetadata = () => {
-      video.play();
-      r();
-    };
-  });
-
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  console.log("CAMERA ON");
-}
-
-// ================= FACE =================
-function recognizeFace(descriptor) {
-  if (!labeledFaceDescriptors.length) return null;
-
-  const matcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.5);
-  return matcher.findBestMatch(descriptor).label;
-}
-
+// ======================
+// ENROLL
+// ======================
 async function enrollUser(label, descriptor) {
   labeledFaceDescriptors.push(
     new faceapi.LabeledFaceDescriptors(label, [descriptor])
   );
 
-  if (window.Android) Android.responPerintah("Wajah tersimpan: " + label);
+  if (window.Android) {
+    Android.responPerintah("Wajah tersimpan untuk " + label);
+  }
 }
 
-// ================= HAND RULE =================
-function isTwoFingers(lm) {
-  return lm[8].y < lm[6].y &&
-         lm[12].y < lm[10].y &&
-         lm[16].y > lm[14].y &&
-         lm[20].y > lm[18].y;
+// ======================
+// RECOGNITION
+// ======================
+function recognizeFace(descriptor) {
+  if (labeledFaceDescriptors.length === 0) return null;
+
+  const matcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.5);
+  return matcher.findBestMatch(descriptor).label;
 }
 
-// ================= HANDS =================
+// ======================
+// ✌️ 2 FINGER
+// ======================
+function isTwoFingers(landmarks) {
+  return landmarks[8].y < landmarks[6].y &&
+         landmarks[12].y < landmarks[10].y &&
+         landmarks[16].y > landmarks[14].y &&
+         landmarks[20].y > landmarks[18].y;
+}
+
+// ======================
+// CAMERA (WAJIB FIX)
+// ======================
+async function startCamera() {
+  try {
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: 1280,
+        height: 720
+      },
+      audio: false
+    });
+
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve();
+      };
+    });
+
+    console.log("✅ Kamera ON");
+
+  } catch (e) {
+    console.log("❌ Kamera error:", e);
+  }
+}
+
+// ======================
+// HANDS
+// ======================
 const hands = new Hands({
-  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+  locateFile: (file) =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
 });
 
 hands.setOptions({
@@ -137,46 +159,48 @@ hands.setOptions({
   minTrackingConfidence: 0.7
 });
 
-// ================= HAND RESULT =================
+// ======================
+// LOOP
+// ======================
 hands.onResults(async (results) => {
 
   if (!video.videoWidth) return;
 
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(results.image, 0, 0);
 
-  // ================= FACE DETECT (SAFE THROTTLE) =================
-  if (faceReady) {
-    try {
-      const det = await faceapi
-        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+  // FACE DETECTION SAFE
+  try {
+    const detections = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
 
-      if (det) {
-        let label = recognizeFace(det.descriptor);
+    if (detections) {
 
-        if (!label) {
-          await enrollUser("User1", det.descriptor);
-        } else {
-          if (window.Android) {
-            Android.responPerintah("Halo " + label);
-          }
-        }
+      let label = recognizeFace(detections.descriptor);
+
+      if (label && window.Android) {
+        Android.responPerintah("Halo " + label);
+      } else {
+        await enrollUser("User1", detections.descriptor);
       }
-
-    } catch (e) {
-      console.log("FACE ERROR:", e);
     }
+
+  } catch (e) {
+    console.log("Face error:", e);
   }
 
-  // ================= HAND DRAW =================
+  // HAND DRAW
   if (results.multiHandLandmarks) {
     for (const lm of results.multiHandLandmarks) {
 
       drawConnectors(ctx, lm, HAND_CONNECTIONS, {
         color: "#00FF00",
-        lineWidth: 3
+        lineWidth: 4
       });
 
       drawLandmarks(ctx, lm, {
@@ -195,48 +219,54 @@ hands.onResults(async (results) => {
   }
 });
 
-// ================= HAND LOOP (CAMERA UTAMA MEDIAPIPE) =================
-function startHandsCamera() {
-  const camera = new Camera(video, {
-    onFrame: async () => {
-      await hands.send({ image: video });
-    },
-    width: 1280,
-    height: 720
-  });
-
-  camera.start();
-  console.log("MEDIAPIPE CAMERA START");
-}
-
-// ================= FOTO =================
+// ======================
+// FOTO
+// ======================
 function ambilFoto() {
+
   const temp = document.createElement("canvas");
   temp.width = video.videoWidth;
   temp.height = video.videoHeight;
 
-  temp.getContext("2d").drawImage(video, 0, 0);
+  const tctx = temp.getContext("2d");
+  tctx.drawImage(video, 0, 0);
 
-  const base64 = temp.toDataURL("image/jpeg", 0.9);
+  const base64 = temp.toDataURL("image/jpeg", 1.0);
 
   hasil.src = base64;
 
-  if (window.Android?.kirimFoto) {
+  if (window.Android && Android.kirimFoto) {
     Android.kirimFoto(base64);
   }
 
-  console.log("FOTO OK");
+  console.log("📸 FOTO OK");
 }
 
-// ================= START SYSTEM =================
+// ======================
+// START SYSTEM
+// ======================
 async function start() {
 
   await loadFaceModels();
   await startCamera();
 
-  console.log("SYSTEM START");
+  setTimeout(() => {
 
-  startHandsCamera();
+    const camera = new Camera(video, {
+      onFrame: async () => {
+        if (video.readyState >= 2) {
+          await hands.send({ image: video });
+        }
+      },
+      width: 1280,
+      height: 720
+    });
+
+    camera.start();
+
+    console.log("🚀 SYSTEM READY");
+
+  }, 1000);
 }
 
 start();
