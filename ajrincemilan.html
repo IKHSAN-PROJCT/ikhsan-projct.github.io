@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajrin Cemilan - Lumring</title>
+    <!-- Google Fonts & FontAwesome untuk Ikon -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- Reset & Base Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --primary: #e67e22;
+            --primary-hover: #d35400;
+            --dark: #2c3e50;
+            --light: #f9f6f0;
+            --white: #ffffff;
+            --text-muted: #7f8c8d;
+        }
+
+        body {
+            background-color: var(--light);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Header / Navbar --- */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        /* --- ANIMASI LOGO AJRIN CEMILAN --- */
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            display: inline-block;
+            
+            /* Efek Warna Gradient Berjalan */
+            background: linear-gradient(120deg, #d35400, #e67e22, #f39c12, #e67e22, #d35400);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .logo span {
+            /* Beri sedikit perbedaan warna gradasi pada kata "Cemilan" */
+            background: linear-gradient(120deg, #f39c12, #f1c40f, #e67e22, #f1c40f, #f39c12);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Efek Interaktif Saat Logo Disentuh Kursor */
+        .logo:hover {
+            transform: scale(1.08) rotate(-1deg);
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+        /* ---------------------------------- */
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu li {
+            margin-left: 30px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 15px;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        /* Menu Toggle (Mobile) */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: var(--dark);
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://i.ibb.co.com/WWBVBvsr/86ba2754080917389545713f1c26c2dc.jpg') no-repeat center center/cover;
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-content h1 {
+            font-size: 52px;
+            margin-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            margin-bottom: 35px;
+            color: #f1f1f1;
+            font-weight: 300;
+            animation: fadeInUp 1s ease;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 14px 35px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.6);
+        }
+
+        /* --- Products Section --- */
+        .products-section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+
+        .product-img-wrapper {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.1);
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 5px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge.hot { background-color: #e74c3c; }
+        .badge.sweet { background-color: #9b59b6; }
+
+        .product-info {
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-info h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .product-info p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .price-wrapper {
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-hover);
+        }
+
+        .btn-wa {
+            background-color: #25d366;
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-wa:hover {
+            background-color: #20ba5a;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        footer p {
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .social-icons {
+            margin-bottom: 15px;
+        }
+
+        .social-icons a {
+            color: var(--white);
+            font-size: 18px;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 992px) {
+            .hero-content h1 { font-size: 42px; }
+            .product-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: var(--white);
+                flex-direction: column;
+                align-items: center;
+                padding-top: 5px;
+                transition: 0.4s ease;
+                box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-menu li {
+                margin: 20px 0;
+            }
+
+            .hero { height: 55vh; }
+            .hero-content h1 { font-size: 34px; }
+            .hero-content p { font-size: 15px; }
+            
+            .menu-toggle.active span:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 5px);
+            }
+            .menu-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .menu-toggle.active span:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -5px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <header>
+        <div class="container nav-container">
+            <a href="#home" class="logo">Ajrin<span>Cemilan</span></a>
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#produk">Varian Lumring</a></li>
+                <li><a href="#kontak">Hubungi Kami</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Kriuknya Lumring</h1>
+                <p>Lumpia kering super renyah dengan bumbu melimpah pilihan terbaik untuk teman santaimu di segala suasana.</p>
+                <a href="#produk" class="btn">Lihat Menu <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="produk">
+        <div class="container">
+            <div class="section-title">
+                <h2>Varian Rasa Lumring</h2>
+                <p>Pilih rasa favoritmu, serba Rp 5.000 saja!</p>
+            </div>
+            
+            <div class="product-grid">
+                
+                <!-- Varian Original -->
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <span class="badge">Best Seller</span>
+                        <img src="https://i.ibb.co.com/Y71Xchw5/photo.jpg" alt="Lumring Original" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3>Lumring Original</h3>
+                        <p>Rasa gurih asin alami dan bumbu rempah yang pas, cocok untuk kamu yang suka keaslian rasa kriuk sejati.</p>
+                        <div class="price-wrapper">
+                            <div class="price">Rp 5.000</div>
+                        </div>
+                        <a href="https://wa.me/6281234567890?text=Halo%20Ajrin%20Cemilan,%20saya%20mau%20pesan%20Lumring%20Original" class="btn btn-wa" target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i> Beli Sekarang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Varian Coklat -->
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <span class="badge sweet">Manis</span>
+                        <img src="https://i.ibb.co.com/DDt8THd3/images-1.jpg" alt="Lumring Coklat" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3>Lumring Coklat</h3>
+                        <p>Perpaduan unik lumring super kriuk berbalut coklat premium lumer yang manisnya pas di lidah.</p>
+                        <div class="price-wrapper">
+                            <div class="price">Rp 5.000</div>
+                        </div>
+                        <a href="https://wa.me/6281234567890?text=Halo%20Ajrin%20Cemilan,%20saya%20mau%20pesan%20Lumring%20Coklat" class="btn btn-wa" target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i> Beli Sekarang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Varian Strawberry -->
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <span class="badge sweet">Fruity</span>
+                        <img src="https://i.ibb.co.com/1Jb0s3p7/1783010504710.png" alt="Lumring Strawberry" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3>Lumring Strawberry</h3>
+                        <p>Sensasi rasa buah strawberry yang manis segar dipadukan dengan renyahnya kulit lumpia kering.</p>
+                        <div class="price-wrapper">
+                            <div class="price">Rp 5.000</div>
+                        </div>
+                        <a href="https://wa.me/6281234567890?text=Halo%20Ajrin%20Cemilan,%20saya%20mau%20pesan%20Lumring%20Strawberry" class="btn btn-wa" target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i> Beli Sekarang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Varian Pedas -->
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <span class="badge hot">Pedas</span>
+                        <img src="https://i.ibb.co.com/GQTyjDbS/S91f96258305d4a8994e5aef301af2168-H.jpg" alt="Lumring Pedas" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3>Lumring Pedas</h3>
+                        <p>Racikan pedas pas dikombinasikan dengan aroma daun jeruk yang segar. Nikmatnya bikin tidak bisa berhenti!</p>
+                        <div class="price-wrapper">
+                            <div class="price">Rp 5.000</div>
+                        </div>
+                        <a href="https://wa.me/6281234567890?text=Halo%20Ajrin%20Cemilan,%20saya%20mau%20pesan%20Lumring%20Pedas" class="btn btn-wa" target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i> Beli Sekarang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Varian Extra Pedas -->
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <span class="badge hot">Super Hot</span>
+                        <img src="https://i.ibb.co.com/YvwK0yz/1783010623473.png" alt="Lumring Extra Pedas" class="product-img">
+                    </div>
+                    <div class="product-info">
+                        <h3>Lumring Extra Pedas</h3>
+                        <p>Khusus untuk para petualang rasa! Pedas nampol tingkat tinggi menggunakan cabai kering asli pilihan.</p>
+                        <div class="price-wrapper">
+                            <div class="price">Rp 5.000</div>
+                        </div>
+                        <a href="https://wa.me/6282319747158?text=Halo%20Ajrin%20Cemilan,%20saya%20mau%20pesan%20Lumring%20Extra%20Pedas" class="btn btn-wa" target="_blank">
+                            <i class="fa-brands fa-whatsapp"></i> Beli Sekarang
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="kontak">
+        <div class="container">
+            <div class="social-icons">
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+            <p>&copy; 2026 Ajrin Cemilan. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Script untuk Responsif Mobile Menu -->
+    <script>
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navMenu = document.querySelector('.nav-menu');
+
+        mobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Menutup menu setelah klik link (di mobile)
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
