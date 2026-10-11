@@ -1,10 +1,14 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#000000">
-  <title>IMO Hand Gesture Detector</title>  <style>
+
+  <title>IMO Hand Gesture Detector</title>
+
+  <style>
     * {
       box-sizing: border-box;
     }
@@ -48,27 +52,43 @@
       font-size: 12px;
       background: rgba(0, 30, 35, 0.8);
     }
-  </style></head><body>
-  <div id="status">Memuat library deteksi tangan...</div>
-  <div id="indicator">IMO • Kamera belum aktif</div><video id="camera"
-autoplay
-playsinline
-muted></video>
+  </style>
+</head>
 
-<canvas id="output"></canvas>
+<body>
+  <div id="status">Memuat library deteksi tangan...</div>
+
+  <div id="indicator">IMO • Kamera belum aktif</div>
+
+  <video
+    id="camera"
+    autoplay
+    playsinline
+    muted>
+  </video>
+
+  <canvas id="output"></canvas>
 
   <script>
     "use strict";
 
-    const statusElement = document.getElementById("status");
-    const indicatorElement = document.getElementById("indicator");
-    const video = document.getElementById("camera");
+    const statusElement =
+      document.getElementById("status");
+
+    const indicatorElement =
+      document.getElementById("indicator");
+
+    const video =
+      document.getElementById("camera");
 
     let lastGesture = "";
     let detectorReady = false;
     let hands = null;
     let processing = false;
     let lastStatus = "";
+
+    // Mencegah selfie diminta berulang kali.
+    let selfieRequested = false;
 
     function setStatus(message) {
       if (message !== lastStatus) {
@@ -81,7 +101,7 @@ muted></video>
       indicatorElement.textContent = message;
     }
 
-    // Mengirim pesan ke MainActivity melalui AndroidBridge.
+    // Mengirim gestur ke MainActivity Android.
     function sendGesture(gesture) {
       if (
         window.AndroidBridge &&
@@ -94,13 +114,13 @@ muted></video>
         }
       } else {
         console.warn(
-          "AndroidBridge belum tersedia. Gesture:",
+          "AndroidBridge belum tersedia. Gestur:",
           gesture
         );
       }
     }
 
-    // Kirim hanya jika gestur berubah.
+    // Hanya kirim ketika gestur berubah.
     function reportGesture(gesture) {
       if (gesture === lastGesture) return;
 
@@ -113,7 +133,7 @@ muted></video>
       return landmarks[tip].y < landmarks[pip].y;
     }
 
-    // Pose pistol: telunjuk lurus, jari lain menekuk.
+    // Pose pistol.
     function detectPistol(landmarks) {
       const indexUp = fingerUp(landmarks, 8, 6);
       const middleUp = fingerUp(landmarks, 12, 10);
@@ -133,8 +153,7 @@ muted></video>
              thumbOut;
     }
 
-    // Jempol ke atas:
-    // jempol terangkat dan empat jari lainnya menekuk.
+    // Deteksi jempol ke atas.
     function detectThumbsUp(landmarks) {
       const thumbTip = landmarks[4];
       const thumbIp = landmarks[3];
@@ -165,8 +184,7 @@ muted></video>
              pinkyFolded;
     }
 
-    // Gerakan menarik pelatuk:
-    // telunjuk menekuk dan jari lainnya tetap menekuk.
+    // Deteksi gerakan menarik pelatuk.
     function detectShot(landmarks) {
       const indexTip = landmarks[8];
       const indexPip = landmarks[6];
@@ -191,12 +209,13 @@ muted></video>
              pinkyFolded;
     }
 
+    // Memuat library eksternal.
     function loadScript(url) {
       return new Promise((resolve, reject) => {
         const script = document.createElement("script");
+
         script.src = url;
         script.async = true;
-
         script.onload = resolve;
 
         script.onerror = () => {
@@ -208,6 +227,95 @@ muted></video>
         document.head.appendChild(script);
       });
     }
+
+    /*
+     * Dipanggil MainActivity melalui evaluateJavascript().
+     * Mengambil gambar dari video kamera depan yang sudah aktif.
+     */
+    window.captureSelfieForIMO = function () {
+      try {
+        if (
+          !video ||
+          !video.videoWidth ||
+          !video.videoHeight ||
+          !video.srcObject
+        ) {
+          if (
+            window.AndroidBridge &&
+            typeof window.AndroidBridge.onSelfieCaptureFailed ===
+              "function"
+          ) {
+            window.AndroidBridge.onSelfieCaptureFailed();
+          }
+
+          return;
+        }
+
+        const canvas = document.createElement("canvas");
+
+        // Batasi resolusi agar transfer gambar lebih ringan.
+        const maxWidth = 720;
+
+        const ratio = Math.min(
+          1,
+          maxWidth / video.videoWidth
+        );
+
+        canvas.width = Math.round(
+          video.videoWidth * ratio
+        );
+
+        canvas.height = Math.round(
+          video.videoHeight * ratio
+        );
+
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+          throw new Error("Canvas tidak tersedia.");
+        }
+
+        // Cerminkan gambar agar tampak seperti selfie.
+        context.translate(canvas.width, 0);
+        context.scale(-1, 1);
+
+        context.drawImage(
+          video,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        const photo = canvas.toDataURL(
+          "image/jpeg",
+          0.82
+        );
+
+        if (
+          window.AndroidBridge &&
+          typeof window.AndroidBridge.onSelfieCaptured ===
+            "function"
+        ) {
+          window.AndroidBridge.onSelfieCaptured(photo);
+        } else {
+          console.error(
+            "AndroidBridge.onSelfieCaptured tidak tersedia."
+          );
+        }
+
+      } catch (error) {
+        console.error("Gagal mengambil selfie:", error);
+
+        if (
+          window.AndroidBridge &&
+          typeof window.AndroidBridge.onSelfieCaptureFailed ===
+            "function"
+        ) {
+          window.AndroidBridge.onSelfieCaptureFailed();
+        }
+      }
+    };
 
     async function startDetector() {
       try {
@@ -227,7 +335,8 @@ muted></video>
 
         hands = new Hands({
           locateFile: (file) =>
-            "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" + file
+            "https://cdn.jsdelivr.net/npm/@mediapipe/hands/" +
+            file
         });
 
         hands.setOptions({
@@ -244,9 +353,15 @@ muted></video>
 
           if (!list || list.length === 0) {
             reportGesture("none");
+
+            // Izinkan gestur jempol berikutnya setelah tangan
+            // tidak terdeteksi lagi.
+            selfieRequested = false;
+
             setStatus(
               "Kamera aktif — tangan tidak terdeteksi."
             );
+
             setIndicator("IMO • Menunggu gestur");
             return;
           }
@@ -256,30 +371,51 @@ muted></video>
           // Prioritas 1: gestur tembakan.
           if (detectShot(landmarks)) {
             reportGesture("shot");
-            setStatus("DOR! Gestur tembakan terdeteksi!");
+
+            setStatus(
+              "DOR! Gestur tembakan terdeteksi!"
+            );
+
             setIndicator("IMO • Gestur tembakan");
 
-          // Prioritas 2: jempol untuk mengaktifkan mode suara.
+          // Prioritas 2: jempol ke atas.
           } else if (detectThumbsUp(landmarks)) {
             reportGesture("thumbs_up");
+
             setStatus(
               "👍 Jempol terdeteksi!\n" +
-              "Meminta Android mengaktifkan mode suara IMO..."
+              "IMO sedang mengambil selfie..."
             );
-            setIndicator("IMO • Meminta mode suara");
+
+            setIndicator("IMO • Selfie");
+
+            // Jangan mengirim permintaan terus-menerus
+            // selama jempol masih terlihat.
+            if (!selfieRequested) {
+              selfieRequested = true;
+            }
 
           // Prioritas 3: pose pistol.
           } else if (detectPistol(landmarks)) {
             reportGesture("pistol");
+
             setStatus(
               "Pose pistol terdeteksi!\n" +
               "Ampun, Bang Ikhsan..."
             );
+
             setIndicator("IMO • Pose pistol");
 
           } else {
             reportGesture("none");
-            setStatus("Kamera aktif — tangan terdeteksi.");
+
+            // Tangan masih terlihat, tetapi pose berubah.
+            selfieRequested = false;
+
+            setStatus(
+              "Kamera aktif — tangan terdeteksi."
+            );
+
             setIndicator("IMO • Kamera aktif");
           }
         });
@@ -292,7 +428,8 @@ muted></video>
         ) {
           throw new Error(
             "Akses kamera tidak tersedia. " +
-            "Gunakan HTTPS atau WebView Android yang mendukung kamera."
+            "Gunakan HTTPS atau WebView Android " +
+            "yang mendukung kamera."
           );
         }
 
@@ -310,7 +447,10 @@ muted></video>
         video.srcObject = stream;
         await video.play();
 
-        setStatus("4/4 Kamera aktif, memulai deteksi...");
+        setStatus(
+          "4/4 Kamera aktif, memulai deteksi..."
+        );
+
         setIndicator("IMO • Kamera aktif");
 
         detectorReady = true;
@@ -318,13 +458,20 @@ muted></video>
         async function processFrame() {
           if (!detectorReady) return;
 
-          if (video.readyState >= 2 && !processing) {
+          if (
+            video.readyState >= 2 &&
+            !processing
+          ) {
             processing = true;
 
             try {
               await hands.send({ image: video });
             } catch (error) {
-              console.error("Kesalahan deteksi:", error);
+              console.error(
+                "Kesalahan deteksi:",
+                error
+              );
+
               setStatus(
                 "Deteksi gagal: " + error.message
               );
@@ -342,10 +489,13 @@ muted></video>
 
       } catch (error) {
         detectorReady = false;
+
         console.error(error);
 
         setStatus("ERROR: " + error.message);
+
         setIndicator("IMO • Terjadi kesalahan");
+
         reportGesture("none");
       }
     }
@@ -356,6 +506,7 @@ muted></video>
           "ERROR: Halaman harus dibuka melalui HTTPS " +
           "atau konteks lokal yang aman."
         );
+
         return;
       }
 
@@ -369,16 +520,23 @@ muted></video>
       );
     });
 
-    window.addEventListener("unhandledrejection", (event) => {
-      console.error(
-        "Promise error:",
-        event.reason
-      );
+    window.addEventListener(
+      "unhandledrejection",
+      (event) => {
+        console.error(
+          "Promise error:",
+          event.reason
+        );
 
-      setStatus(
-        "ERROR: " +
-        (event.reason?.message || String(event.reason))
-      );
-    });
-  </script></body>
+        setStatus(
+          "ERROR: " +
+          (
+            event.reason?.message ||
+            String(event.reason)
+          )
+        );
+      }
+    );
+  </script>
+</body>
 </html>
