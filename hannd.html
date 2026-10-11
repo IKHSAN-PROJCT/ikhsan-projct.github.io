@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
-  <title>Hand Gesture Detector</title>
+  <title>IMO Hand Gesture Detector</title>
 
   <style>
     * {
@@ -72,6 +71,7 @@
     let hands = null;
     let processing = false;
 
+    // Mengirim hanya jika gesture berubah.
     function reportGesture(gesture) {
       if (gesture === lastGesture) return;
 
@@ -79,11 +79,12 @@
       sendGesture(gesture);
     }
 
-    // Pemeriksaan sederhana apakah jari mengarah ke atas.
+    // Pemeriksaan posisi jari.
     function fingerUp(landmarks, tip, pip) {
       return landmarks[tip].y < landmarks[pip].y;
     }
 
+    // Pose pistol: telunjuk lurus, jari lain menekuk.
     function detectPistol(landmarks) {
       const indexUp = fingerUp(landmarks, 8, 6);
       const middleUp = fingerUp(landmarks, 12, 10);
@@ -101,6 +102,32 @@
              !ringUp &&
              !pinkyUp &&
              thumbOut;
+    }
+
+    // Gerakan menarik pelatuk:
+    // telunjuk menekuk, jari lainnya tetap menekuk.
+    function detectShot(landmarks) {
+      const indexTip = landmarks[8];
+      const indexPip = landmarks[6];
+      const indexMcp = landmarks[5];
+
+      const indexBent =
+        indexTip.y > indexPip.y &&
+        indexPip.y > indexMcp.y;
+
+      const middleFolded =
+        landmarks[12].y > landmarks[10].y;
+
+      const ringFolded =
+        landmarks[16].y > landmarks[14].y;
+
+      const pinkyFolded =
+        landmarks[20].y > landmarks[18].y;
+
+      return indexBent &&
+             middleFolded &&
+             ringFolded &&
+             pinkyFolded;
     }
 
     function loadScript(url) {
@@ -157,9 +184,15 @@
             return;
           }
 
-          if (detectPistol(list[0])) {
+          const landmarks = list[0];
+
+          // Periksa tembakan terlebih dahulu.
+          if (detectShot(landmarks)) {
+            reportGesture("shot");
+            setStatus("DOR! IMO pingsan!");
+          } else if (detectPistol(landmarks)) {
             reportGesture("pistol");
-            setStatus("Pose pistol terdeteksi!");
+            setStatus("Pose pistol terdeteksi! Ampun, Bang Ikhsan...");
           } else {
             reportGesture("none");
             setStatus("Kamera aktif — tangan terdeteksi.");
@@ -168,8 +201,10 @@
 
         setStatus("3/4 Meminta izin kamera...");
 
-        if (!navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia) {
+        if (
+          !navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia
+        ) {
           throw new Error(
             "Akses kamera tidak tersedia. Gunakan HTTPS dan WebView yang mendukung kamera."
           );
