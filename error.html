@@ -232,7 +232,6 @@
 
   <section class="result" aria-live="polite">
     <div id="swatch" class="swatch"></div>
-
     <div>
       <div class="eyebrow">Perkiraan warna baju</div>
       <div id="colorName" class="color-name">Belum diketahui</div>
@@ -254,8 +253,7 @@
   <p class="note">
     Halaman harus dibuka melalui HTTPS atau localhost dan memerlukan
     izin kamera. Deteksi warna merupakan perkiraan yang dapat
-    dipengaruhi pencahayaan, bayangan, warna kulit, dan latar belakang.
-    Untuk hasil lebih akurat, posisikan bagian baju di tengah garis.
+    dipengaruhi pencahayaan, bayangan, dan latar belakang.
   </p>
 
   <canvas id="canvas" width="96" height="96"></canvas>
@@ -284,13 +282,33 @@
   var timer = null;
   var starting = false;
   var stoppedByUser = false;
+
   var lastColor = 'Tidak diketahui';
   var stableColor = 'Tidak diketahui';
   var stableCount = 0;
+  var lastSentColor = '';
 
   function setStatus(message, live) {
     statusEl.textContent = message;
     dot.classList.toggle('live', Boolean(live));
+  }
+
+  /*
+   * Kirim warna ke Java Android.
+   * AndroidIMO harus dipasang di WebView melalui
+   * addJavascriptInterface(..., "AndroidIMO").
+   */
+  function sendColorToAndroid(color, hex) {
+    try {
+      if (
+        window.AndroidIMO &&
+        typeof window.AndroidIMO.onClothingColorDetected === 'function'
+      ) {
+        window.AndroidIMO.onClothingColorDetected(color, hex);
+      }
+    } catch (error) {
+      console.log('Bridge Android belum tersedia:', error);
+    }
   }
 
   function rgbToHsv(r, g, b) {
@@ -333,10 +351,7 @@
     var v = hsv.v;
 
     if (v < 0.16) return 'Hitam';
-
-    if (s < 0.16 && v > 0.82) {
-      return 'Putih';
-    }
+    if (s < 0.16 && v > 0.82) return 'Putih';
 
     if (s < 0.18) {
       return v < 0.43 ? 'Abu-abu tua' : 'Abu-abu';
@@ -370,10 +385,12 @@
   }
 
   function detect() {
-    if (!stream ||
-        !video.videoWidth ||
-        !video.videoHeight ||
-        video.readyState < 2) {
+    if (
+      !stream ||
+      !video.videoWidth ||
+      !video.videoHeight ||
+      video.readyState < 2
+    ) {
       return;
     }
 
@@ -381,11 +398,6 @@
       var vw = video.videoWidth;
       var vh = video.videoHeight;
 
-      /*
-       * Mengambil sampel dari area tengah video.
-       * Sesuaikan posisi crop jika garis panduan tidak
-       * tepat mengenai bagian baju.
-       */
       var cropW = Math.floor(Math.min(vw * 0.42, vh * 0.55));
       var cropH = Math.floor(Math.min(vh * 0.38, vw * 0.72));
 
@@ -459,6 +471,7 @@
       }
 
       colorNameEl.textContent = displayName;
+
       hexEl.textContent =
         'RGB ' + red + ', ' + green + ', ' + blue + ' · ' + hex;
 
@@ -478,6 +491,19 @@
       };
 
       jsonEl.textContent = JSON.stringify(result, null, 2);
+
+      /*
+       * Kirim hanya setelah warna stabil.
+       * Jika warnanya berubah, kirim nilai terbaru.
+       */
+      if (
+        stableCount >= 2 &&
+        displayName !== 'Tidak diketahui' &&
+        displayName !== lastSentColor
+      ) {
+        lastSentColor = displayName;
+        sendColorToAndroid(displayName, hex);
+      }
 
       setStatus(
         'Kamera depan aktif · warna diperbarui otomatis',
@@ -507,10 +533,12 @@
       stream = null;
     }
 
-    if (!navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia) {
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
       setStatus(
-        'Browser tidak mendukung kamera. Gunakan Chrome melalui HTTPS.'
+        'Browser tidak mendukung kamera. Gunakan halaman HTTPS.'
       );
       stopBtn.disabled = true;
       starting = false;
@@ -520,24 +548,21 @@
     try {
       setStatus('Meminta izin kamera depan…');
 
-      /*
-       * "exact: user" meminta kamera depan secara khusus.
-       * Tidak ada fallback otomatis ke kamera belakang.
-       */
-      var newStream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: {
-            exact: 'user'
-          },
-          width: {
-            ideal: 1280
-          },
-          height: {
-            ideal: 720
+      var newStream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: {
+              exact: 'user'
+            },
+            width: {
+              ideal: 1280
+            },
+            height: {
+              ideal: 720
+            }
           }
-        }
-      });
+        });
 
       if (stoppedByUser) {
         newStream.getTracks().forEach(function (track) {
@@ -555,7 +580,10 @@
       stopBtn.disabled = false;
       startBtn.disabled = true;
 
-      setStatus('Kamera depan aktif · menyiapkan deteksi…', true);
+      setStatus(
+        'Kamera depan aktif · menyiapkan deteksi…',
+        true
+      );
 
       timer = setInterval(detect, 450);
 
@@ -571,17 +599,21 @@
 
       var message = 'Kamera depan gagal dibuka.';
 
-      if (error.name === 'NotAllowedError' ||
-          error.name === 'PermissionDeniedError') {
+      if (
+        error.name === 'NotAllowedError' ||
+        error.name === 'PermissionDeniedError'
+      ) {
         message =
-          'Izin kamera ditolak. Izinkan kamera di pengaturan browser lalu muat ulang halaman.';
-      } else if (error.name === 'NotFoundError' ||
-                 error.name === 'OverconstrainedError') {
+          'Izin kamera ditolak. Izinkan kamera lalu muat ulang halaman.';
+      } else if (
+        error.name === 'NotFoundError' ||
+        error.name === 'OverconstrainedError'
+      ) {
         message =
           'Kamera depan tidak ditemukan atau tidak tersedia.';
       } else if (error.name === 'NotReadableError') {
         message =
-          'Kamera sedang digunakan aplikasi lain. Tutup aplikasi tersebut lalu coba lagi.';
+          'Kamera sedang digunakan aplikasi lain.';
       } else if (error.name === 'SecurityError') {
         message =
           'Akses kamera diblokir. Pastikan halaman menggunakan HTTPS.';
@@ -589,6 +621,7 @@
 
       setStatus(message);
       dot.classList.remove('live');
+
       stopBtn.disabled = true;
       startBtn.disabled = false;
 
@@ -643,7 +676,6 @@
     }
   });
 
-  // Mulai kamera depan otomatis ketika halaman selesai dimuat.
   window.addEventListener('load', function () {
     startCamera();
   });
