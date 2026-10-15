@@ -1,15 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#10131a">
-
   <title>IMO Clothing Color Detector</title>
 
   <style>
@@ -23,9 +18,7 @@
       --danger: #ff8585;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -79,13 +72,8 @@
       background: #f3bd59;
     }
 
-    .dot.ready {
-      background: var(--accent);
-    }
-
-    .dot.error {
-      background: var(--danger);
-    }
+    .dot.ready { background: var(--accent); }
+    .dot.error { background: var(--danger); }
 
     .camera {
       position: relative;
@@ -148,9 +136,7 @@
       pointer-events: none;
     }
 
-    .camera-message.hidden {
-      display: none;
-    }
+    .camera-message.hidden { display: none; }
 
     .result {
       display: flex;
@@ -179,16 +165,10 @@
       overflow-wrap: anywhere;
     }
 
-    .hex {
+    .hex, .confidence {
       color: var(--muted);
       font-size: 13px;
       margin-top: 5px;
-    }
-
-    .confidence {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
     }
 
     .hint {
@@ -207,604 +187,526 @@
       margin-top: 10px;
     }
 
-    canvas {
-      display: none;
-    }
+    canvas { display: none; }
+    #json { display: none; }
   </style>
 </head>
 
 <body>
-  <main class="app">
+<main class="app">
 
-    <h1>IMO Vision</h1>
+  <h1>IMO Vision</h1>
 
-    <p class="subtitle">
-      Detektor Warna Baju
-      <br>
-      Kamera aktif otomatis. Posisikan baju di dalam kotak.
+  <p class="subtitle">
+    Detektor Warna Baju<br>
+    Kamera aktif otomatis. Posisikan baju di dalam kotak.
+  </p>
+
+  <section class="panel">
+    <div class="status">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText">Menyiapkan kamera...</span>
+    </div>
+    <div id="debug" class="debug">Memeriksa akses kamera...</div>
+  </section>
+
+  <section class="camera">
+    <video id="video" autoplay muted playsinline></video>
+    <div class="guide"></div>
+    <div class="guide-label">Posisikan baju di dalam kotak</div>
+    <div id="cameraMessage" class="camera-message">
+      Mengaktifkan kamera...
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <div class="result">
+      <div id="swatch" class="swatch"></div>
+      <div>
+        <div class="result-label">Warna baju terdeteksi</div>
+        <div id="colorName" class="color-name">Tidak diketahui</div>
+        <div id="hex" class="hex">HEX: --</div>
+        <div id="confidence" class="confidence">Menunggu hasil deteksi</div>
+      </div>
+    </div>
+
+    <p class="hint">
+      Deteksi berlangsung otomatis. Gunakan pencahayaan cukup,
+      hindari bayangan kuat, dan letakkan baju di dalam kotak.
+      Warna merupakan perkiraan dari gambar kamera.
     </p>
+  </section>
 
-    <section class="panel">
-      <div class="status">
-        <span id="statusDot" class="dot"></span>
-        <span id="statusText">Menyiapkan kamera...</span>
-      </div>
+  <canvas id="canvas" width="80" height="80"></canvas>
 
-      <div id="debug" class="debug">
-        Memeriksa akses kamera...
-      </div>
-    </section>
+  <!-- Dibaca oleh Java melalui evaluateJavascript(). -->
+  <pre id="json">{"detectedClothingColor":"Tidak diketahui","hex":null,"confidence":"rendah"}</pre>
 
-    <section class="camera">
-      <video
-        id="video"
-        autoplay
-        muted
-        playsinline
-      ></video>
+</main>
 
-      <div class="guide"></div>
+<script>
+(function () {
+  "use strict";
 
-      <div class="guide-label">
-        Posisikan baju di dalam kotak
-      </div>
+  var video = document.getElementById("video");
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
 
-      <div id="cameraMessage" class="camera-message">
-        Mengaktifkan kamera...
-      </div>
-    </section>
+  var statusDot = document.getElementById("statusDot");
+  var statusText = document.getElementById("statusText");
+  var cameraMessage = document.getElementById("cameraMessage");
+  var debug = document.getElementById("debug");
 
-    <section class="panel" style="margin-top:14px">
+  var colorNameElement = document.getElementById("colorName");
+  var hexElement = document.getElementById("hex");
+  var confidenceElement = document.getElementById("confidence");
+  var swatch = document.getElementById("swatch");
+  var jsonElement = document.getElementById("json");
 
-      <div class="result">
-        <div id="swatch" class="swatch"></div>
+  var cameraStream = null;
+  var scanTimer = null;
+  var retryTimer = null;
+  var cameraStarting = false;
+  var pageStopped = false;
 
-        <div>
-          <div class="result-label">
-            Warna baju terdeteksi
-          </div>
+  var lastColor = "";
+  var lastHex = null;
+  var lastScore = 0;
 
-          <div id="colorName" class="color-name">
-            Tidak diketahui
-          </div>
+  var stableColor = "";
+  var stableCount = 0;
+  var lastSentColor = "";
+  var lastSentHex = "";
+  var lastSentTime = 0;
 
-          <div id="hex" class="hex">
-            HEX: --
-          </div>
+  function setStatus(message, state) {
+    statusText.textContent = message;
+    statusDot.className = "dot";
 
-          <div id="confidence" class="confidence">
-            Menunggu hasil deteksi
-          </div>
-        </div>
-      </div>
+    if (state === "ready") {
+      statusDot.classList.add("ready");
+    } else if (state === "error") {
+      statusDot.classList.add("error");
+    }
+  }
 
-      <p class="hint">
-        Deteksi dan pengiriman warna ke IMO berlangsung otomatis.
-        Gunakan pencahayaan yang cukup dan hindari bayangan kuat.
-        Hasil warna merupakan perkiraan dari gambar kamera.
-      </p>
+  function setDebug(message) {
+    debug.textContent = message;
+  }
 
-    </section>
+  function showCameraMessage(message) {
+    cameraMessage.textContent = message;
+    cameraMessage.classList.remove("hidden");
+  }
 
-    <canvas id="canvas" width="80" height="80"></canvas>
+  function hideCameraMessage() {
+    cameraMessage.classList.add("hidden");
+  }
 
-  </main>
+  function stopCamera() {
+    if (scanTimer !== null) {
+      clearInterval(scanTimer);
+      scanTimer = null;
+    }
 
-  <script>
-    (function () {
-      "use strict";
+    if (cameraStream !== null) {
+      cameraStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+      cameraStream = null;
+    }
 
-      var video = document.getElementById("video");
-      var canvas = document.getElementById("canvas");
-      var ctx = canvas.getContext("2d");
+    video.srcObject = null;
+  }
 
-      var statusDot = document.getElementById("statusDot");
-      var statusText = document.getElementById("statusText");
-      var cameraMessage = document.getElementById("cameraMessage");
-      var debug = document.getElementById("debug");
+  function classifyColor(r, g, b) {
+    var max = Math.max(r, g, b);
+    var min = Math.min(r, g, b);
+    var delta = max - min;
+    var brightness = (r + g + b) / 3;
+    var saturation = max === 0 ? 0 : delta / max;
 
-      var colorNameElement = document.getElementById("colorName");
-      var hexElement = document.getElementById("hex");
-      var confidenceElement = document.getElementById("confidence");
-      var swatch = document.getElementById("swatch");
+    if (brightness < 42) return "Hitam";
 
-      var cameraStream = null;
-      var scanTimer = null;
-      var retryTimer = null;
+    if (brightness > 224 && saturation < 0.18) {
+      return "Putih";
+    }
 
-      var cameraStarting = false;
-      var pageStopped = false;
+    if (saturation < 0.17) {
+      if (brightness < 90) return "Abu-abu tua";
+      if (brightness < 155) return "Abu-abu";
+      return "Abu-abu muda";
+    }
 
-      var lastColor = "";
-      var lastHex = "#000000";
-      var lastScore = 0;
+    var hue;
 
-      var stableColor = "";
-      var stableCount = 0;
+    if (delta === 0) {
+      hue = 0;
+    } else if (max === r) {
+      hue = 60 * (((g - b) / delta) % 6);
+    } else if (max === g) {
+      hue = 60 * ((b - r) / delta + 2);
+    } else {
+      hue = 60 * ((r - g) / delta + 4);
+    }
 
-      var lastSentColor = "";
-      var lastSentHex = "";
-      var lastSentTime = 0;
+    if (hue < 0) hue += 360;
 
-      function setStatus(message, state) {
-        statusText.textContent = message;
-        statusDot.className = "dot";
+    if (hue < 12 || hue >= 345) {
+      return brightness < 100 ? "Merah tua" : "Merah";
+    }
 
-        if (state === "ready") {
-          statusDot.classList.add("ready");
-        } else if (state === "error") {
-          statusDot.classList.add("error");
-        }
-      }
+    if (hue < 28) return "Oranye";
+    if (hue < 45) return "Kuning";
+    if (hue < 75) return "Kuning kehijauan";
+    if (hue < 165) return "Hijau";
+    if (hue < 195) return "Toska";
+    if (hue < 255) return "Biru";
+    if (hue < 290) return "Ungu";
+    if (hue < 320) return "Magenta";
 
-      function setDebug(message) {
-        debug.textContent = message;
-      }
+    return "Merah muda";
+  }
 
-      function showCameraMessage(message) {
-        cameraMessage.textContent = message;
-        cameraMessage.classList.remove("hidden");
-      }
+  function median(values) {
+    values.sort(function (a, b) {
+      return a - b;
+    });
 
-      function hideCameraMessage() {
-        cameraMessage.classList.add("hidden");
-      }
+    var middle = Math.floor(values.length / 2);
 
-      function stopCamera() {
-        if (scanTimer !== null) {
-          clearInterval(scanTimer);
-          scanTimer = null;
-        }
+    if (values.length % 2 !== 0) {
+      return values[middle];
+    }
 
-        if (cameraStream !== null) {
-          var tracks = cameraStream.getTracks();
+    return (values[middle - 1] + values[middle]) / 2;
+  }
 
-          for (var i = 0; i < tracks.length; i++) {
-            tracks[i].stop();
-          }
+  function sampleColor() {
+    if (!video.videoWidth ||
+        !video.videoHeight ||
+        video.readyState < 2) {
+      return null;
+    }
 
-          cameraStream = null;
-        }
+    var width = canvas.width;
+    var height = canvas.height;
 
-        video.srcObject = null;
-      }
+    var sourceWidth = video.videoWidth * 0.34;
+    var sourceHeight = video.videoHeight * 0.34;
+    var sourceX = (video.videoWidth - sourceWidth) / 2;
+    var sourceY = video.videoHeight * 0.36;
 
-      function classifyColor(r, g, b) {
+    if (sourceY + sourceHeight > video.videoHeight) {
+      sourceY = video.videoHeight - sourceHeight;
+    }
+
+    ctx.drawImage(
+      video,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      width,
+      height
+    );
+
+    var imageData;
+
+    try {
+      imageData = ctx.getImageData(0, 0, width, height);
+    } catch (error) {
+      setDebug("Gagal membaca gambar: " + error.message);
+      return null;
+    }
+
+    var data = imageData.data;
+    var reds = [];
+    var greens = [];
+    var blues = [];
+
+    for (var y = 4; y < height - 4; y += 2) {
+      for (var x = 4; x < width - 4; x += 2) {
+        var index = (y * width + x) * 4;
+        var r = data[index];
+        var g = data[index + 1];
+        var b = data[index + 2];
+
         var max = Math.max(r, g, b);
         var min = Math.min(r, g, b);
-        var delta = max - min;
-
         var brightness = (r + g + b) / 3;
-        var saturation = max === 0 ? 0 : delta / max;
 
-        if (brightness < 42) {
-          return "Hitam";
-        }
+        if (brightness < 18 || brightness > 247) continue;
+        if (max - min < 8 && brightness > 238) continue;
 
-        if (brightness > 224 && saturation < 0.18) {
-          return "Putih";
-        }
-
-        if (saturation < 0.17) {
-          if (brightness < 90) return "Abu-abu tua";
-          if (brightness < 155) return "Abu-abu";
-          return "Abu-abu muda";
-        }
-
-        var hue;
-
-        if (delta === 0) {
-          hue = 0;
-        } else if (max === r) {
-          hue = 60 * (((g - b) / delta) % 6);
-        } else if (max === g) {
-          hue = 60 * ((b - r) / delta + 2);
-        } else {
-          hue = 60 * ((r - g) / delta + 4);
-        }
-
-        if (hue < 0) {
-          hue += 360;
-        }
-
-        if (hue < 12 || hue >= 345) {
-          return brightness < 100 ? "Merah tua" : "Merah";
-        }
-
-        if (hue < 28) return "Oranye";
-        if (hue < 45) return "Kuning";
-        if (hue < 75) return "Kuning kehijauan";
-        if (hue < 165) return "Hijau";
-        if (hue < 195) return "Toska";
-        if (hue < 255) return "Biru";
-        if (hue < 290) return "Ungu";
-        if (hue < 320) return "Magenta";
-
-        return "Merah muda";
+        reds.push(r);
+        greens.push(g);
+        blues.push(b);
       }
-
-      function median(values) {
-        values.sort(function (a, b) {
-          return a - b;
-        });
-
-        var middle = Math.floor(values.length / 2);
-
-        if (values.length % 2 !== 0) {
-          return values[middle];
-        }
-
-        return (values[middle - 1] + values[middle]) / 2;
-      }
-
-      function sampleColor() {
-        if (
-          !video.videoWidth ||
-          !video.videoHeight ||
-          video.readyState < 2
-        ) {
-          return null;
-        }
-
-        var width = canvas.width;
-        var height = canvas.height;
-
-        // Mengambil bagian tengah video sebagai perkiraan area baju.
-        var sourceWidth = video.videoWidth * 0.34;
-        var sourceHeight = video.videoHeight * 0.34;
-
-        var sourceX = (video.videoWidth - sourceWidth) / 2;
-        var sourceY = video.videoHeight * 0.36;
-
-        if (sourceY + sourceHeight > video.videoHeight) {
-          sourceY = video.videoHeight - sourceHeight;
-        }
-
-        ctx.drawImage(
-          video,
-          sourceX,
-          sourceY,
-          sourceWidth,
-          sourceHeight,
-          0,
-          0,
-          width,
-          height
-        );
-
-        var imageData;
-
-        try {
-          imageData = ctx.getImageData(
-            0, 0, width, height
-          );
-        } catch (error) {
-          setDebug(
-            "Gagal membaca gambar kamera: " + error.message
-          );
-          return null;
-        }
-
-        var data = imageData.data;
-        var reds = [];
-        var greens = [];
-        var blues = [];
-
-        for (var y = 4; y < height - 4; y += 2) {
-          for (var x = 4; x < width - 4; x += 2) {
-            var index = (y * width + x) * 4;
-
-            var r = data[index];
-            var g = data[index + 1];
-            var b = data[index + 2];
-
-            var max = Math.max(r, g, b);
-            var min = Math.min(r, g, b);
-            var brightness = (r + g + b) / 3;
-
-            if (brightness < 18 || brightness > 247) {
-              continue;
-            }
-
-            if (max - min < 8 && brightness > 238) {
-              continue;
-            }
-
-            reds.push(r);
-            greens.push(g);
-            blues.push(b);
-          }
-        }
-
-        if (reds.length < 20) {
-          return null;
-        }
-
-        var red = Math.round(median(reds));
-        var green = Math.round(median(greens));
-        var blue = Math.round(median(blues));
-
-        var hex = "#" +
-          red.toString(16).padStart(2, "0") +
-          green.toString(16).padStart(2, "0") +
-          blue.toString(16).padStart(2, "0");
-
-        var color = classifyColor(red, green, blue);
-
-        // Indikator kestabilan, bukan probabilitas akurasi.
-        var score = Math.min(
-          0.99,
-          0.55 + Math.min(reds.length / 300, 0.30)
-        );
-
-        return {
-          color: color,
-          hex: hex,
-          score: score
-        };
-      }
-
-      function updateResult(result) {
-        colorNameElement.textContent = result.color;
-        hexElement.textContent = "HEX: " + result.hex;
-        swatch.style.backgroundColor = result.hex;
-
-        confidenceElement.textContent =
-          "Indikator kestabilan: " +
-          Math.round(result.score * 100) + "%";
-
-        lastColor = result.color;
-        lastHex = result.hex;
-        lastScore = result.score;
-      }
-
-      // KIRIM HASIL OTOMATIS KE ANDROIDBRIDGE
-      function sendColorToAndroid(forceSend) {
-        if (
-          !lastColor ||
-          lastColor === "Tidak diketahui"
-        ) {
-          return;
-        }
-
-        if (
-          !window.AndroidBridge ||
-          typeof window.AndroidBridge.onClothingColor !== "function"
-        ) {
-          setDebug(
-            "Kamera aktif, menunggu AndroidBridge.onClothingColor tersedia."
-          );
-          return;
-        }
-
-        var now = Date.now();
-
-        // Kirim ketika warna/HEX berubah atau ulangi maksimal tiap 3 detik.
-        if (
-          !forceSend &&
-          lastSentColor === lastColor &&
-          lastSentHex === lastHex &&
-          now - lastSentTime < 3000
-        ) {
-          return;
-        }
-
-        var payload = {
-          color: lastColor,
-          hex: lastHex,
-          score: lastScore
-        };
-
-        try {
-          window.AndroidBridge.onClothingColor(
-            JSON.stringify(payload)
-          );
-
-          lastSentColor = lastColor;
-          lastSentHex = lastHex;
-          lastSentTime = now;
-
-          setDebug(
-            "Warna terkirim otomatis ke IMO: " +
-            JSON.stringify(payload)
-          );
-        } catch (error) {
-          setDebug(
-            "Gagal mengirim warna ke Android: " +
-            error.message
-          );
-        }
-      }
-
-      function scanOnce() {
-        if (pageStopped || !cameraStream) {
-          return;
-        }
-
-        var result = sampleColor();
-
-        if (!result) {
-          confidenceElement.textContent =
-            "Posisikan baju di depan kamera.";
-          return;
-        }
-
-        if (result.color === stableColor) {
-          stableCount++;
-        } else {
-          stableColor = result.color;
-          stableCount = 1;
-        }
-
-        if (stableCount >= 3) {
-          updateResult(result);
-          sendColorToAndroid(false);
-        }
-      }
-
-      function startScanning() {
-        if (scanTimer !== null) {
-          clearInterval(scanTimer);
-        }
-
-        scanTimer = setInterval(scanOnce, 600);
-      }
-
-      function scheduleRetry() {
-        if (pageStopped || retryTimer !== null) {
-          return;
-        }
-
-        retryTimer = setTimeout(function () {
-          retryTimer = null;
-
-          if (!pageStopped && !cameraStream) {
-            startCamera();
-          }
-        }, 2500);
-      }
-
-      function startCamera() {
-        if (cameraStarting || pageStopped) {
-          return;
-        }
-
-        if (
-          !navigator.mediaDevices ||
-          !navigator.mediaDevices.getUserMedia
-        ) {
-          setStatus("Kamera tidak didukung", "error");
-
-          showCameraMessage(
-            "WebView tidak menyediakan akses kamera. " +
-            "Periksa izin kamera dan versi Android System WebView."
-          );
-
-          setDebug(
-            "getUserMedia tidak tersedia. Pastikan halaman dibuka melalui HTTPS."
-          );
-
-          return;
-        }
-
-        cameraStarting = true;
-
-        setStatus("Meminta izin kamera...", "loading");
-        showCameraMessage("Mengaktifkan kamera...");
-
-        stopCamera();
-
-        navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "user" },
-            width: { ideal: 640 },
-            height: { ideal: 480 }
-          }
-        }).then(function (stream) {
-          cameraStream = stream;
-          video.srcObject = stream;
-
-          return video.play();
-
-        }).then(function () {
-          cameraStarting = false;
-
-          setStatus("Kamera aktif — deteksi otomatis", "ready");
-          hideCameraMessage();
-
-          setDebug(
-            "Kamera aktif. Hasil warna akan dikirim otomatis ke IMO."
-          );
-
-          startScanning();
-
-        }).catch(function (error) {
-          cameraStarting = false;
-
-          stopCamera();
-
-          setStatus("Kamera gagal dibuka", "error");
-
-          showCameraMessage(
-            "Kamera gagal ditampilkan. Periksa izin kamera Android."
-          );
-
-          var detail = error && error.name
-            ? error.name + ": " + error.message
-            : String(error);
-
-          setDebug("Detail kesalahan: " + detail);
-
-          if (error && error.name === "NotReadableError") {
-            setDebug(
-              "NotReadableError: kamera mungkin sedang dipakai aplikasi lain, " +
-              "atau akses kamera WebView gagal. Tutup aplikasi kamera lain."
-            );
-          } else if (error && error.name === "NotAllowedError") {
-            setDebug(
-              "NotAllowedError: izin kamera ditolak. " +
-              "Aktifkan izin Kamera untuk aplikasi IMO di pengaturan Android."
-            );
-          } else if (error && error.name === "NotFoundError") {
-            setDebug("NotFoundError: kamera tidak ditemukan.");
-          }
-
-          scheduleRetry();
-        });
-      }
-
-      // Dapat dipanggil dari Java melalui evaluateJavascript.
-      window.startClothingCamera = function () {
-        pageStopped = false;
+    }
+
+    if (reds.length < 20) return null;
+
+    var red = Math.round(median(reds));
+    var green = Math.round(median(greens));
+    var blue = Math.round(median(blues));
+
+    var hex = "#" +
+      red.toString(16).padStart(2, "0") +
+      green.toString(16).padStart(2, "0") +
+      blue.toString(16).padStart(2, "0");
+
+    var color = classifyColor(red, green, blue);
+
+    // Ini indikator kestabilan, bukan probabilitas akurasi.
+    var score = Math.min(
+      0.99,
+      0.55 + Math.min(reds.length / 300, 0.30)
+    );
+
+    return {
+      color: color,
+      hex: hex,
+      score: score
+    };
+  }
+
+  // Memperbarui tampilan DAN JSON yang dibaca Java.
+  function updateResult(result) {
+    lastColor = result.color;
+    lastHex = result.hex;
+    lastScore = result.score;
+
+    colorNameElement.textContent = result.color;
+    hexElement.textContent = "HEX: " + result.hex;
+    swatch.style.backgroundColor = result.hex;
+
+    confidenceElement.textContent =
+      "Indikator kestabilan: " +
+      Math.round(result.score * 100) + "%";
+
+    jsonElement.textContent = JSON.stringify({
+      detectedClothingColor: lastColor,
+      hex: lastHex,
+      confidence: Math.round(lastScore * 100) + "%",
+      timestamp: Date.now()
+    });
+
+    sendColorToAndroid(false);
+  }
+
+  // Mengirim warna melalui JavascriptInterface jika tersedia.
+  function sendColorToAndroid(forceSend) {
+    if (!lastColor || lastColor === "Tidak diketahui") return;
+
+    var bridge = window.AndroidBridge;
+
+    if (!bridge ||
+        typeof bridge.onClothingColor !== "function") {
+      setDebug(
+        "Warna tersedia. Menunggu AndroidBridge.onClothingColor; " +
+        "hasil tetap disimpan di JSON untuk dibaca Java."
+      );
+      return;
+    }
+
+    var now = Date.now();
+
+    if (!forceSend &&
+        lastSentColor === lastColor &&
+        lastSentHex === lastHex &&
+        now - lastSentTime < 3000) {
+      return;
+    }
+
+    try {
+      bridge.onClothingColor(JSON.stringify({
+        color: lastColor,
+        hex: lastHex,
+        score: lastScore
+      }));
+
+      lastSentColor = lastColor;
+      lastSentHex = lastHex;
+      lastSentTime = now;
+
+      setDebug(
+        "Warna terkirim ke IMO: " +
+        lastColor + " (" + lastHex + ")"
+      );
+    } catch (error) {
+      setDebug("Pengiriman ke Android gagal: " + error.message);
+    }
+  }
+
+  function scanOnce() {
+    if (pageStopped || !cameraStream) return;
+
+    var result = sampleColor();
+
+    if (!result) {
+      confidenceElement.textContent =
+        "Posisikan baju di depan kamera.";
+      return;
+    }
+
+    if (result.color === stableColor) {
+      stableCount++;
+    } else {
+      stableColor = result.color;
+      stableCount = 1;
+    }
+
+    if (stableCount >= 3) {
+      updateResult(result);
+    }
+  }
+
+  function startScanning() {
+    if (scanTimer !== null) clearInterval(scanTimer);
+    scanTimer = setInterval(scanOnce, 600);
+  }
+
+  function scheduleRetry() {
+    if (pageStopped || retryTimer !== null) return;
+
+    retryTimer = setTimeout(function () {
+      retryTimer = null;
+
+      if (!pageStopped && !cameraStream) {
         startCamera();
-      };
+      }
+    }, 2500);
+  }
 
-      window.getDetectedClothingColor = function () {
-        return lastColor || "Tidak diketahui";
-      };
+  function startCamera() {
+    if (cameraStarting || pageStopped) return;
 
-      window.getDetectedClothingHex = function () {
-        return lastHex;
-      };
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+      setStatus("Kamera tidak didukung", "error");
+      showCameraMessage(
+        "Akses kamera tidak tersedia. Periksa HTTPS, izin kamera, " +
+        "dan versi Android System WebView."
+      );
+      setDebug("navigator.mediaDevices.getUserMedia tidak tersedia.");
+      return;
+    }
 
-      window.requestClothingColor = function () {
-        sendColorToAndroid(true);
-      };
+    cameraStarting = true;
+    setStatus("Meminta izin kamera...", "loading");
+    showCameraMessage("Mengaktifkan kamera...");
 
-      window.addEventListener("pagehide", function () {
-        pageStopped = true;
+    stopCamera();
 
-        if (retryTimer !== null) {
-          clearTimeout(retryTimer);
-          retryTimer = null;
-        }
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: { ideal: "user" },
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      }
+    }).then(function (stream) {
+      cameraStream = stream;
+      video.srcObject = stream;
+      return video.play();
 
-        stopCamera();
-      });
+    }).then(function () {
+      cameraStarting = false;
+      setStatus("Kamera aktif — deteksi otomatis", "ready");
+      hideCameraMessage();
 
-      document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-          stopCamera();
-        } else {
-          pageStopped = false;
+      setDebug("Kamera aktif. Membaca warna baju...");
+      startScanning();
 
-          if (!cameraStream) {
-            startCamera();
-          }
-        }
-      });
+    }).catch(function (error) {
+      cameraStarting = false;
+      stopCamera();
 
-      // Mulai otomatis tanpa tombol.
-      if (document.readyState === "complete") {
-        startCamera();
-      } else {
-        window.addEventListener("load", function () {
-          startCamera();
-        });
+      setStatus("Kamera gagal dibuka", "error");
+      showCameraMessage(
+        "Kamera gagal ditampilkan. Periksa izin kamera Android."
+      );
+
+      var detail = error && error.name
+        ? error.name + ": " + error.message
+        : String(error);
+
+      setDebug("Kesalahan: " + detail);
+
+      if (error && error.name === "NotAllowedError") {
+        setDebug(
+          "Izin kamera ditolak. Aktifkan izin kamera IMO di pengaturan Android."
+        );
+      } else if (error && error.name === "NotReadableError") {
+        setDebug(
+          "Kamera sedang digunakan aplikasi lain atau tidak bisa diakses."
+        );
+      } else if (error && error.name === "NotFoundError") {
+        setDebug("Kamera tidak ditemukan.");
       }
 
-    })();
-  </script>
+      scheduleRetry();
+    });
+  }
+
+  // Dipanggil Java jika perlu memulai kamera.
+  window.startClothingCamera = function () {
+    pageStopped = false;
+    startCamera();
+  };
+
+  // Mengembalikan warna terbaru untuk pemanggil JavaScript.
+  window.getDetectedClothingColor = function () {
+    return lastColor || "Tidak diketahui";
+  };
+
+  window.getDetectedClothingHex = function () {
+    return lastHex;
+  };
+
+  // Dipanggil melalui evaluateJavascript oleh Java.
+  window.requestClothingColor = function () {
+    sendColorToAndroid(true);
+
+    return JSON.stringify({
+      detectedClothingColor: lastColor || "Tidak diketahui",
+      hex: lastHex,
+      confidence: lastScore,
+      timestamp: Date.now()
+    });
+  };
+
+  window.addEventListener("pagehide", function () {
+    pageStopped = true;
+
+    if (retryTimer !== null) {
+      clearTimeout(retryTimer);
+      retryTimer = null;
+    }
+
+    stopCamera();
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      stopCamera();
+    } else {
+      pageStopped = false;
+
+      if (!cameraStream) startCamera();
+    }
+  });
+
+  if (document.readyState === "complete") {
+    startCamera();
+  } else {
+    window.addEventListener("load", startCamera);
+  }
+
+})();
+</script>
 </body>
 </html>
