@@ -1,211 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Hand Control</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-
-<style>
-body { margin:0; overflow:hidden; background:black; }
-video { position:absolute; width:100%; height:100%; object-fit:cover; }
-canvas { position:absolute; top:0; left:0; }
-#status {
-  position:absolute; top:10px; left:10px;
-  color:white; background:rgba(0,0,0,0.5);
-  padding:6px 10px; border-radius:6px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10131a">
+  <title>IMO Clothing Color Detector</title>
+  <style>
+    :root { color-scheme: dark; --bg:#10131a; --panel:#1a202b; --text:#f4f6fb; --muted:#a9b2c3; --accent:#78e0c3; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    main { width:min(760px,100%); margin:0 auto; padding:18px 14px 28px; }
+    h1 { font-size:1.35rem; margin:0 0 6px; }
+    .sub { color:var(--muted); margin:0 0 16px; font-size:.94rem; line-height:1.45; }
+    .camera-wrap { position:relative; overflow:hidden; background:#050608; border-radius:18px; aspect-ratio:3/4; max-height:68vh; display:flex; align-items:center; justify-content:center; border:1px solid #303847; }
+    video { width:100%; height:100%; object-fit:cover; display:block; }
+    .guide { position:absolute; left:20%; right:20%; top:30%; bottom:12%; border:2px dashed rgba(120,224,195,.9); border-radius:28px; pointer-events:none; }
+    .guide-label { position:absolute; top:calc(30% - 28px); left:0; right:0; text-align:center; font-size:.78rem; color:#d9fff4; text-shadow:0 1px 5px #000; }
+    .status { display:flex; align-items:center; gap:8px; margin:12px 0; color:var(--muted); font-size:.9rem; }
+    .dot { width:9px; height:9px; border-radius:50%; background:#778195; flex:none; }
+    .dot.live { background:#55dfa7; box-shadow:0 0 10px #55dfa777; }
+    .result { background:var(--panel); border:1px solid #303847; border-radius:18px; padding:16px; display:flex; gap:14px; align-items:center; }
+    .swatch { width:62px; height:62px; border-radius:14px; background:#626b79; border:2px solid #ffffff35; flex:none; }
+    .eyebrow { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; }
+    .color-name { font-size:1.45rem; font-weight:750; margin:2px 0; }
+    .hex { color:var(--muted); font-variant-numeric:tabular-nums; font-size:.9rem; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0; }
+    button, select { border:1px solid #394354; background:#242c39; color:var(--text); border-radius:12px; padding:12px 14px; font:inherit; }
+    button { cursor:pointer; font-weight:650; }
+    button.primary { background:var(--accent); color:#09251d; border-color:transparent; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .note { color:var(--muted); font-size:.82rem; line-height:1.5; margin-top:14px; }
+    .data { margin-top:12px; padding:12px; border-radius:12px; background:#0b0e13; color:#b8c3d4; font: .8rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
+    canvas { display:none; }
+    @media (min-width:650px) { .camera-wrap { aspect-ratio:4/3; } }
+  </style>
 </head>
-
 <body>
+<main>
+  <h1>IMO Clothing Color Detector</h1>
+  <p class="sub">Kamera mulai otomatis saat halaman dibuka. Arahkan kamera ke tubuh bagian atas dan pastikan baju terlihat di dalam garis.</p>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
-<div id="status">Loading...</div>
+  <div class="camera-wrap">
+    <video id="video" autoplay muted playsinline></video>
+    <div class="guide"></div>
+    <div class="guide-label">Posisikan baju di area ini</div>
+  </div>
+
+  <div class="status"><span id="dot" class="dot"></span><span id="status">Sedang mengaktifkan kamera…</span></div>
+
+  <section class="result" aria-live="polite">
+    <div id="swatch" class="swatch"></div>
+    <div>
+      <div class="eyebrow">Perkiraan warna baju</div>
+      <div id="colorName" class="color-name">Belum diketahui</div>
+      <div id="hex" class="hex">RGB —</div>
+    </div>
+  </section>
+
+  <div class="controls">
+    <button id="stop">Matikan kamera</button>
+    <select id="camera" aria-label="Pilih kamera">
+      <option value="environment">Kamera belakang</option>
+      <option value="user">Kamera depan</option>
+    </select>
+  </div>
+
+  <div class="data" id="json">{"detectedClothingColor":"Tidak diketahui","hex":null,"confidence":"rendah"}</div>
+  <p class="note">Kamera memerlukan izin browser dan halaman HTTPS atau localhost. Browser tetap dapat menampilkan permintaan izin. Jika izin ditolak, izinkan kamera melalui pengaturan situs lalu muat ulang halaman. Deteksi warna adalah perkiraan dan dapat dipengaruhi pencahayaan, bayangan, serta latar belakang.</p>
+  <canvas id="canvas" width="96" height="96"></canvas>
+</main>
 
 <script>
-const videoElement = document.getElementById('video');
-const canvasElement = document.getElementById('canvas');
-const canvasCtx = canvasElement.getContext('2d');
-const statusText = document.getElementById('status');
+(() => {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const stopBtn = document.getElementById('stop');
+  const cameraSelect = document.getElementById('camera');
+  const statusEl = document.getElementById('status');
+  const dot = document.getElementById('dot');
+  const colorNameEl = document.getElementById('colorName');
+  const hexEl = document.getElementById('hex');
+  const swatch = document.getElementById('swatch');
+  const jsonEl = document.getElementById('json');
 
-canvasElement.width = window.innerWidth;
-canvasElement.height = window.innerHeight;
+  let stream = null;
+  let timer = null;
+  let stoppedByUser = false;
+  let lastColor = 'Tidak diketahui';
+  let stableColor = 'Tidak diketahui';
+  let stableCount = 0;
 
-let lastY = null;
-const smoothFactor = 0.6;
-let velocityY = 0;
+  function setStatus(message, live = false) {
+    statusEl.textContent = message;
+    dot.classList.toggle('live', live);
+  }
 
-// ================= UTIL =================
-function isFingerOpen(lm, tip, pip){
-    return lm[tip].y < lm[pip].y;
-}
-
-function isOpenHand(lm){
-    return isFingerOpen(lm,8,6) &&
-           isFingerOpen(lm,12,10) &&
-           isFingerOpen(lm,16,14) &&
-           isFingerOpen(lm,20,18);
-}
-
-function send(cmd){
-    if(window.Android){
-        Android.exec(cmd);
+  function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    let h = 0;
+    if (d) {
+      if (max === r) h = ((g - b) / d) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+      if (h < 0) h += 360;
     }
-}
+    return { h, s: max === 0 ? 0 : d / max, v: max };
+  }
 
-// ================= GESTURE =================
-function detectGesture(lm){
+  function classifyColor(r, g, b) {
+    const { h, s, v } = rgbToHsv(r, g, b);
+    if (v < 0.16) return 'Hitam';
+    if (s < 0.16 && v > 0.82) return 'Putih';
+    if (s < 0.18) return v < 0.43 ? 'Abu-abu tua' : 'Abu-abu';
+    if (h < 12 || h >= 345) return v < 0.45 ? 'Merah tua' : 'Merah';
+    if (h < 25) return v < 0.55 ? 'Cokelat' : 'Oranye';
+    if (h < 45) return 'Oranye';
+    if (h < 68) return 'Kuning';
+    if (h < 165) return 'Hijau';
+    if (h < 195) return 'Toska';
+    if (h < 255) return 'Biru';
+    if (h < 285) return 'Ungu';
+    if (h < 320) return 'Magenta';
+    return 'Merah muda';
+  }
 
-    let wrist = lm[0];
-    let y = wrist.y;
+  function median(values) {
+    values.sort((a, b) => a - b);
+    return values[Math.floor(values.length / 2)] || 0;
+  }
 
-    if(lastY !== null){
-
-        let dy = y - lastY;
-
-        // smoothing velocity
-        velocityY = velocityY * smoothFactor + dy * (1 - smoothFactor);
-
-        let absY = Math.abs(velocityY);
-
-        if(isOpenHand(lm)){
-
-            if(absY > 0.005){
-
-                let velocity = Math.abs(velocityY) * 4000;
-                velocity = Math.min(Math.max(velocity, 300), 4000);
-
-                if(velocityY > 0){
-                    statusText.innerText = "SCROLL DOWN ⬇️";
-
-                    // FIX: pakai method DOWN
-                    send("SCROLL_STREAM:DOWN:" + velocity + ":1");
-
-                } else {
-                    statusText.innerText = "SCROLL UP ⬆️";
-
-                    // FIX: pakai method UP
-                    send("SCROLL_STREAM:UP:" + velocity + ":1");
-                }
-            }
+  function detect() {
+    if (!video.videoWidth || !video.videoHeight || video.readyState < 2) return;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const cropW = Math.floor(Math.min(vw * 0.42, vh * 0.55));
+    const cropH = Math.floor(Math.min(vh * 0.38, vw * 0.72));
+    const sx = Math.floor((vw - cropW) / 2);
+    const sy = Math.floor(vh * 0.47);
+    canvas.width = 96; canvas.height = 96;
+    ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, 96, 96);
+    const data = ctx.getImageData(0, 0, 96, 96).data;
+    const rs = [], gs = [], bs = [];
+    for (let y = 12; y < 84; y += 3) {
+      for (let x = 12; x < 84; x += 3) {
+        const i = (y * 96 + x) * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const hsv = rgbToHsv(r, g, b);
+        if (hsv.v > 0.08 && hsv.v < 0.98) {
+          rs.push(r); gs.push(g); bs.push(b);
         }
+      }
     }
-
-    lastY = y;
-}
-
-// ================= MEDIAPIPE =================
-const hands = new Hands({
-  locateFile: (file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
-
-hands.setOptions({
-  maxNumHands:1,
-  modelComplexity:1,
-  minDetectionConfidence:0.7,
-  minTrackingConfidence:0.7
-});
-
-hands.onResults(results=>{
-    canvasCtx.clearRect(0,0,canvasElement.width,canvasElement.height);
-
-    if(results.multiHandLandmarks.length > 0){
-        const lm = results.multiHandLandmarks[0];
-
-        drawConnectors(canvasCtx,lm,HAND_CONNECTIONS);
-        drawLandmarks(canvasCtx,lm);
-
-        detectGesture(lm);
-    } else {
-        statusText.innerText = "No hand detected";
+    if (rs.length < 20) {
+      setStatus('Belum cukup area terlihat. Arahkan kamera ke baju.', true);
+      return;
     }
-});
+    const r = Math.round(median(rs)), g = Math.round(median(gs)), b = Math.round(median(bs));
+    const name = classifyColor(r, g, b);
+    const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
 
-// ================= CAMERA =================
-const camera = new Camera(videoElement,{
-    onFrame: async()=>{
-        await hands.send({image:videoElement});
-    },
-    width:640,
-    height:480
-});
+    if (name === stableColor) stableCount++;
+    else { stableColor = name; stableCount = 1; }
+    const displayName = stableCount >= 2 ? name : lastColor;
+    if (stableCount >= 2) lastColor = name;
 
-camera.start();
-</script>
+    colorNameEl.textContent = displayName;
+    hexEl.textContent = `RGB ${r}, ${g}, ${b} · ${hex}`;
+    swatch.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    jsonEl.textContent = JSON.stringify({
+      detectedClothingColor: displayName,
+      hex,
+      rgb: { r, g, b },
+      confidence: 'perkiraan',
+      timestamp: new Date().toISOString()
+    });
+    setStatus('Kamera aktif · warna diperbarui otomatis', true);
+  }
 
-</body>
-</html>
-                    statusText.innerText = "SCROLL UP ⬆️";
-                    send("SCROLL_DYNAMIC:" + (-velocity) + ":" + distance);
-                }
-
-                lastGestureTime = now;
-            }
+  async function startCamera() {
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    if (timer) { clearInterval(timer); timer = null; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('Browser tidak mendukung kamera. Buka melalui Chrome dengan HTTPS.');
+      return;
+    }
+    try {
+      setStatus('Meminta izin kamera…');
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: cameraSelect.value },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
+      });
+      video.srcObject = stream;
+      await video.play();
+      stopBtn.disabled = false;
+      setStatus('Kamera aktif · menyiapkan deteksi…', true);
+      timer = setInterval(detect, 450);
+    } catch (err) {
+      let message = 'Kamera gagal dibuka.';
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') message = 'Izin kamera ditolak. Izinkan kamera di pengaturan browser lalu muat ulang halaman.';
+      else if (err.name === 'NotFoundError') message = 'Kamera tidak ditemukan di perangkat ini.';
+      else if (err.name === 'NotReadableError') message = 'Kamera sedang digunakan aplikasi lain. Tutup aplikasi tersebut lalu muat ulang.';
+      setStatus(message);
+      dot.classList.remove('live');
     }
+  }
 
-    lastY = y;
-}
+  function stopCamera() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+    video.srcObject = null;
+    stopBtn.disabled = true;
+    setStatus('Kamera dimatikan.');
+    dot.classList.remove('live');
+  }
 
-// ================= MEDIAPIPE =================
-const hands = new Hands({
-  locateFile: (file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-});
+  stopBtn.addEventListener('click', () => {
+    stoppedByUser = true;
+    stopCamera();
+  });
+  cameraSelect.addEventListener('change', () => {
+    if (!stoppedByUser) startCamera();
+  });
+  window.addEventListener('pagehide', stopCamera);
 
-hands.setOptions({
-  maxNumHands:1,
-  modelComplexity:1,
-  minDetectionConfidence:0.7,
-  minTrackingConfidence:0.7
-});
-
-hands.onResults(results=>{
-    canvasCtx.clearRect(0,0,canvasElement.width,canvasElement.height);
-
-    if(results.multiHandLandmarks.length > 0){
-        const lm = results.multiHandLandmarks[0];
-
-        drawConnectors(canvasCtx,lm,HAND_CONNECTIONS);
-        drawLandmarks(canvasCtx,lm);
-
-        detectGesture(lm);
-    } else {
-        statusText.innerText = "No hand detected";
-    }
-});
-
-// ================= CAMERA =================
-const camera = new Camera(videoElement,{
-    onFrame: async()=>{
-        await hands.send({image:videoElement});
-    },
-    width:640,
-    height:480
-});
-
-camera.start();
+  // Coba aktifkan kamera otomatis saat halaman selesai dimuat.
+  window.addEventListener('load', () => {
+    stoppedByUser = false;
+    startCamera();
+  });
+})();
 </script>
-
-</body>
-</html>        statusText.innerText = "No hand detected";
-    }
-});
-
-// ================= CAMERA =================
-const camera = new Camera(videoElement,{
-    onFrame: async()=>{
-        await hands.send({image:videoElement});
-    },
-    width:640,
-    height:480
-});
-
-camera.start();
-</script>
-
 </body>
 </html>
